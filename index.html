@@ -54,7 +54,10 @@
     top:0; left:0; right:0; bottom:0;
     overflow:hidden;
     z-index:0;
+    opacity:0;
+    transition:opacity .6s ease;
   }
+  body.opened .stars{ opacity:1; }
   .stars span{
     position:absolute;
     width:2px; height:2px;
@@ -248,30 +251,23 @@
   window.addEventListener('pageshow', (e) => {
     if (e.persisted) {
       document.body.classList.add('returning');
+      document.body.classList.remove('opened');
+      logo.classList.remove('active');
+      menuLinks.forEach(link => link.classList.remove('active'));
       setTimeout(() => {
         document.body.classList.remove('returning');
-        logo.classList.remove('active');
-        menuLinks.forEach(link => link.classList.remove('active'));
       }, 900);
     }
   });
 
-  console.log('Logo element:', logo);
-  console.log('Menu links:', menuLinks);
-
-  if (logo) {
-    logo.addEventListener('click', (e) => {
-      console.log('Logo clicked!', e);
-      logo.classList.add('active');
-      menuLinks.forEach(link => link.classList.add('active'));
-      document.body.classList.add('opening');
-      setTimeout(() => {
-        document.body.classList.remove('opening');
-      }, 900);
-    });
-  } else {
-    console.error('Logo not found!');
-  }
+  logo.addEventListener('click', () => {
+    logo.classList.add('active');
+    menuLinks.forEach(link => link.classList.add('active'));
+    document.body.classList.add('opened', 'opening');
+    setTimeout(() => {
+      document.body.classList.remove('opening');
+    }, 900);
+  });
 </script>
 </body>
 </html>
