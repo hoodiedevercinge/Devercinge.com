@@ -73,7 +73,7 @@
     const count = cartCount();
     document.querySelectorAll('[data-cart-badge]').forEach(function (el) {
       el.textContent = count;
-      el.style.display = count > 0 ? 'flex' : 'none';
+      el.style.display = count > 0 ? 'inline-flex' : 'none';
     });
   }
 

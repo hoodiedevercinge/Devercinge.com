@@ -75,8 +75,6 @@
     animation:twinkle 3.5s ease-in-out infinite;
   }
 
-  @keyframes twinkle{ 0%,100%{opacity:.12;} 50%{opacity:.8;} }
-
   .cart-link{
     position:absolute;
     top:calc(20px + env(safe-area-inset-top));
@@ -226,25 +224,22 @@
     overflow:hidden;
   }
 
-  .product-visual.photo{ padding:0; }
   .product-photo{
-    width:100%;
-    height:100%;
-    object-fit:cover;
+    width:82%;
+    height:82%;
+    object-fit:contain;
     object-position:center;
     display:block;
-  }
-
-  .piece{ width:75%; }
-  .piece svg{ width:100%; height:auto; display:block; }
-
-  .product-visual{
-    touch-action:none;
+    touch-action:pan-y;
     user-select:none;
-    transition:transform .4s cubic-bezier(.25,.46,.45,.94);
+    -webkit-user-drag:none;
+    cursor:grab;
+    filter:drop-shadow(0 18px 40px rgba(0,0,0,.45));
+    transition:transform .5s cubic-bezier(.25,.46,.45,.94);
   }
-  .product-visual.dragging{
+  .product-photo.dragging{
     transition:none;
+    cursor:grabbing;
   }
 
   .product-info{ padding:22px; }
@@ -438,7 +433,6 @@
   <main>
     <div class="product">
       <div class="product-visual" id="visualWrap">
-        <div class="piece" id="artworkWrap"></div>
       </div>
 
       <div class="product-info">
@@ -494,31 +488,31 @@
       name: 'Classique Dv Noir',
       price: '34,44 €',
       desc: "Coton épais 100%, coupe unisexe. T-shirt noir avec logo brodé au niveau du buste.",
-      photo: 'assets/products/tshirt-noir.jpg'
+      photo: 'assets/products/tshirt-noir.png'
     },
     blanc: {
       name: 'Classique Dv Blanc',
       price: '34,44 €',
       desc: "Coton épais 100%, coupe unisexe. T-shirt blanc avec logo brodé au niveau du buste.",
-      photo: 'assets/products/tshirt-blanc.jpg'
+      photo: 'assets/products/tshirt-blanc.png'
     },
     'short-noir': {
       name: 'Le Short Dv Noir',
       price: '24,44 €',
       desc: "Short léger, taille élastiquée, logo Devercinge brodé sur le côté gauche.",
-      photo: 'assets/products/short-noir.jpg'
+      photo: 'assets/products/short-noir.png'
     },
     'short-blanc': {
       name: 'Le Short Dv Blanc',
       price: '24,44 €',
       desc: "Short léger, taille élastiquée, logo Devercinge brodé sur le côté gauche.",
-      photo: 'assets/products/short-blanc.jpg'
+      photo: 'assets/products/short-blanc.png'
     },
     sweat: {
       name: 'Hoodie Confort DV',
       price: '74,44 €',
       desc: "Sweat épais, intérieur molletonné, coupe confort, logo brodé au niveau du buste.",
-      photo: 'assets/products/hoodie.jpg'
+      photo: 'assets/products/hoodie.png'
     }
   };
 
@@ -532,12 +526,7 @@
   document.getElementById('productDesc').textContent = item.desc;
 
   const visualWrap = document.getElementById('visualWrap');
-  if (item.photo) {
-    visualWrap.classList.add('photo');
-    visualWrap.innerHTML = `<img src="${item.photo}" alt="${item.name}" class="product-photo">`;
-  } else {
-    document.getElementById('artworkWrap').innerHTML = item.artwork;
-  }
+  visualWrap.innerHTML = `<img src="${item.photo}" alt="${item.name}" class="product-photo" draggable="false">`;
 
   document.title = 'Devercinge — ' + item.name;
 
@@ -554,34 +543,36 @@
     starsContainer.appendChild(s);
   }
 
-  // Draggable product visual
-  const productVisual = document.getElementById('visualWrap');
-  let isDragging = false;
+  // La photo suit le doigt puis revient se recentrer quand on lache.
+  const productPhoto = visualWrap.querySelector('.product-photo');
+  let dragPointer = null;
   let startX = 0, startY = 0;
-  let offsetX = 0, offsetY = 0;
 
-  productVisual.addEventListener('pointerdown', (e) => {
-    isDragging = true;
-    startX = e.clientX - offsetX;
-    startY = e.clientY - offsetY;
-    productVisual.classList.add('dragging');
+  function releasePhoto() {
+    if (dragPointer === null) return;
+    dragPointer = null;
+    productPhoto.classList.remove('dragging');
+    productPhoto.style.transform = '';
+  }
+
+  productPhoto.addEventListener('pointerdown', (e) => {
+    dragPointer = e.pointerId;
+    startX = e.clientX;
+    startY = e.clientY;
+    productPhoto.setPointerCapture(e.pointerId);
+    productPhoto.classList.add('dragging');
   });
 
-  document.addEventListener('pointermove', (e) => {
-    if (!isDragging) return;
-    offsetX = e.clientX - startX;
-    offsetY = e.clientY - startY;
-    productVisual.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+  productPhoto.addEventListener('pointermove', (e) => {
+    if (e.pointerId !== dragPointer) return;
+    // Amorti + limite pour que la piece reste dans son cadre.
+    const dx = Math.max(-60, Math.min(60, (e.clientX - startX) * 0.5));
+    const dy = Math.max(-60, Math.min(60, (e.clientY - startY) * 0.5));
+    productPhoto.style.transform = `translate(${dx}px, ${dy}px)`;
   });
 
-  document.addEventListener('pointerup', () => {
-    if (!isDragging) return;
-    isDragging = false;
-    productVisual.classList.remove('dragging');
-    offsetX = 0;
-    offsetY = 0;
-    productVisual.style.transform = 'translate(0, 0)';
-  });
+  productPhoto.addEventListener('pointerup', releasePhoto);
+  productPhoto.addEventListener('pointercancel', releasePhoto);
 
   const sizeButtons = document.querySelectorAll('.size-btn');
   let selectedSize = 'M';

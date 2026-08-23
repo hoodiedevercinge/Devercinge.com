@@ -6,6 +6,18 @@
 <title>Devercinge — Boutique</title>
 <meta name="description" content="Boutique Devercinge : collection streetwear en édition limitée.">
 <meta name="theme-color" content="#0a0a0c">
+<link rel="canonical" href="https://hoodiedevercinge.github.io/Devercinge.com/boutique.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Devercinge">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:url" content="https://hoodiedevercinge.github.io/Devercinge.com/boutique.html">
+<meta property="og:title" content="Devercinge — Boutique">
+<meta property="og:description" content="La collection Devercinge en édition limitée : t-shirts, shorts et hoodies.">
+<meta property="og:image" content="https://hoodiedevercinge.github.io/Devercinge.com/assets/og-image.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Devercinge — Boutique">
+<meta name="twitter:description" content="La collection Devercinge en édition limitée : t-shirts, shorts et hoodies.">
+<meta name="twitter:image" content="https://hoodiedevercinge.github.io/Devercinge.com/assets/og-image.jpg">
 <link rel="icon" href="assets/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="256x256" href="assets/favicon-256.png">
 <link rel="icon" type="image/png" sizes="128x128" href="assets/favicon-128.png">
@@ -224,12 +236,19 @@
     transition:color .2s ease;
   }
 
+  .shortcut-count{
+    display:none;
+    margin-left:2px;
+    color:var(--violet);
+    font-weight:700;
+  }
+
   .shortcut-item:hover .shortcut-label, .shortcut-item:active .shortcut-label{
     color:var(--ink);
   }
 
   @media (prefers-reduced-motion: reduce){
-    .product-item, .hint{ animation:none; }
+    .product-item, .back-link, .stars span{ animation:none; }
   }
 </style>
 </head>
@@ -251,13 +270,13 @@
   </div>
 
   <div class="shortcuts-bar">
-    <a href="menu.html" class="shortcut-item">
+    <a href="index.html" class="shortcut-item">
       <div class="shortcut-line"></div>
       <div class="shortcut-label">Menu</div>
     </a>
     <a href="cart.html" class="shortcut-item">
       <div class="shortcut-line"></div>
-      <div class="shortcut-label">Panier</div>
+      <div class="shortcut-label">Panier <span class="shortcut-count" data-cart-badge>0</span></div>
     </a>
     <a href="contact.html" class="shortcut-item">
       <div class="shortcut-line"></div>
@@ -287,9 +306,6 @@
     { id: 'short-blanc', name: 'Le Short Dv Blanc', image: 'assets/products/short-blanc.png' },
     { id: 'sweat', name: 'Hoodie Confort DV', image: 'assets/products/hoodie.png' }
   ];
-
-  let currentIndex = 0;
-  let isRotating = true;
 
   function createProductElement(product) {
     const div = document.createElement('div');
