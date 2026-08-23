@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Devercinge — Panier</title>
+<meta name="description" content="Ton panier Devercinge : vérifie tes articles, tailles et quantités avant de passer commande par e-mail.">
+<meta name="theme-color" content="#0a0a0c">
+<link rel="canonical" href="https://hoodiedevercinge.github.io/Devercinge.com/cart.html">
+<link rel="icon" href="assets/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="robots" content="noindex">
+<style>
+  :root{
+    --bg: #0a0a0c;
+    --card: #131316;
+    --ink: #f2f1ef;
+    --ink-dim: #9d9ba3;
+    --violet: #9b6bff;
+    --green: #3ddc84;
+    --line: #232227;
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system, 'Inter', 'Segoe UI', sans-serif;
+    max-width:480px;
+    margin:0 auto;
+    min-height:100vh;
+    position:relative;
+    overflow-x:hidden;
+  }
+
+  body::before{
+    content:'';
+    position:fixed;
+    inset:0;
+    z-index:-1;
+    background:
+      radial-gradient(ellipse 60% 40% at 12% 8%, rgba(155,107,255,.16), transparent 60%),
+      radial-gradient(ellipse 60% 45% at 88% 92%, rgba(61,220,132,.13), transparent 60%),
+      var(--bg);
+  }
+
+  header{
+    position:relative;
+    z-index:1;
+    padding:60px 24px 36px;
+    text-align:center;
+  }
+
+  .back-link{
+    position:absolute;
+    top:20px;
+    left:20px;
+    font-size:12px;
+    letter-spacing:.05em;
+    color:var(--ink-dim);
+    text-decoration:none;
+    z-index:2;
+  }
+  .back-link:hover{ color:var(--ink); }
+
+  .brand-mark{
+    width:40px;
+    height:auto;
+    display:block;
+    margin:0 auto 14px;
+    filter:drop-shadow(0 0 14px rgba(155,107,255,.28));
+  }
+
+  .eyebrow{
+    font-size:11px;
+    letter-spacing:.28em;
+    text-transform:uppercase;
+    background:linear-gradient(90deg, var(--violet), var(--green));
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+    color:transparent;
+    margin-bottom:14px;
+    font-weight:600;
+  }
+  h1{
+    font-family:'Arial Black', 'Segoe UI Black', sans-serif;
+    font-size:32px;
+    line-height:1.1;
+    letter-spacing:-.01em;
+    text-transform:uppercase;
+  }
+
+  .tagline{
+    margin-top:14px;
+    color:var(--ink-dim);
+    font-size:14px;
+    line-height:1.5;
+    padding:0 12px;
+  }
+
+  main{ position:relative; z-index:1; padding:0 20px 60px; }
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:22px;
+    margin-top:16px;
+  }
+
+  .empty-state{ text-align:center; }
+  .empty-state p{ color:var(--ink-dim); font-size:14px; }
+  .empty-cta{
+    display:inline-block;
+    margin-top:18px;
+    padding:12px 22px;
+    border-radius:10px;
+    background:var(--violet);
+    color:#0a0a0c;
+    font-weight:700;
+    font-size:14px;
+    text-decoration:none;
+  }
+
+  .cart-line{
+    display:flex;
+    gap:14px;
+    padding:16px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .cart-line:last-child{ border-bottom:none; }
+
+  .cart-line-photo{
+    width:72px;
+    height:72px;
+    border-radius:8px;
+    object-fit:cover;
+    flex-shrink:0;
+    background:#0f0f12;
+  }
+
+  .cart-line-info{ flex:1; min-width:0; }
+  .cart-line-name{
+    font-size:14px;
+    text-transform:uppercase;
+    letter-spacing:.01em;
+  }
+  .cart-line-meta{
+    margin-top:4px;
+    font-size:12px;
+    color:var(--ink-dim);
+  }
+
+  .cart-line-qty{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-top:10px;
+  }
+  .qty-btn{
+    width:26px; height:26px;
+    border-radius:50%;
+    border:1px solid var(--line);
+    background:transparent;
+    color:var(--ink);
+    font-size:14px;
+    line-height:1;
+    cursor:pointer;
+  }
+  .cart-line-qty .qty-val{ font-size:13px; min-width:14px; text-align:center; }
+  .remove-btn{
+    margin-left:auto;
+    background:none;
+    border:none;
+    color:var(--ink-dim);
+    font-size:12px;
+    text-decoration:underline;
+    cursor:pointer;
+    padding:0;
+  }
+  .remove-btn:hover{ color:var(--ink); }
+
+  .cart-line-total{
+    font-size:13px;
+    font-weight:700;
+    white-space:nowrap;
+    align-self:flex-start;
+    margin-top:2px;
+  }
+
+  .summary-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    font-size:15px;
+  }
+  .summary-row strong{
+    background:linear-gradient(90deg, var(--violet), var(--green));
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+    color:transparent;
+    font-size:20px;
+  }
+
+  .cta{
+    width:100%;
+    margin-top:20px;
+    padding:16px;
+    border:1px solid rgba(61,150,110,.35);
+    border-radius:12px;
+    background:#1a3d2c;
+    color:var(--ink);
+    font-size:15px;
+    font-weight:700;
+    letter-spacing:.02em;
+    text-transform:uppercase;
+    cursor:pointer;
+    position:relative;
+    overflow:visible;
+    box-shadow:0 8px 28px rgba(15,60,40,.55), 0 0 34px rgba(20,80,50,.35);
+    transition:transform .15s ease, box-shadow .2s ease;
+  }
+  .cta:active{ transform:scale(.98); }
+  .cta:focus-visible{ outline:3px solid var(--violet); outline-offset:2px; }
+
+  .cta::after{
+    content:'';
+    position:absolute;
+    inset:-6px;
+    border-radius:16px;
+    background:radial-gradient(circle at var(--x,50%) var(--y,50%), rgba(20,90,55,.5), transparent 65%);
+    filter:blur(10px);
+    opacity:0;
+    transition:opacity .3s ease;
+    z-index:-1;
+  }
+  .cta:hover::after{ opacity:1; }
+
+  .clear-btn{
+    display:block;
+    width:100%;
+    text-align:center;
+    margin-top:12px;
+    background:none;
+    border:none;
+    color:var(--ink-dim);
+    font-size:12px;
+    letter-spacing:.05em;
+    text-decoration:underline;
+    cursor:pointer;
+    padding:6px;
+  }
+  .clear-btn:hover{ color:var(--ink); }
+
+  .note{
+    text-align:center;
+    font-size:12px;
+    color:var(--ink-dim);
+    margin-top:14px;
+  }
+
+  footer{
+    position:relative;
+    z-index:1;
+    padding:40px 24px 48px;
+    text-align:center;
+    border-top:1px solid var(--line);
+    margin-top:48px;
+  }
+  footer .name{
+    font-size:13px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+  }
+  footer a{
+    color:var(--green);
+    text-decoration:none;
+    border-bottom:1px solid var(--line);
+  }
+
+  @media (min-width:860px){
+    body{ max-width:620px; }
+    header{ padding-top:80px; }
+  }
+</style>
+</head>
+<body>
+
+  <header>
+    <a href="index.html" class="back-link">← Galerie</a>
+    <img src="assets/logo-mark.png" alt="" class="brand-mark">
+    <div class="eyebrow">Ton panier</div>
+    <h1>Panier</h1>
+    <p class="tagline">Vérifie tes articles, tailles et quantités avant de passer commande.</p>
+  </header>
+
+  <main>
+    <div class="card empty-state" id="emptyState" hidden>
+      <p>Ton panier est vide pour l'instant.</p>
+      <a href="index.html" class="empty-cta">Voir la collection</a>
+    </div>
+
+    <div id="cartLines"></div>
+
+    <div class="card" id="summaryCard" hidden>
+      <div class="summary-row">
+        <span>Total</span>
+        <strong id="cartTotalValue">0,00 €</strong>
+      </div>
+      <button class="cta" id="checkoutBtn">Commander</button>
+      <button class="clear-btn" id="clearCartBtn">Vider le panier</button>
+      <p class="note">Règlement et envoi organisés par e‑mail, on te répond rapidement.</p>
+    </div>
+  </main>
+
+  <footer>
+    <div class="name">Devercinge</div>
+    <p style="margin-top:8px;">
+      <a href="contact.html">Contact</a>
+      &nbsp;·&nbsp;
+      <a href="https://www.instagram.com/devercinge?igsi=MTc5YnJra2Y1aGZzZg%3D%3D&utm_source=qr" target="_blank" rel="noopener">Instagram</a>
+    </p>
+  </footer>
+
+<script src="assets/js/cart.js"></script>
+<script>
+  const cartLinesEl = document.getElementById('cartLines');
+  const emptyState = document.getElementById('emptyState');
+  const summaryCard = document.getElementById('summaryCard');
+  const cartTotalValue = document.getElementById('cartTotalValue');
+
+  function render() {
+    const cart = DevercingeCart.getCart();
+
+    if (cart.length === 0) {
+      emptyState.hidden = false;
+      summaryCard.hidden = true;
+      cartLinesEl.innerHTML = '';
+      return;
+    }
+
+    emptyState.hidden = true;
+    summaryCard.hidden = false;
+
+    cartLinesEl.innerHTML = '<div class="card" id="linesCard"></div>';
+    const linesCard = document.getElementById('linesCard');
+
+    cart.forEach((line, index) => {
+      const row = document.createElement('div');
+      row.className = 'cart-line';
+      row.innerHTML = `
+        <img src="${line.photo}" alt="${line.name}" class="cart-line-photo">
+        <div class="cart-line-info">
+          <div class="cart-line-name">${line.name}</div>
+          <div class="cart-line-meta">Taille ${line.size} · ${line.price}</div>
+          <div class="cart-line-qty">
+            <button class="qty-btn" data-action="minus" data-index="${index}">–</button>
+            <span class="qty-val">${line.qty}</span>
+            <button class="qty-btn" data-action="plus" data-index="${index}">+</button>
+            <button class="remove-btn" data-action="remove" data-index="${index}">Retirer</button>
+          </div>
+        </div>
+        <div class="cart-line-total">${DevercingeCart.formatPrice(line.priceValue * line.qty)}</div>
+      `;
+      linesCard.appendChild(row);
+    });
+
+    cartTotalValue.textContent = DevercingeCart.formatPrice(DevercingeCart.cartTotal());
+  }
+
+  cartLinesEl.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-action]');
+    if (!btn) return;
+    const index = parseInt(btn.dataset.index, 10);
+    const cart = DevercingeCart.getCart();
+    const line = cart[index];
+    if (!line) return;
+
+    if (btn.dataset.action === 'plus') {
+      DevercingeCart.updateLineQty(index, line.qty + 1);
+    } else if (btn.dataset.action === 'minus') {
+      DevercingeCart.updateLineQty(index, line.qty - 1);
+    } else if (btn.dataset.action === 'remove') {
+      DevercingeCart.removeLine(index);
+    }
+    render();
+  });
+
+  document.getElementById('clearCartBtn').addEventListener('click', () => {
+    if (confirm('Vider le panier ?')) {
+      DevercingeCart.clearCart();
+      render();
+    }
+  });
+
+  document.getElementById('checkoutBtn').addEventListener('click', () => {
+    const cart = DevercingeCart.getCart();
+    if (cart.length === 0) return;
+
+    const lignes = cart.map(line =>
+      `- ${line.name} (taille ${line.size}) x${line.qty} — ${DevercingeCart.formatPrice(line.priceValue * line.qty)}`
+    ).join('\n');
+
+    const total = DevercingeCart.formatPrice(DevercingeCart.cartTotal());
+    const sujet = encodeURIComponent('Commande Devercinge');
+    const corps = encodeURIComponent(
+      `Bonjour,\n\nJe voudrais commander :\n${lignes}\n\nTotal : ${total}\n\nMerci de me recontacter pour le règlement et l'envoi.`
+    );
+    window.location.href = `mailto:hoodiedevercinge@gmail.com?subject=${sujet}&body=${corps}`;
+  });
+
+  render();
+</script>
+
+</body>
+</html>

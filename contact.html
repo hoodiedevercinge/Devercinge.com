@@ -4,6 +4,25 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Devercinge — Contact</title>
+<meta name="description" content="Une question, une commande particulière ? Contacte Devercinge directement par e-mail.">
+<meta name="theme-color" content="#0a0a0c">
+<link rel="canonical" href="https://hoodiedevercinge.github.io/Devercinge.com/contact.html">
+<link rel="icon" href="assets/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Devercinge">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:url" content="https://hoodiedevercinge.github.io/Devercinge.com/contact.html">
+<meta property="og:title" content="Devercinge — Contact">
+<meta property="og:description" content="Une question, une commande particulière ? Écris-nous, on te répond directement par e‑mail.">
+<meta property="og:image" content="https://hoodiedevercinge.github.io/Devercinge.com/assets/og-image.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Devercinge — Contact">
+<meta name="twitter:description" content="Une question, une commande particulière ? Écris-nous, on te répond directement par e‑mail.">
+<meta name="twitter:image" content="https://hoodiedevercinge.github.io/Devercinge.com/assets/og-image.jpg">
 <style>
   :root{
     --bg: #0a0a0c;
@@ -27,6 +46,53 @@
     min-height:100vh;
     position:relative;
     overflow-x:hidden;
+  }
+
+  body::before{
+    content:'';
+    position:fixed;
+    inset:0;
+    z-index:-1;
+    background:
+      radial-gradient(ellipse 60% 40% at 12% 8%, rgba(155,107,255,.16), transparent 60%),
+      radial-gradient(ellipse 60% 45% at 88% 92%, rgba(61,220,132,.13), transparent 60%),
+      var(--bg);
+  }
+
+  .brand-mark{
+    width:40px;
+    height:auto;
+    display:block;
+    margin:0 auto 14px;
+    filter:drop-shadow(0 0 14px rgba(155,107,255,.28));
+  }
+
+  .cart-link{
+    position:absolute;
+    top:20px;
+    right:20px;
+    z-index:2;
+    display:flex;
+    align-items:center;
+    gap:5px;
+    color:var(--ink-dim);
+    text-decoration:none;
+  }
+  .cart-link:hover{ color:var(--ink); }
+  .cart-link svg{ width:20px; height:20px; display:block; }
+  .cart-badge{
+    display:none;
+    align-items:center;
+    justify-content:center;
+    min-width:16px;
+    height:16px;
+    padding:0 4px;
+    border-radius:999px;
+    background:var(--violet);
+    color:#0a0a0c;
+    font-size:10px;
+    font-weight:700;
+    line-height:1;
   }
 
   .stars{
@@ -191,6 +257,11 @@
     text-transform:uppercase;
     color:var(--ink-dim);
   }
+
+  @media (min-width:860px){
+    body{ max-width:620px; }
+    header{ padding-top:80px; }
+  }
 </style>
 </head>
 <body>
@@ -198,7 +269,12 @@
   <div class="stars" id="stars"></div>
 
   <header>
-    <a href="gallery.html" class="back-link">← Galerie</a>
+    <a href="index.html" class="back-link">← Galerie</a>
+    <a href="cart.html" class="cart-link" aria-label="Voir le panier">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1 12H7L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+      <span class="cart-badge" data-cart-badge>0</span>
+    </a>
+    <img src="assets/logo-mark.png" alt="" class="brand-mark">
     <div class="eyebrow">Devercinge</div>
     <h1>Contact</h1>
     <p class="tagline">Une question, une commande particulière ? Écris-nous, on te répond directement par e‑mail.</p>
@@ -230,6 +306,7 @@
     <div class="name">Devercinge</div>
   </footer>
 
+<script src="assets/js/cart.js"></script>
 <script>
   const starsContainer = document.getElementById('stars');
   const STAR_COUNT = 50;
