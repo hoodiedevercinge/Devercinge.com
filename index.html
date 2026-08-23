@@ -49,6 +49,22 @@
     background:var(--bg);
   }
 
+  .stars{
+    position:fixed;
+    top:0; left:0; right:0; bottom:0;
+    overflow:hidden;
+    z-index:0;
+  }
+  .stars span{
+    position:absolute;
+    width:2px; height:2px;
+    background:var(--ink);
+    border-radius:50%;
+    opacity:.6;
+    animation:twinkle 3s ease-in-out infinite;
+  }
+  @keyframes twinkle{ 0%,100%{ opacity:.15; } 50%{ opacity:.85; } }
+
   .menu-container{
     position:relative;
     z-index:1;
@@ -165,6 +181,8 @@
 </head>
 <body>
 
+  <div class="stars" id="stars"></div>
+
   <div class="menu-nav">
     <a href="aventure.html" class="menu-link left">← Aventure</a>
     <a href="boutique.html" class="menu-link right">Boutique →</a>
@@ -179,6 +197,19 @@
   const logo = document.querySelector('.brand-mark');
   const menuLinks = document.querySelectorAll('.menu-link');
   const starsContainer = document.getElementById('stars');
+
+  // Generate stars
+  const STAR_COUNT = 70;
+  for (let i = 0; i < STAR_COUNT; i++) {
+    const s = document.createElement('span');
+    s.style.left = Math.random() * 100 + '%';
+    s.style.top = Math.random() * 100 + '%';
+    s.style.animationDelay = (Math.random() * 3) + 's';
+    const size = Math.random() * 1.5 + 1;
+    s.style.width = size + 'px';
+    s.style.height = size + 'px';
+    starsContainer.appendChild(s);
+  }
 
   // Add animation delay to each star
   const stars = starsContainer.querySelectorAll('span');
