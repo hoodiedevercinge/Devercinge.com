@@ -229,8 +229,17 @@
     display:block;
   }
 
-  .piece{ width:58%; }
+  .piece{ width:75%; }
   .piece svg{ width:100%; height:auto; display:block; }
+
+  .product-visual{
+    touch-action:none;
+    user-select:none;
+    transition:transform .4s cubic-bezier(.25,.46,.45,.94);
+  }
+  .product-visual.dragging{
+    transition:none;
+  }
 
   .product-info{ padding:22px; }
 
@@ -538,6 +547,35 @@
     s.style.height = size + 'px';
     starsContainer.appendChild(s);
   }
+
+  // Draggable product visual
+  const productVisual = document.getElementById('visualWrap');
+  let isDragging = false;
+  let startX = 0, startY = 0;
+  let offsetX = 0, offsetY = 0;
+
+  productVisual.addEventListener('pointerdown', (e) => {
+    isDragging = true;
+    startX = e.clientX - offsetX;
+    startY = e.clientY - offsetY;
+    productVisual.classList.add('dragging');
+  });
+
+  document.addEventListener('pointermove', (e) => {
+    if (!isDragging) return;
+    offsetX = e.clientX - startX;
+    offsetY = e.clientY - startY;
+    productVisual.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+  });
+
+  document.addEventListener('pointerup', () => {
+    if (!isDragging) return;
+    isDragging = false;
+    productVisual.classList.remove('dragging');
+    offsetX = 0;
+    offsetY = 0;
+    productVisual.style.transform = 'translate(0, 0)';
+  });
 
   const sizeButtons = document.querySelectorAll('.size-btn');
   let selectedSize = 'M';
