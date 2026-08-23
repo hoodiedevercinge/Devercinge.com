@@ -197,9 +197,8 @@
     flex:0 0 100%;
     scroll-snap-align:center;
     padding:0 28px;
-    transition:transform .1s ease-out, opacity .1s ease;
-    will-change:transform, opacity;
-    transform-style:preserve-3d;
+    transition:filter .15s ease, opacity .15s ease;
+    will-change:filter, opacity;
   }
 
   .frame{
@@ -486,11 +485,10 @@
       const maxDist = galleryRect.width;
       const ratio = Math.min(absDist / maxDist, 1);
 
-      const rotationY = Math.max(-25, Math.min(25, (dist / galleryRect.width) * 50));
-      const opacity = 1 - ratio * 0.35;
-      const translateZ = (1 - ratio) * 100;
+      const blurAmount = ratio * 8;
+      const opacity = 1 - ratio * 0.3;
 
-      slide.style.transform = `rotateY(${rotationY}deg) translateZ(${translateZ}px)`;
+      slide.style.filter = `blur(${blurAmount}px)`;
       slide.style.opacity = opacity;
     });
 
