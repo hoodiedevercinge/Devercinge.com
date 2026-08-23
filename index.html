@@ -197,7 +197,7 @@
     flex:0 0 100%;
     scroll-snap-align:center;
     padding:0 28px;
-    transition:transform .08s linear, opacity .08s linear;
+    transition:transform .05s linear, opacity .05s linear;
     will-change:transform, opacity;
   }
 
@@ -485,8 +485,8 @@
       const maxDist = galleryRect.width;
       const ratio = Math.min(absDist / maxDist, 1);
 
-      const scale = 1 - ratio * 0.05;
-      const opacity = 1 - ratio * 0.2;
+      const scale = 1 - ratio * 0.12;
+      const opacity = 1 - ratio * 0.6;
 
       slide.style.transform = `scale(${scale})`;
       slide.style.opacity = opacity;
