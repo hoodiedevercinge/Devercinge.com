@@ -229,10 +229,18 @@
     }
   });
 
-  logo.addEventListener('click', () => {
-    logo.classList.add('active');
-    menuLinks.forEach(link => link.classList.add('active'));
-  });
+  console.log('Logo element:', logo);
+  console.log('Menu links:', menuLinks);
+
+  if (logo) {
+    logo.addEventListener('click', (e) => {
+      console.log('Logo clicked!', e);
+      logo.classList.add('active');
+      menuLinks.forEach(link => link.classList.add('active'));
+    });
+  } else {
+    console.error('Logo not found!');
+  }
 </script>
 </body>
 </html>
