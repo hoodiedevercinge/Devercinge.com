@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Devercinge — Merch</title>
+<style>
+  :root{
+    --bg: #0a0a0c;
+    --card: #131316;
+    --ink: #f2f1ef;
+    --ink-dim: #9d9ba3;
+    --violet: #9b6bff;
+    --green: #3ddc84;
+    --line: #232227;
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system, 'Inter', 'Segoe UI', sans-serif;
+    max-width:480px;
+    margin:0 auto;
+    min-height:100vh;
+    position:relative;
+    overflow-x:hidden;
+  }
+
+  .stars{
+    position:absolute;
+    top:0; left:0; right:0;
+    height:520px;
+    overflow:hidden;
+    z-index:0;
+  }
+  .stars span{
+    position:absolute;
+    width:2px; height:2px;
+    background:var(--ink);
+    border-radius:50%;
+    opacity:.6;
+    animation:twinkle 3s ease-in-out infinite;
+  }
+  @keyframes twinkle{ 0%,100%{ opacity:.15; } 50%{ opacity:.85; } }
+  @media (prefers-reduced-motion: reduce){ .stars span{ animation:none; opacity:.4; } }
+
+  header{
+    position:relative;
+    z-index:1;
+    padding:60px 24px 36px;
+    text-align:center;
+  }
+
+  .back-link{
+    position:absolute;
+    top:20px;
+    left:20px;
+    font-size:12px;
+    letter-spacing:.05em;
+    color:var(--ink-dim);
+    text-decoration:none;
+    z-index:2;
+  }
+  .back-link:hover{ color:var(--ink); }
+
+  .eyebrow{
+    font-size:11px;
+    letter-spacing:.28em;
+    text-transform:uppercase;
+    background:linear-gradient(90deg, var(--violet), var(--green));
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+    color:transparent;
+    margin-bottom:14px;
+    font-weight:600;
+  }
+  h1{
+    font-family:'Arial Black', 'Segoe UI Black', sans-serif;
+    font-size:32px;
+    line-height:1.1;
+    letter-spacing:-.01em;
+    text-transform:uppercase;
+  }
+
+  .tagline{
+    margin-top:14px;
+    color:var(--ink-dim);
+    font-size:14px;
+    line-height:1.5;
+    padding:0 12px;
+  }
+
+  main{ position:relative; z-index:1; padding:0 20px 60px; }
+
+  .product{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:14px;
+    overflow:hidden;
+    margin-top:8px;
+  }
+
+  .product-visual{
+    aspect-ratio:1/1;
+    background:
+      radial-gradient(circle at 25% 15%, rgba(155,107,255,.16), transparent 55%),
+      radial-gradient(circle at 80% 85%, rgba(61,220,132,.12), transparent 55%),
+      #0f0f12;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    overflow:hidden;
+  }
+
+  .product-visual.photo{ padding:0; }
+  .product-photo{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    object-position:center;
+    display:block;
+  }
+
+  .piece{ width:58%; }
+  .piece svg{ width:100%; height:auto; display:block; }
+
+  .product-info{ padding:22px; }
+
+  .product-info h2{
+    font-size:19px;
+    text-transform:uppercase;
+    letter-spacing:.01em;
+  }
+
+  .price{
+    font-size:22px;
+    background:linear-gradient(90deg, var(--violet), var(--green));
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+    color:transparent;
+    margin-top:6px;
+    font-weight:700;
+  }
+
+  .desc{
+    margin-top:12px;
+    color:var(--ink-dim);
+    font-size:14px;
+    line-height:1.6;
+  }
+
+  .field{ margin-top:22px; }
+
+  .field-label{
+    font-size:11px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+    margin-bottom:10px;
+    display:block;
+  }
+
+  .sizes{
+    display:flex;
+    gap:8px;
+  }
+
+  .size-btn{
+    flex:1;
+    padding:12px 0;
+    background:transparent;
+    border:1px solid var(--line);
+    border-radius:10px;
+    color:var(--ink);
+    font-size:14px;
+    cursor:pointer;
+    transition:.15s ease;
+  }
+  .size-btn.active{
+    background:var(--violet);
+    border-color:var(--violet);
+    color:#0a0a0c;
+    font-weight:700;
+  }
+
+  .qty{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    margin-top:22px;
+  }
+  .qty-btn{
+    width:38px; height:38px;
+    border-radius:50%;
+    border:1px solid var(--line);
+    background:transparent;
+    color:var(--ink);
+    font-size:18px;
+    cursor:pointer;
+  }
+  .qty-val{ font-size:16px; min-width:16px; text-align:center; }
+
+  .cta{
+    width:100%;
+    margin-top:26px;
+    padding:16px;
+    border:1px solid rgba(61,150,110,.35);
+    border-radius:12px;
+    background:#1a3d2c;
+    color:var(--ink);
+    font-size:15px;
+    font-weight:700;
+    letter-spacing:.02em;
+    text-transform:uppercase;
+    cursor:pointer;
+    position:relative;
+    overflow:visible;
+    box-shadow:0 8px 28px rgba(15,60,40,.55), 0 0 34px rgba(20,80,50,.35);
+    transition:transform .15s ease, box-shadow .2s ease;
+  }
+  .cta:active{ transform:scale(.98); }
+  .cta:focus-visible{ outline:3px solid var(--violet); outline-offset:2px; }
+
+  .cta::after{
+    content:'';
+    position:absolute;
+    inset:-6px;
+    border-radius:16px;
+    background:radial-gradient(circle at var(--x,50%) var(--y,50%), rgba(20,90,55,.5), transparent 65%);
+    filter:blur(10px);
+    opacity:0;
+    transition:opacity .3s ease;
+    z-index:-1;
+  }
+  .cta:hover::after{ opacity:1; }
+
+  .note{
+    text-align:center;
+    font-size:12px;
+    color:var(--ink-dim);
+    margin-top:10px;
+  }
+
+  .about{
+    margin-top:48px;
+    text-align:center;
+    padding:0 8px;
+  }
+  .about .divider{
+    background:linear-gradient(90deg, var(--violet), var(--green));
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+    color:transparent;
+    font-size:14px;
+    letter-spacing:.3em;
+    margin-bottom:18px;
+  }
+  .about p{
+    color:var(--ink-dim);
+    font-size:14px;
+    line-height:1.7;
+  }
+
+  footer{
+    position:relative;
+    z-index:1;
+    padding:40px 24px 48px;
+    text-align:center;
+    border-top:1px solid var(--line);
+    margin-top:48px;
+  }
+  footer .name{
+    font-size:13px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+  }
+  footer a{
+    color:var(--green);
+    text-decoration:none;
+    border-bottom:1px solid var(--line);
+  }
+</style>
+</head>
+<body>
+
+  <div class="stars" id="stars"></div>
+
+  <header>
+    <a href="index.html" class="back-link">← Galerie</a>
+    <div class="eyebrow">Merch officiel</div>
+    <h1 id="itemTitle">Devercinge</h1>
+    <p class="tagline">Édition limitée. Détails soignés, esprit Devercinge.</p>
+  </header>
+
+  <main>
+    <div class="product">
+      <div class="product-visual" id="visualWrap">
+        <div class="piece" id="artworkWrap"></div>
+      </div>
+
+      <div class="product-info">
+        <h2 id="productName">Classique Dv Noir</h2>
+        <div class="price" id="productPrice">34,44 €</div>
+        <p class="desc" id="productDesc">Coton épais 100%, coupe unisexe.</p>
+
+        <div class="field">
+          <span class="field-label">Taille</span>
+          <div class="sizes" id="sizes">
+            <button class="size-btn" data-size="S">S</button>
+            <button class="size-btn active" data-size="M">M</button>
+            <button class="size-btn" data-size="L">L</button>
+            <button class="size-btn" data-size="XL">XL</button>
+          </div>
+        </div>
+
+        <div class="qty">
+          <button class="qty-btn" id="minus">–</button>
+          <span class="qty-val" id="qtyVal">1</span>
+          <button class="qty-btn" id="plus">+</button>
+        </div>
+
+        <button class="cta" id="orderBtn">Commander</button>
+        <p class="note">Paiement géré par e‑mail pour l'instant — voir note dans le code.</p>
+      </div>
+    </div>
+
+    <div class="about">
+      <div class="divider">✦ ✦ ✦</div>
+      <p>Chaque pièce est produite en petite quantité. En commandant, tu soutiens directement le projet Devercinge.</p>
+    </div>
+  </main>
+
+  <footer>
+    <div class="name">Devercinge</div>
+    <p style="margin-top:8px;">
+      <a href="contact.html" style="color:var(--green); text-decoration:none; border-bottom:1px solid var(--line);">Contact</a>
+      &nbsp;·&nbsp;
+      <a href="https://www.instagram.com/devercinge?igsi=MTc5YnJra2Y1aGZzZg%3D%3D&utm_source=qr" target="_blank" rel="noopener" style="color:var(--violet); text-decoration:none; border-bottom:1px solid var(--line);">Instagram</a>
+    </p>
+  </footer>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+
+  const items = {
+    noir: {
+      name: 'Classique Dv Noir',
+      price: '34,44 €',
+      desc: "Coton épais 100%, coupe unisexe. T-shirt noir avec logo brodé au niveau du buste.",
+      photo: 'assets/products/tshirt-noir.jpg'
+    },
+    blanc: {
+      name: 'Classique Dv Blanc',
+      price: '34,44 €',
+      desc: "Coton épais 100%, coupe unisexe. T-shirt blanc avec logo brodé au niveau du buste.",
+      photo: 'assets/products/tshirt-blanc.jpg'
+    },
+    'short-noir': {
+      name: 'Le Short Dv Noir',
+      price: '24,44 €',
+      desc: "Short léger, taille élastiquée, logo Devercinge brodé sur le côté gauche.",
+      photo: 'assets/products/short-noir.jpg'
+    },
+    'short-blanc': {
+      name: 'Le Short Dv Blanc',
+      price: '24,44 €',
+      desc: "Short léger, taille élastiquée, logo Devercinge brodé sur le côté gauche.",
+      photo: 'assets/products/short-blanc.jpg'
+    },
+    sweat: {
+      name: 'Hoodie Confort DV',
+      price: '74,44 €',
+      desc: "Sweat épais, intérieur molletonné, coupe confort, logo brodé au niveau du buste.",
+      photo: 'assets/products/hoodie.jpg'
+    }
+  };
+
+  const chosenItem = params.get('item');
+  const item = items[chosenItem] || items.noir;
+
+  document.getElementById('itemTitle').textContent = item.name;
+  document.getElementById('productName').textContent = item.name;
+  document.getElementById('productPrice').textContent = item.price;
+  document.getElementById('productDesc').textContent = item.desc;
+
+  const visualWrap = document.getElementById('visualWrap');
+  if (item.photo) {
+    visualWrap.classList.add('photo');
+    visualWrap.innerHTML = `<img src="${item.photo}" alt="${item.name}" class="product-photo">`;
+  } else {
+    document.getElementById('artworkWrap').innerHTML = item.artwork;
+  }
+
+  document.title = 'Devercinge — ' + item.name;
+
+  const starsContainer = document.getElementById('stars');
+  const STAR_COUNT = 60;
+  for (let i = 0; i < STAR_COUNT; i++) {
+    const s = document.createElement('span');
+    s.style.left = Math.random() * 100 + '%';
+    s.style.top = Math.random() * 100 + '%';
+    s.style.animationDelay = (Math.random() * 3) + 's';
+    const size = Math.random() * 1.5 + 1;
+    s.style.width = size + 'px';
+    s.style.height = size + 'px';
+    starsContainer.appendChild(s);
+  }
+
+  const sizeButtons = document.querySelectorAll('.size-btn');
+  let selectedSize = 'M';
+  sizeButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      sizeButtons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedSize = btn.dataset.size;
+    });
+  });
+
+  let qty = 1;
+  const qtyVal = document.getElementById('qtyVal');
+  document.getElementById('plus').addEventListener('click', () => {
+    qty++;
+    qtyVal.textContent = qty;
+  });
+  document.getElementById('minus').addEventListener('click', () => {
+    if (qty > 1) qty--;
+    qtyVal.textContent = qty;
+  });
+
+  const cta = document.getElementById('orderBtn');
+  cta.addEventListener('pointermove', (e) => {
+    const rect = cta.getBoundingClientRect();
+    cta.style.setProperty('--x', (e.clientX - rect.left) + 'px');
+    cta.style.setProperty('--y', (e.clientY - rect.top) + 'px');
+  });
+
+  cta.addEventListener('click', () => {
+    const sujet = encodeURIComponent('Commande ' + item.name);
+    const corps = encodeURIComponent(
+      `Bonjour,\n\nJe voudrais commander :\n- Article : ${item.name}\n- Prix : ${item.price}\n- Taille : ${selectedSize}\n- Quantité : ${qty}\n\nMerci de me recontacter pour le règlement et l'envoi.`
+    );
+    window.location.href = `mailto:hoodiedevercinge@gmail.com?subject=${sujet}&body=${corps}`;
+  });
+</script>
+
+</body>
+</html>
