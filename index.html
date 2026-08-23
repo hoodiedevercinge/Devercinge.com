@@ -122,6 +122,37 @@
     }
   }
 
+  @keyframes logoExpand{
+    from{
+      opacity:0;
+      transform:scale(0.3);
+    }
+    to{
+      opacity:1;
+      transform:scale(1);
+    }
+  }
+
+  @keyframes starsParallax{
+    from{
+      opacity:0;
+      transform:scale(2.5) translateZ(1000px);
+    }
+    to{
+      opacity:1;
+      transform:scale(1) translateZ(0);
+    }
+  }
+
+  body.returning .brand-mark{
+    animation:logoExpand .8s cubic-bezier(.25,.46,.45,.94);
+  }
+
+  body.returning .stars span{
+    animation:starsParallax .8s cubic-bezier(.25,.46,.45,.94), twinkle 3s ease-in-out infinite;
+    animation-delay:0s, calc((var(--star-delay, 0) * 3.5s));
+  }
+
   @media (prefers-reduced-motion: reduce){
     .brand-mark{ animation:none; }
   }
@@ -142,6 +173,25 @@
 <script>
   const logo = document.querySelector('.brand-mark');
   const menuLinks = document.querySelectorAll('.menu-link');
+  const starsContainer = document.getElementById('stars');
+
+  // Add animation delay to each star
+  const stars = starsContainer.querySelectorAll('span');
+  stars.forEach((star, i) => {
+    star.style.setProperty('--star-delay', Math.random());
+  });
+
+  // Detect when returning to this page (via back button or history)
+  window.addEventListener('pageshow', (e) => {
+    if (e.persisted) {
+      document.body.classList.add('returning');
+      setTimeout(() => {
+        document.body.classList.remove('returning');
+        logo.classList.remove('active');
+        menuLinks.forEach(link => link.classList.remove('active'));
+      }, 900);
+    }
+  });
 
   logo.addEventListener('click', () => {
     logo.classList.add('active');
