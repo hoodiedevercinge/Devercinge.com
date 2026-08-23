@@ -81,7 +81,10 @@
     display:block;
     margin:0 auto 14px;
     filter:drop-shadow(0 0 14px rgba(155,107,255,.28));
+    animation:twinkle 3.5s ease-in-out infinite;
   }
+
+  @keyframes twinkle{ 0%,100%{opacity:.12;} 50%{opacity:.8;} }
 
   .eyebrow{
     font-size:11px;
