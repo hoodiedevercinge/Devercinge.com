@@ -176,6 +176,17 @@
     }
   }
 
+  @keyframes starsZoomIn{
+    from{
+      opacity:1;
+      transform:scale(1) translateZ(0);
+    }
+    to{
+      opacity:0;
+      transform:scale(0.4) translateZ(-1000px);
+    }
+  }
+
   body.returning .brand-mark{
     animation:logoExpand .8s cubic-bezier(.25,.46,.45,.94);
   }
@@ -183,6 +194,10 @@
   body.returning .stars span{
     animation:starsParallax .8s cubic-bezier(.25,.46,.45,.94), twinkle 3s ease-in-out infinite;
     animation-delay:0s, calc((var(--star-delay, 0) * 3.5s));
+  }
+
+  body.opening .stars span{
+    animation:starsZoomIn .8s cubic-bezier(.25,.46,.45,.94);
   }
 
   @media (prefers-reduced-motion: reduce){
@@ -248,6 +263,10 @@
       console.log('Logo clicked!', e);
       logo.classList.add('active');
       menuLinks.forEach(link => link.classList.add('active'));
+      document.body.classList.add('opening');
+      setTimeout(() => {
+        document.body.classList.remove('opening');
+      }, 900);
     });
   } else {
     console.error('Logo not found!');
