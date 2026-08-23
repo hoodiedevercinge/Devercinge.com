@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Devercinge — Contact</title>
+<style>
+  :root{
+    --bg: #0a0a0c;
+    --card: #131316;
+    --ink: #f2f1ef;
+    --ink-dim: #9d9ba3;
+    --violet: #9b6bff;
+    --green: #3ddc84;
+    --line: #232227;
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system, 'Inter', 'Segoe UI', sans-serif;
+    max-width:480px;
+    margin:0 auto;
+    min-height:100vh;
+    position:relative;
+    overflow-x:hidden;
+  }
+
+  .stars{
+    position:absolute;
+    top:0; left:0; right:0;
+    height:420px;
+    overflow:hidden;
+    z-index:0;
+  }
+  .stars span{
+    position:absolute;
+    width:2px; height:2px;
+    background:var(--ink);
+    border-radius:50%;
+    opacity:.6;
+    animation:twinkle 3s ease-in-out infinite;
+  }
+  @keyframes twinkle{ 0%,100%{ opacity:.15; } 50%{ opacity:.85; } }
+  @media (prefers-reduced-motion: reduce){ .stars span{ animation:none; opacity:.4; } }
+
+  header{
+    position:relative;
+    z-index:1;
+    padding:60px 24px 36px;
+    text-align:center;
+  }
+
+  .back-link{
+    position:absolute;
+    top:20px;
+    left:20px;
+    font-size:12px;
+    letter-spacing:.05em;
+    color:var(--ink-dim);
+    text-decoration:none;
+    z-index:2;
+  }
+  .back-link:hover{ color:var(--ink); }
+
+  .eyebrow{
+    font-size:11px;
+    letter-spacing:.28em;
+    text-transform:uppercase;
+    background:linear-gradient(90deg, var(--violet), var(--green));
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+    color:transparent;
+    margin-bottom:14px;
+    font-weight:600;
+  }
+  h1{
+    font-family:'Arial Black', 'Segoe UI Black', sans-serif;
+    font-size:32px;
+    line-height:1.1;
+    letter-spacing:-.01em;
+    text-transform:uppercase;
+  }
+
+  .tagline{
+    margin-top:14px;
+    color:var(--ink-dim);
+    font-size:14px;
+    line-height:1.5;
+    padding:0 12px;
+  }
+
+  main{ position:relative; z-index:1; padding:0 20px 60px; }
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:24px 22px;
+    margin-top:8px;
+  }
+
+  .field{ margin-bottom:20px; }
+  .field:last-of-type{ margin-bottom:0; }
+
+  .field-label{
+    font-size:11px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+    margin-bottom:10px;
+    display:block;
+  }
+
+  input, textarea{
+    width:100%;
+    background:#0f0f12;
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:13px 14px;
+    color:var(--ink);
+    font-size:15px;
+    font-family:inherit;
+  }
+  input:focus, textarea:focus{
+    outline:none;
+    border-color:var(--violet);
+  }
+  textarea{
+    resize:vertical;
+    min-height:120px;
+    line-height:1.5;
+  }
+
+  .cta{
+    width:100%;
+    margin-top:26px;
+    padding:16px;
+    border:1px solid rgba(61,150,110,.35);
+    border-radius:12px;
+    background:#1a3d2c;
+    color:var(--ink);
+    font-size:15px;
+    font-weight:700;
+    letter-spacing:.02em;
+    text-transform:uppercase;
+    cursor:pointer;
+    position:relative;
+    overflow:visible;
+    box-shadow:0 8px 28px rgba(15,60,40,.55), 0 0 34px rgba(20,80,50,.35);
+    transition:transform .15s ease, box-shadow .2s ease;
+  }
+  .cta:active{ transform:scale(.98); }
+  .cta:focus-visible{ outline:3px solid var(--violet); outline-offset:2px; }
+
+  .cta::after{
+    content:'';
+    position:absolute;
+    inset:-6px;
+    border-radius:16px;
+    background:radial-gradient(circle at var(--x,50%) var(--y,50%), rgba(20,90,55,.5), transparent 65%);
+    filter:blur(10px);
+    opacity:0;
+    transition:opacity .3s ease;
+    z-index:-1;
+  }
+  .cta:hover::after{ opacity:1; }
+
+  .note{
+    text-align:center;
+    font-size:12px;
+    color:var(--ink-dim);
+    margin-top:10px;
+  }
+
+  footer{
+    position:relative;
+    z-index:1;
+    padding:40px 24px 48px;
+    text-align:center;
+    border-top:1px solid var(--line);
+    margin-top:48px;
+  }
+  footer .name{
+    font-size:13px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+  }
+</style>
+</head>
+<body>
+
+  <div class="stars" id="stars"></div>
+
+  <header>
+    <a href="index.html" class="back-link">← Galerie</a>
+    <div class="eyebrow">Devercinge</div>
+    <h1>Contact</h1>
+    <p class="tagline">Une question, une commande particulière ? Écris-nous, on te répond directement par e‑mail.</p>
+  </header>
+
+  <main>
+    <div class="card">
+      <div class="field">
+        <span class="field-label">Ton nom</span>
+        <input type="text" id="fName" placeholder="Prénom / pseudo">
+      </div>
+
+      <div class="field">
+        <span class="field-label">Ton e‑mail</span>
+        <input type="email" id="fEmail" placeholder="ton@mail.com">
+      </div>
+
+      <div class="field">
+        <span class="field-label">Ton message</span>
+        <textarea id="fMessage" placeholder="Écris ta demande ici..."></textarea>
+      </div>
+
+      <button class="cta" id="sendBtn">Envoyer</button>
+      <p class="note">Ouvre ton application mail pour envoyer directement à hoodiedevercinge@gmail.com</p>
+    </div>
+  </main>
+
+  <footer>
+    <div class="name">Devercinge</div>
+  </footer>
+
+<script>
+  const starsContainer = document.getElementById('stars');
+  const STAR_COUNT = 50;
+  for (let i = 0; i < STAR_COUNT; i++) {
+    const s = document.createElement('span');
+    s.style.left = Math.random() * 100 + '%';
+    s.style.top = Math.random() * 100 + '%';
+    s.style.animationDelay = (Math.random() * 3) + 's';
+    const size = Math.random() * 1.5 + 1;
+    s.style.width = size + 'px';
+    s.style.height = size + 'px';
+    starsContainer.appendChild(s);
+  }
+
+  const cta = document.getElementById('sendBtn');
+  cta.addEventListener('pointermove', (e) => {
+    const rect = cta.getBoundingClientRect();
+    cta.style.setProperty('--x', (e.clientX - rect.left) + 'px');
+    cta.style.setProperty('--y', (e.clientY - rect.top) + 'px');
+  });
+
+  cta.addEventListener('click', () => {
+    const nom = document.getElementById('fName').value || 'Non renseigné';
+    const email = document.getElementById('fEmail').value || 'Non renseigné';
+    const message = document.getElementById('fMessage').value || '';
+
+    const sujet = encodeURIComponent('Demande depuis le site Devercinge');
+    const corps = encodeURIComponent(
+      `Nom : ${nom}\nE-mail : ${email}\n\nMessage :\n${message}`
+    );
+    window.location.href = `mailto:hoodiedevercinge@gmail.com?subject=${sujet}&body=${corps}`;
+  });
+</script>
+
+</body>
+</html>
