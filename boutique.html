@@ -94,6 +94,19 @@
   }
   @keyframes twinkle{ 0%,100%{opacity:.12;} 50%{opacity:.8;} }
 
+  .brand-mark{
+    width:40px;
+    height:auto;
+    display:block;
+    position:absolute;
+    top:calc(20px + env(safe-area-inset-top));
+    left:50%;
+    transform:translateX(-50%);
+    z-index:11;
+    filter:drop-shadow(0 0 14px rgba(155,107,255,.28));
+    animation:twinkle 3.5s ease-in-out infinite;
+  }
+
   .gallery-container{
     position:relative;
     z-index:1;
@@ -226,6 +239,7 @@
   <div class="stars" id="stars"></div>
 
   <header>
+    <img src="assets/logo-mark.png" alt="" class="brand-mark">
     <a href="menu.html" class="back-link">← Menu</a>
     <div class="product-name" id="productName">Sélectionne un article</div>
   </header>

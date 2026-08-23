@@ -98,6 +98,21 @@
     filter:drop-shadow(0 0 4px rgba(155,107,255,.5));
   }
 
+  .brand-mark{
+    width:40px;
+    height:auto;
+    display:block;
+    position:absolute;
+    top:calc(20px + env(safe-area-inset-top));
+    left:50%;
+    transform:translateX(-50%);
+    z-index:11;
+    filter:drop-shadow(0 0 14px rgba(155,107,255,.28));
+    animation:twinkle 3.5s ease-in-out infinite;
+  }
+
+  @keyframes twinkle{ 0%,100%{opacity:.12;} 50%{opacity:.8;} }
+
   .info-panel{
     position:fixed;
     bottom:0;
@@ -129,6 +144,7 @@
 <body>
 
   <header>
+    <img src="assets/logo-mark.png" alt="" class="brand-mark">
     <a href="menu.html" class="back-link">← Menu</a>
     <button class="gps-button" id="gpsBtn">📍 Direct</button>
   </header>
