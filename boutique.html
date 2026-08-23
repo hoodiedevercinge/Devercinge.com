@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Devercinge — Boutique</title>
+<meta name="description" content="Boutique Devercinge : collection streetwear en édition limitée.">
+<meta name="theme-color" content="#0a0a0c">
+<link rel="icon" href="assets/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<style>
+  :root{
+    --bg: #0a0a0c;
+    --ink: #f2f1ef;
+    --ink-dim: #9d9ba3;
+    --violet: #9b6bff;
+    --green: #3ddc84;
+    --line: #232227;
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system, 'Inter', 'Segoe UI', sans-serif;
+    max-width:480px;
+    margin:0 auto;
+    min-height:100vh;
+    position:relative;
+    overflow:hidden;
+  }
+
+  body::before{
+    content:'';
+    position:fixed;
+    inset:0;
+    z-index:-1;
+    background:
+      radial-gradient(ellipse 60% 40% at 12% 8%, rgba(155,107,255,.08), transparent 60%),
+      radial-gradient(ellipse 60% 45% at 88% 92%, rgba(61,220,132,.08), transparent 60%),
+      var(--bg);
+  }
+
+  header{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    z-index:10;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:calc(20px + env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) 20px max(24px, env(safe-area-inset-left));
+    background:linear-gradient(180deg, var(--bg) 70%, transparent);
+  }
+
+  .back-link{
+    font-size:12px;
+    letter-spacing:.05em;
+    color:var(--ink-dim);
+    text-decoration:none;
+  }
+  .back-link:hover{ color:var(--ink); }
+
+  .product-name{
+    font-size:12px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+    text-align:right;
+    min-width:100px;
+  }
+
+  .stars{
+    position:fixed;
+    top:0; left:0; right:0; bottom:0;
+    overflow:hidden;
+    z-index:0;
+    max-width:480px;
+    margin:0 auto;
+  }
+  .stars span{
+    position:absolute;
+    width:2px; height:2px;
+    background:var(--ink);
+    border-radius:50%;
+    opacity:.5;
+    animation:twinkle 3.5s ease-in-out infinite;
+  }
+  @keyframes twinkle{ 0%,100%{opacity:.12;} 50%{opacity:.8;} }
+
+  .gallery-container{
+    position:relative;
+    z-index:1;
+    padding-top:80px;
+    height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    perspective:1200px;
+  }
+
+  .gallery{
+    position:relative;
+    width:280px;
+    height:350px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .product-carousel{
+    position:absolute;
+    width:100%;
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .product-item{
+    position:absolute;
+    width:240px;
+    height:300px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:radial-gradient(circle at 25% 15%, rgba(155,107,255,.1), transparent 55%),
+                radial-gradient(circle at 80% 85%, rgba(61,220,132,.08), transparent 55%);
+    border-radius:12px;
+    padding:20px;
+    cursor:pointer;
+    transition:transform .4s cubic-bezier(.25,.46,.45,.94);
+    transform-style:preserve-3d;
+  }
+
+  .product-item img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+  }
+
+  .product-shortcuts{
+    position:absolute;
+    bottom:-50px;
+    left:50%;
+    transform:translateX(-50%);
+    display:flex;
+    gap:12px;
+    padding:8px 12px;
+    background:rgba(19,19,22,.9);
+    border-radius:8px;
+    backdrop-filter:blur(8px);
+    opacity:0;
+    transition:opacity .3s ease;
+  }
+
+  .product-item:hover .product-shortcuts{
+    opacity:1;
+  }
+
+  .shortcut{
+    width:24px;
+    height:24px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:4px;
+    background:transparent;
+    border:none;
+    color:var(--ink-dim);
+    cursor:pointer;
+    font-size:10px;
+    text-decoration:none;
+    transition:color .2s ease, background .2s ease;
+  }
+
+  .shortcut:hover{
+    color:var(--ink);
+    background:rgba(155,107,255,.2);
+  }
+
+  .shortcut-label{
+    position:absolute;
+    bottom:-20px;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:8px;
+    color:var(--ink-dim);
+    white-space:nowrap;
+    pointer-events:none;
+    opacity:0;
+    transition:opacity .2s ease;
+  }
+
+  .shortcut:hover .shortcut-label{
+    opacity:1;
+  }
+
+  .hint{
+    position:absolute;
+    bottom:40px;
+    left:50%;
+    transform:translateX(-50%);
+    text-align:center;
+    font-size:11px;
+    letter-spacing:.08em;
+    color:var(--ink-dim);
+    text-transform:uppercase;
+    animation:pulse 2s ease infinite;
+  }
+
+  @keyframes pulse{
+    0%, 100%{ opacity:.5; }
+    50%{ opacity:1; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .product-item, .hint{ animation:none; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="stars" id="stars"></div>
+
+  <header>
+    <a href="menu.html" class="back-link">← Menu</a>
+    <div class="product-name" id="productName">Sélectionne un article</div>
+  </header>
+
+  <div class="gallery-container">
+    <div class="gallery" id="gallery">
+      <div class="product-carousel" id="carousel"></div>
+      <p class="hint">Clique pour voir les détails</p>
+    </div>
+  </div>
+
+<script src="assets/js/cart.js"></script>
+<script>
+  const starsContainer = document.getElementById('stars');
+  const STAR_COUNT = 70;
+  for (let i = 0; i < STAR_COUNT; i++) {
+    const s = document.createElement('span');
+    s.style.left = Math.random() * 100 + '%';
+    s.style.top = Math.random() * 100 + '%';
+    s.style.animationDelay = (Math.random() * 3.5) + 's';
+    const size = Math.random() * 1.5 + 1;
+    s.style.width = size + 'px';
+    s.style.height = size + 'px';
+    starsContainer.appendChild(s);
+  }
+
+  const products = [
+    { id: 'noir', name: 'Classique Dv Noir', image: 'assets/products/tshirt-noir.png' },
+    { id: 'blanc', name: 'Classique Dv Blanc', image: 'assets/products/tshirt-blanc.png' },
+    { id: 'short-noir', name: 'Le Short Dv Noir', image: 'assets/products/short-noir.png' },
+    { id: 'short-blanc', name: 'Le Short Dv Blanc', image: 'assets/products/short-blanc.png' },
+    { id: 'sweat', name: 'Hoodie Confort DV', image: 'assets/products/hoodie.png' }
+  ];
+
+  let currentIndex = 0;
+  let isRotating = true;
+
+  function createProductElement(product, index) {
+    const div = document.createElement('div');
+    div.className = 'product-item';
+
+    const angle = (index - currentIndex) * 72;
+    div.style.transform = `rotateY(${angle}deg) translateZ(150px)`;
+
+    div.innerHTML = `
+      <img src="${product.image}" alt="${product.name}">
+      <div class="product-shortcuts">
+        <a href="menu.html" class="shortcut" title="Menu">⌂</a>
+        <a href="cart.html" class="shortcut" title="Panier">🛒</a>
+        <a href="contact.html" class="shortcut" title="Contact">✉</a>
+        <a href="https://www.instagram.com/devercinge" class="shortcut" title="Instagram">📷</a>
+      </div>
+    `;
+
+    div.addEventListener('click', () => {
+      isRotating = false;
+      window.location.href = `product.html?item=${product.id}`;
+    });
+
+    return div;
+  }
+
+  function render() {
+    const carousel = document.getElementById('carousel');
+    carousel.innerHTML = '';
+
+    products.forEach((product, i) => {
+      carousel.appendChild(createProductElement(product, i));
+    });
+
+    document.getElementById('productName').textContent = products[currentIndex].name;
+  }
+
+  function rotate() {
+    if (!isRotating) return;
+
+    currentIndex = (currentIndex + 1) % products.length;
+    render();
+  }
+
+  setInterval(rotate, 3000);
+  render();
+</script>
+
+</body>
+</html>
