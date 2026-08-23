@@ -98,34 +98,41 @@
     position:relative;
     z-index:1;
     padding-top:80px;
+    padding-bottom:120px;
     height:100vh;
     display:flex;
     align-items:center;
     justify-content:center;
-    perspective:1200px;
+    overflow:hidden;
   }
 
   .gallery{
     position:relative;
-    width:280px;
-    height:350px;
+    width:100%;
+    height:400px;
     display:flex;
     align-items:center;
     justify-content:center;
+    overflow-x:auto;
+    scroll-snap-type:x mandatory;
+    scroll-behavior:smooth;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+  }
+
+  .gallery::-webkit-scrollbar{
+    display:none;
   }
 
   .product-carousel{
-    position:absolute;
-    width:100%;
-    height:100%;
     display:flex;
-    align-items:center;
-    justify-content:center;
+    gap:24px;
+    padding:0 60px;
+    width:100%;
   }
 
   .product-item{
-    position:absolute;
-    width:240px;
+    flex:0 0 240px;
     height:300px;
     display:flex;
     align-items:center;
@@ -135,8 +142,7 @@
     border-radius:12px;
     padding:20px;
     cursor:pointer;
-    transition:transform .4s cubic-bezier(.25,.46,.45,.94);
-    transform-style:preserve-3d;
+    scroll-snap-align:center;
   }
 
   .product-item img{
@@ -145,79 +151,60 @@
     object-fit:contain;
   }
 
-  .product-shortcuts{
-    position:absolute;
-    bottom:-50px;
-    left:50%;
-    transform:translateX(-50%);
+  .shortcuts-bar{
+    position:fixed;
+    bottom:0;
+    left:0;
+    right:0;
+    z-index:10;
+    max-width:480px;
+    margin:0 auto;
+    padding:16px 0;
+    background:linear-gradient(180deg, transparent, var(--bg) 20%);
+    border-top:1px solid var(--line);
     display:flex;
-    gap:12px;
-    padding:8px 12px;
-    background:rgba(19,19,22,.9);
-    border-radius:8px;
-    backdrop-filter:blur(8px);
-    opacity:0;
-    transition:opacity .3s ease;
-  }
-
-  .product-item:hover .product-shortcuts{
-    opacity:1;
-  }
-
-  .shortcut{
-    width:24px;
-    height:24px;
-    display:flex;
-    align-items:center;
     justify-content:center;
-    border-radius:4px;
-    background:transparent;
-    border:none;
-    color:var(--ink-dim);
-    cursor:pointer;
-    font-size:10px;
-    text-decoration:none;
-    transition:color .2s ease, background .2s ease;
+    gap:40px;
   }
 
-  .shortcut:hover{
+  .shortcut-item{
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+    text-decoration:none;
+    color:var(--ink-dim);
+    font-size:12px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    cursor:pointer;
+    transition:color .2s ease;
+  }
+
+  .shortcut-item:hover, .shortcut-item:active{
     color:var(--ink);
-    background:rgba(155,107,255,.2);
+  }
+
+  .shortcut-line{
+    width:40px;
+    height:1px;
+    background:var(--ink-dim);
+    transition:background .2s ease;
+  }
+
+  .shortcut-item:hover .shortcut-line, .shortcut-item:active .shortcut-line{
+    background:var(--ink);
   }
 
   .shortcut-label{
-    position:absolute;
-    bottom:-20px;
-    left:50%;
-    transform:translateX(-50%);
-    font-size:8px;
-    color:var(--ink-dim);
-    white-space:nowrap;
-    pointer-events:none;
-    opacity:0;
-    transition:opacity .2s ease;
-  }
-
-  .shortcut:hover .shortcut-label{
-    opacity:1;
-  }
-
-  .hint{
-    position:absolute;
-    bottom:40px;
-    left:50%;
-    transform:translateX(-50%);
-    text-align:center;
     font-size:11px;
-    letter-spacing:.08em;
     color:var(--ink-dim);
-    text-transform:uppercase;
-    animation:pulse 2s ease infinite;
+    transition:color .2s ease;
   }
 
-  @keyframes pulse{
-    0%, 100%{ opacity:.5; }
-    50%{ opacity:1; }
+  .shortcut-item:hover .shortcut-label, .shortcut-item:active .shortcut-label{
+    color:var(--ink);
   }
 
   @media (prefers-reduced-motion: reduce){
@@ -237,8 +224,22 @@
   <div class="gallery-container">
     <div class="gallery" id="gallery">
       <div class="product-carousel" id="carousel"></div>
-      <p class="hint">Clique pour voir les détails</p>
     </div>
+  </div>
+
+  <div class="shortcuts-bar">
+    <a href="menu.html" class="shortcut-item">
+      <div class="shortcut-line"></div>
+      <div class="shortcut-label">Menu</div>
+    </a>
+    <a href="cart.html" class="shortcut-item">
+      <div class="shortcut-line"></div>
+      <div class="shortcut-label">Panier</div>
+    </a>
+    <a href="contact.html" class="shortcut-item">
+      <div class="shortcut-line"></div>
+      <div class="shortcut-label">Contact</div>
+    </a>
   </div>
 
 <script src="assets/js/cart.js"></script>
@@ -267,25 +268,13 @@
   let currentIndex = 0;
   let isRotating = true;
 
-  function createProductElement(product, index) {
+  function createProductElement(product) {
     const div = document.createElement('div');
     div.className = 'product-item';
 
-    const angle = (index - currentIndex) * 72;
-    div.style.transform = `rotateY(${angle}deg) translateZ(150px)`;
-
-    div.innerHTML = `
-      <img src="${product.image}" alt="${product.name}">
-      <div class="product-shortcuts">
-        <a href="menu.html" class="shortcut" title="Menu">⌂</a>
-        <a href="cart.html" class="shortcut" title="Panier">🛒</a>
-        <a href="contact.html" class="shortcut" title="Contact">✉</a>
-        <a href="https://www.instagram.com/devercinge" class="shortcut" title="Instagram">📷</a>
-      </div>
-    `;
+    div.innerHTML = `<img src="${product.image}" alt="${product.name}">`;
 
     div.addEventListener('click', () => {
-      isRotating = false;
       window.location.href = `product.html?item=${product.id}`;
     });
 
@@ -296,22 +285,39 @@
     const carousel = document.getElementById('carousel');
     carousel.innerHTML = '';
 
-    products.forEach((product, i) => {
-      carousel.appendChild(createProductElement(product, i));
+    products.forEach((product) => {
+      carousel.appendChild(createProductElement(product));
     });
 
-    document.getElementById('productName').textContent = products[currentIndex].name;
+    updateProductName();
   }
 
-  function rotate() {
-    if (!isRotating) return;
+  function updateProductName() {
+    const gallery = document.getElementById('gallery');
+    const rect = gallery.getBoundingClientRect();
+    const center = rect.left + rect.width / 2;
 
-    currentIndex = (currentIndex + 1) % products.length;
-    render();
+    let closestProduct = products[0];
+    let closestDist = Infinity;
+
+    document.querySelectorAll('.product-item').forEach((item, i) => {
+      const itemRect = item.getBoundingClientRect();
+      const itemCenter = itemRect.left + itemRect.width / 2;
+      const dist = Math.abs(itemCenter - center);
+
+      if (dist < closestDist) {
+        closestDist = dist;
+        closestProduct = products[i];
+      }
+    });
+
+    document.getElementById('productName').textContent = closestProduct.name;
   }
 
-  setInterval(rotate, 3000);
   render();
+
+  const gallery = document.getElementById('gallery');
+  gallery.addEventListener('scroll', updateProductName);
 </script>
 
 </body>
