@@ -95,10 +95,13 @@
   }
 
   .menu-nav{
-    position:absolute;
+    position:fixed;
     top:0;
     left:0;
     right:0;
+    width:100%;
+    max-width:480px;
+    margin:0 auto;
     display:flex;
     justify-content:space-between;
     align-items:center;
@@ -129,8 +132,16 @@
     background:rgba(155,107,255,.1);
   }
 
-  .menu-link.left{ margin-right:auto; }
-  .menu-link.right{ margin-left:auto; }
+  .menu-link.left{
+    position:fixed;
+    left:max(20px, env(safe-area-inset-left));
+    top:calc(20px + env(safe-area-inset-top));
+  }
+  .menu-link.right{
+    position:fixed;
+    right:max(20px, env(safe-area-inset-right));
+    top:calc(20px + env(safe-area-inset-top));
+  }
 
   @keyframes fadeInDown{
     from{
