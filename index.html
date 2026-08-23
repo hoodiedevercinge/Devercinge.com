@@ -58,12 +58,19 @@
   }
 
   .brand-mark{
-    width:120px;
+    width:200px;
     height:auto;
     display:block;
     margin-bottom:60px;
     filter:drop-shadow(0 0 20px rgba(155,107,255,.2));
     animation:fadeInDown .8s ease;
+    cursor:pointer;
+    transition:width .6s cubic-bezier(.25,.46,.45,.94), margin-bottom .6s cubic-bezier(.25,.46,.45,.94);
+  }
+
+  .brand-mark.active{
+    width:80px;
+    margin-bottom:40px;
   }
 
   .menu-nav{
@@ -86,7 +93,14 @@
     text-decoration:none;
     padding:8px 16px;
     border-radius:6px;
-    transition:color .3s ease, background .3s ease;
+    transition:color .3s ease, background .3s ease, opacity .6s ease;
+    opacity:0;
+    pointer-events:none;
+  }
+
+  .menu-link.active{
+    opacity:1;
+    pointer-events:auto;
   }
 
   .menu-link:hover, .menu-link:active{
@@ -125,5 +139,14 @@
   </div>
 
 <script src="assets/js/cart.js"></script>
+<script>
+  const logo = document.querySelector('.brand-mark');
+  const menuLinks = document.querySelectorAll('.menu-link');
+
+  logo.addEventListener('click', () => {
+    logo.classList.add('active');
+    menuLinks.forEach(link => link.classList.add('active'));
+  });
+</script>
 </body>
 </html>
