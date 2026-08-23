@@ -197,8 +197,6 @@
     flex:0 0 100%;
     scroll-snap-align:center;
     padding:0 28px;
-    transition:transform .05s linear, opacity .05s linear;
-    will-change:transform, opacity;
   }
 
   .frame{
@@ -464,7 +462,7 @@
   });
   const dots = document.querySelectorAll('.dot');
 
-  function updateDiamondEffect() {
+  function updateActiveDot() {
     const galleryRect = gallery.getBoundingClientRect();
     const center = galleryRect.left + galleryRect.width / 2;
 
@@ -481,23 +479,14 @@
         closestDist = absDist;
         closestIndex = i;
       }
-
-      const maxDist = galleryRect.width;
-      const ratio = Math.min(absDist / maxDist, 1);
-
-      const scale = 1 - ratio * 0.12;
-      const opacity = 1 - ratio * 0.6;
-
-      slide.style.transform = `scale(${scale})`;
-      slide.style.opacity = opacity;
     });
 
     dots.forEach((d, i) => d.classList.toggle('active', i === closestIndex));
   }
 
-  gallery.addEventListener('scroll', updateDiamondEffect);
-  window.addEventListener('resize', updateDiamondEffect);
-  updateDiamondEffect();
+  gallery.addEventListener('scroll', updateActiveDot);
+  window.addEventListener('resize', updateActiveDot);
+  updateActiveDot();
 </script>
 
 </body>
