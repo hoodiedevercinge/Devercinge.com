@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Devercinge</title>
+<title>Devercinge — Galerie</title>
 <style>
   :root{
     --bg: #0a0a0c;
+    --card: #131316;
     --ink: #f2f1ef;
     --ink-dim: #9d9ba3;
     --violet: #9b6bff;
@@ -15,11 +16,7 @@
   }
 
   *{ margin:0; padding:0; box-sizing:border-box; }
-
-  html, body{
-    height:100%;
-    overflow:hidden;
-  }
+  html{ scroll-behavior:smooth; }
 
   body{
     background:var(--bg);
@@ -27,10 +24,8 @@
     font-family:-apple-system, 'Inter', 'Segoe UI', sans-serif;
     max-width:480px;
     margin:0 auto;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    position:relative;
+    min-height:100vh;
+    overflow-x:hidden;
   }
 
   .stars{
@@ -50,102 +45,195 @@
     animation:twinkle 3.5s ease-in-out infinite;
   }
   @keyframes twinkle{ 0%,100%{opacity:.12;} 50%{opacity:.8;} }
+  @media (prefers-reduced-motion: reduce){ .stars span{ animation:none; opacity:.35; } }
 
-  .splash{
+  header{
     position:relative;
     z-index:1;
+    padding:56px 24px 24px;
     text-align:center;
-    padding:0 32px;
   }
 
-  .logo-wrap{
-    width:120px;
-    height:120px;
-    margin:0 auto 28px;
-    border-radius:50%;
-    background:
-      radial-gradient(circle at 30% 25%, rgba(155,107,255,.25), transparent 60%),
-      radial-gradient(circle at 70% 75%, rgba(61,220,132,.2), transparent 60%),
-      #131316;
-    border:1px solid var(--line);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    animation:pulse 2.4s ease-in-out infinite;
-  }
-
-  @keyframes pulse{
-    0%,100%{ transform:scale(1); box-shadow:0 0 0 rgba(155,107,255,0); }
-    50%{ transform:scale(1.04); box-shadow:0 0 24px rgba(155,107,255,.25); }
-  }
-
-  .logo-wrap span{
-    font-family:'Arial Black', 'Segoe UI Black', sans-serif;
-    font-size:34px;
-    letter-spacing:.02em;
-    background:linear-gradient(135deg, var(--violet), var(--green));
+  .eyebrow{
+    font-size:11px;
+    letter-spacing:.3em;
+    text-transform:uppercase;
+    background:linear-gradient(90deg, var(--violet), var(--green));
     -webkit-background-clip:text;
     background-clip:text;
     -webkit-text-fill-color:transparent;
     color:transparent;
+    margin-bottom:14px;
+    font-weight:600;
   }
 
   h1{
     font-family:'Arial Black', 'Segoe UI Black', sans-serif;
-    font-size:22px;
+    font-size:32px;
     text-transform:uppercase;
-    letter-spacing:.04em;
+    letter-spacing:-.01em;
     color:var(--ink);
+  }
+
+  .tagline{
+    margin-top:14px;
+    color:var(--ink-dim);
+    font-size:14px;
+    line-height:1.6;
+    padding:0 24px;
+  }
+
+  .gallery-wrap{
+    position:relative;
+    z-index:1;
+    margin-top:20px;
+    perspective:900px;
+  }
+
+  .edge-fade{
+    position:absolute;
+    top:0;
+    bottom:24px;
+    width:46px;
+    z-index:2;
+    pointer-events:none;
+  }
+  .edge-fade.left{
+    left:0;
+    background:linear-gradient(90deg, var(--bg) 0%, rgba(10,10,12,.55) 45%, transparent 100%);
+    backdrop-filter:blur(4px);
+    -webkit-backdrop-filter:blur(4px);
+  }
+  .edge-fade.right{
+    right:0;
+    background:linear-gradient(270deg, var(--bg) 0%, rgba(10,10,12,.55) 45%, transparent 100%);
+    backdrop-filter:blur(4px);
+    -webkit-backdrop-filter:blur(4px);
+  }
+
+  .gallery{
+    display:flex;
+    overflow-x:auto;
+    scroll-snap-type:x mandatory;
+    -webkit-overflow-scrolling:touch;
+    gap:0;
+    padding:20px 0 24px;
+    scrollbar-width:none;
+  }
+  .gallery::-webkit-scrollbar{ display:none; }
+
+  .slide{
+    flex:0 0 100%;
+    scroll-snap-align:center;
+    padding:0 28px;
+    transition:transform .05s linear, opacity .05s linear;
+    will-change:transform, opacity;
+  }
+
+  .frame{
+    display:block;
+    text-decoration:none;
+    color:inherit;
+    background:var(--card);
+    border-radius:10px;
+    padding:22px 18px 20px;
+  }
+
+  .frame-visual{
+    aspect-ratio:4/5;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:
+      radial-gradient(circle at 25% 15%, rgba(155,107,255,.14), transparent 55%),
+      radial-gradient(circle at 80% 85%, rgba(61,220,132,.10), transparent 55%),
+      #0f0f12;
+    border-radius:4px;
+    overflow:hidden;
+  }
+
+  .frame-visual.photo{ padding:0; }
+  .product-photo{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    object-position:center;
+    display:block;
+  }
+
+  .piece{
+    width:58%;
+  }
+  .piece svg{ width:100%; height:auto; display:block; }
+  @media (prefers-reduced-motion: reduce){
+    .piece, .product-photo{ animation:none; }
+  }
+
+  .caption{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-top:16px;
+    padding-top:14px;
+  }
+  .caption .num{
+    font-size:10px;
+    letter-spacing:.15em;
+    color:var(--violet);
+  }
+  .caption .view{
+    font-size:10px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+  }
+  .piece-title{
+    margin-top:6px;
+    font-size:14px;
+    text-transform:uppercase;
+    letter-spacing:.01em;
+    line-height:1.3;
+  }
+
+  .dots{
+    display:flex;
+    justify-content:center;
+    gap:8px;
+    margin-top:8px;
+  }
+  .dot{
+    width:6px; height:6px;
+    border-radius:50%;
+    background:var(--line);
+    transition:background .2s ease, transform .2s ease;
+  }
+  .dot.active{
+    background:var(--green);
+    transform:scale(1.3);
   }
 
   .hint{
+    text-align:center;
+    font-size:11px;
+    letter-spacing:.08em;
+    color:var(--ink-dim);
     margin-top:14px;
-    font-size:13px;
-    letter-spacing:.05em;
-    color:var(--ink-dim);
-    line-height:1.6;
-  }
-
-  .shake-icon{
-    display:inline-block;
-    margin-top:22px;
-    animation:shake-hint 1.6s ease-in-out infinite;
-  }
-  @keyframes shake-hint{
-    0%,100%{ transform:rotate(0deg); }
-    20%{ transform:rotate(-14deg); }
-    40%{ transform:rotate(12deg); }
-    60%{ transform:rotate(-10deg); }
-    80%{ transform:rotate(8deg); }
-  }
-
-  .enable-btn{
-    margin-top:28px;
-    padding:13px 28px;
-    background:transparent;
-    border:1px solid var(--violet);
-    border-radius:30px;
-    color:var(--ink);
-    font-size:13px;
-    letter-spacing:.05em;
     text-transform:uppercase;
-    cursor:pointer;
   }
 
-  .skip-link{
-    display:block;
-    margin-top:20px;
-    font-size:12px;
+  footer{
+    position:relative;
+    z-index:1;
+    padding:52px 24px 48px;
+    text-align:center;
+    border-top:1px solid var(--line);
+    margin-top:48px;
+  }
+  footer .name{
+    font-size:13px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
     color:var(--ink-dim);
-    text-decoration:underline;
-    text-underline-offset:3px;
-  }
-
-  .fade-out{
-    animation:fadeOut .5s ease forwards;
-  }
-  @keyframes fadeOut{
-    to{ opacity:0; transform:scale(1.05); }
   }
 </style>
 </head>
@@ -153,21 +241,101 @@
 
   <div class="stars" id="stars"></div>
 
-  <div class="splash" id="splash">
-    <div class="logo-wrap">
-      <span>DV</span>
-    </div>
+  <header>
+    <div class="eyebrow">Collection</div>
     <h1>Devercinge</h1>
-    <p class="hint" id="hintText">Secoue ton téléphone<br>pour entrer</p>
-    <div class="shake-icon">📳</div>
-    <br>
-    <button class="enable-btn" id="enableBtn" style="display:none;">Activer les capteurs</button>
-    <a href="gallery.html" class="skip-link">Entrer sans secouer</a>
+    <p class="tagline">Deux créateurs, cinq pièces et mille quatre cent trente-quatre kilomètres à parcourir pour réaliser un seul rêve.</p>
+  </header>
+
+  <div class="gallery-wrap">
+    <div class="gallery" id="gallery">
+
+      <div class="slide">
+        <a class="frame" href="product.html?item=noir">
+          <div class="frame-visual photo">
+            <img src="assets/products/tshirt-noir.jpg" alt="Classique Dv Noir" class="product-photo">
+          </div>
+          <div class="caption">
+            <span class="num">N°01</span>
+            <span class="view">Ouvrir →</span>
+          </div>
+          <div class="piece-title">Classique Dv Noir</div>
+        </a>
+      </div>
+
+      <div class="slide">
+        <a class="frame" href="product.html?item=blanc">
+          <div class="frame-visual photo">
+            <img src="assets/products/tshirt-blanc.jpg" alt="Classique Dv Blanc" class="product-photo">
+          </div>
+          <div class="caption">
+            <span class="num">N°02</span>
+            <span class="view">Ouvrir →</span>
+          </div>
+          <div class="piece-title">Classique Dv Blanc</div>
+        </a>
+      </div>
+
+      <div class="slide">
+        <a class="frame" href="product.html?item=short-noir">
+          <div class="frame-visual photo">
+            <img src="assets/products/short-noir.jpg" alt="Le Short Dv Noir" class="product-photo">
+          </div>
+          <div class="caption">
+            <span class="num">N°03</span>
+            <span class="view">Ouvrir →</span>
+          </div>
+          <div class="piece-title">Le Short Dv Noir</div>
+        </a>
+      </div>
+
+      <div class="slide">
+        <a class="frame" href="product.html?item=short-blanc">
+          <div class="frame-visual photo">
+            <img src="assets/products/short-blanc.jpg" alt="Le Short Dv Blanc" class="product-photo">
+          </div>
+          <div class="caption">
+            <span class="num">N°04</span>
+            <span class="view">Ouvrir →</span>
+          </div>
+          <div class="piece-title">Le Short Dv Blanc</div>
+        </a>
+      </div>
+
+      <div class="slide">
+        <a class="frame" href="product.html?item=sweat">
+          <div class="frame-visual photo">
+            <img src="assets/products/hoodie.jpg" alt="Hoodie Confort DV" class="product-photo">
+          </div>
+          <div class="caption">
+            <span class="num">N°05</span>
+            <span class="view">Ouvrir →</span>
+          </div>
+          <div class="piece-title">Hoodie Confort DV</div>
+        </a>
+      </div>
+
+    </div>
+
+    <div class="edge-fade left"></div>
+    <div class="edge-fade right"></div>
+
+    <div class="dots" id="dots"></div>
+    <p class="hint">← Glisse pour voir la collection →</p>
   </div>
+
+  <footer>
+    <div class="name">Devercinge</div>
+    <p style="margin-top:8px;">
+      <a href="contact.html" style="color:var(--green); text-decoration:none; border-bottom:1px solid var(--line);">Contact</a>
+      &nbsp;·&nbsp;
+      <a href="https://www.instagram.com/devercinge?igsi=MTc5YnJra2Y1aGZzZg%3D%3D&utm_source=qr" target="_blank" rel="noopener" style="color:var(--violet); text-decoration:none; border-bottom:1px solid var(--line);">Instagram</a>
+    </p>
+  </footer>
 
 <script>
   const starsContainer = document.getElementById('stars');
-  const STAR_COUNT = 60;
+  const STAR_COUNT = 70;
   for (let i = 0; i < STAR_COUNT; i++) {
     const s = document.createElement('span');
     s.style.left = Math.random() * 100 + '%';
@@ -179,69 +347,51 @@
     starsContainer.appendChild(s);
   }
 
-  const splash = document.getElementById('splash');
-  const enableBtn = document.getElementById('enableBtn');
-  const hintText = document.getElementById('hintText');
+  const gallery = document.getElementById('gallery');
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const dotsContainer = document.getElementById('dots');
 
-  let lastX, lastY, lastZ;
-  let lastTime = 0;
-  const SHAKE_THRESHOLD = 18;
-  let hasEntered = false;
+  slides.forEach((_, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'dot' + (i === 0 ? ' active' : '');
+    dotsContainer.appendChild(dot);
+  });
+  const dots = document.querySelectorAll('.dot');
 
-  function enterSite() {
-    if (hasEntered) return;
-    hasEntered = true;
-    splash.classList.add('fade-out');
-    setTimeout(() => {
-      window.location.href = 'gallery.html';
-    }, 450);
-  }
+  function updateDiamondEffect() {
+    const galleryRect = gallery.getBoundingClientRect();
+    const center = galleryRect.left + galleryRect.width / 2;
 
-  function handleMotion(event) {
-    const acc = event.accelerationIncludingGravity;
-    if (!acc) return;
+    let closestIndex = 0;
+    let closestDist = Infinity;
 
-    const currentTime = Date.now();
-    if (currentTime - lastTime < 100) return;
+    slides.forEach((slide, i) => {
+      const rect = slide.getBoundingClientRect();
+      const slideCenter = rect.left + rect.width / 2;
+      const dist = slideCenter - center;
+      const absDist = Math.abs(dist);
 
-    const { x, y, z } = acc;
-    if (lastX !== undefined) {
-      const deltaX = Math.abs(x - lastX);
-      const deltaY = Math.abs(y - lastY);
-      const deltaZ = Math.abs(z - lastZ);
-
-      if ((deltaX + deltaY + deltaZ) > SHAKE_THRESHOLD) {
-        enterSite();
+      if (absDist < closestDist) {
+        closestDist = absDist;
+        closestIndex = i;
       }
-    }
 
-    lastX = x; lastY = y; lastZ = z;
-    lastTime = currentTime;
-  }
+      const maxDist = galleryRect.width;
+      const ratio = Math.min(absDist / maxDist, 1);
 
-  if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-    enableBtn.style.display = 'inline-block';
-    hintText.innerHTML = 'Active les capteurs,<br>puis secoue ton téléphone';
-    enableBtn.addEventListener('click', () => {
-      DeviceMotionEvent.requestPermission()
-        .then(response => {
-          if (response === 'granted') {
-            window.addEventListener('devicemotion', handleMotion);
-            enableBtn.style.display = 'none';
-            hintText.innerHTML = 'Secoue ton téléphone<br>pour entrer';
-          } else {
-            hintText.innerHTML = 'Capteurs refusés —<br>utilise le lien ci-dessous';
-          }
-        })
-        .catch(() => {
-          hintText.innerHTML = 'Capteurs indisponibles —<br>utilise le lien ci-dessous';
-        });
+      const scale = 1 - ratio * 0.12;
+      const opacity = 1 - ratio * 0.6;
+
+      slide.style.transform = `scale(${scale})`;
+      slide.style.opacity = opacity;
     });
-  } else if (window.DeviceMotionEvent) {
-    window.addEventListener('devicemotion', handleMotion);
-  } else {
-    hintText.innerHTML = 'Capteurs non disponibles<br>sur cet appareil';
+
+    dots.forEach((d, i) => d.classList.toggle('active', i === closestIndex));
   }
+
+  gallery.addEventListener('scroll', updateDiamondEffect);
+  window.addEventListener('resize', updateDiamondEffect);
+  updateDiamondEffect();
 </script>
 
 </body>
