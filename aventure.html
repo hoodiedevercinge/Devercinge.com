@@ -51,12 +51,15 @@
   }
 
   .back-link{
-    font-size:12px;
-    letter-spacing:.05em;
-    color:var(--ink-dim);
-    text-decoration:none;
+    width:32px;
+    height:auto;
+    display:block;
+    z-index:11;
+    filter:drop-shadow(0 0 14px rgba(155,107,255,.28));
+    animation:twinkle 3.5s ease-in-out infinite;
+    cursor:pointer;
   }
-  .back-link:hover{ color:var(--ink); }
+  .back-link:hover{ opacity:.8; }
 
   .gps-button{
     padding:8px 16px;
@@ -147,8 +150,9 @@
 <body>
 
   <header>
-    <img src="assets/logo-mark.png" alt="" class="brand-mark">
-    <a href="menu.html" class="back-link">← Menu</a>
+    <a href="index.html" class="back-link">
+      <img src="assets/logo-mark.png" alt="Menu">
+    </a>
     <button class="gps-button" id="gpsBtn">📍 Direct</button>
   </header>
 
