@@ -197,8 +197,9 @@
     flex:0 0 100%;
     scroll-snap-align:center;
     padding:0 28px;
-    transition:transform .05s linear, opacity .05s linear;
+    transition:transform .3s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity .3s ease;
     will-change:transform, opacity;
+    transform-style:preserve-3d;
   }
 
   .frame{
@@ -485,10 +486,10 @@
       const maxDist = galleryRect.width;
       const ratio = Math.min(absDist / maxDist, 1);
 
-      const scale = 1 - ratio * 0.12;
-      const opacity = 1 - ratio * 0.6;
+      const rotationY = (dist / galleryRect.width) * 35;
+      const opacity = 1 - ratio * 0.4;
 
-      slide.style.transform = `scale(${scale})`;
+      slide.style.transform = `rotateY(${rotationY}deg) perspective(1200px)`;
       slide.style.opacity = opacity;
     });
 
