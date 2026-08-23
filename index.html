@@ -2,8 +2,31 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Devercinge — Galerie</title>
+<meta name="description" content="Devercinge : collection streetwear en édition limitée. T-shirts, shorts et hoodies imaginés par deux créateurs. Découvre la galerie et commande directement en ligne.">
+<meta name="theme-color" content="#0a0a0c">
+<link rel="canonical" href="https://hoodiedevercinge.github.io/Devercinge.com/">
+<link rel="icon" href="assets/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Devercinge">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Devercinge">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:url" content="https://hoodiedevercinge.github.io/Devercinge.com/">
+<meta property="og:title" content="Devercinge — Galerie">
+<meta property="og:description" content="Deux créateurs, cinq pièces et mille quatre cent trente-quatre kilomètres à parcourir pour réaliser un seul rêve.">
+<meta property="og:image" content="https://hoodiedevercinge.github.io/Devercinge.com/assets/og-image.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Devercinge — Galerie">
+<meta name="twitter:description" content="Collection streetwear en édition limitée, imaginée par deux créateurs.">
+<meta name="twitter:image" content="https://hoodiedevercinge.github.io/Devercinge.com/assets/og-image.jpg">
 <style>
   :root{
     --bg: #0a0a0c;
@@ -26,6 +49,54 @@
     margin:0 auto;
     min-height:100vh;
     overflow-x:hidden;
+    position:relative;
+  }
+
+  body::before{
+    content:'';
+    position:fixed;
+    inset:0;
+    z-index:-1;
+    background:
+      radial-gradient(ellipse 60% 40% at 12% 8%, rgba(155,107,255,.16), transparent 60%),
+      radial-gradient(ellipse 60% 45% at 88% 92%, rgba(61,220,132,.13), transparent 60%),
+      var(--bg);
+  }
+
+  .brand-mark{
+    width:44px;
+    height:auto;
+    display:block;
+    margin:0 auto 16px;
+    filter:drop-shadow(0 0 14px rgba(155,107,255,.28));
+  }
+
+  .cart-link{
+    position:absolute;
+    top:calc(24px + env(safe-area-inset-top));
+    right:max(20px, env(safe-area-inset-right));
+    z-index:2;
+    display:flex;
+    align-items:center;
+    gap:5px;
+    color:var(--ink-dim);
+    text-decoration:none;
+  }
+  .cart-link:hover{ color:var(--ink); }
+  .cart-link svg{ width:20px; height:20px; display:block; }
+  .cart-badge{
+    display:none;
+    align-items:center;
+    justify-content:center;
+    min-width:16px;
+    height:16px;
+    padding:0 4px;
+    border-radius:999px;
+    background:var(--violet);
+    color:#0a0a0c;
+    font-size:10px;
+    font-weight:700;
+    line-height:1;
   }
 
   .stars{
@@ -50,7 +121,7 @@
   header{
     position:relative;
     z-index:1;
-    padding:56px 24px 24px;
+    padding:calc(56px + env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) 24px max(24px, env(safe-area-inset-left));
     text-align:center;
   }
 
@@ -224,7 +295,7 @@
   footer{
     position:relative;
     z-index:1;
-    padding:52px 24px 48px;
+    padding:52px max(24px, env(safe-area-inset-right)) calc(48px + env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
     text-align:center;
     border-top:1px solid var(--line);
     margin-top:48px;
@@ -235,6 +306,35 @@
     text-transform:uppercase;
     color:var(--ink-dim);
   }
+
+  @media (min-width:860px){
+    body{ max-width:1040px; }
+    header{ padding-top:80px; }
+    .tagline{ max-width:480px; margin:14px auto 0; padding:0; }
+
+    .gallery-wrap{ perspective:none; }
+    .edge-fade, .dots, .hint{ display:none; }
+
+    .gallery{
+      display:grid;
+      grid-template-columns:repeat(3, 1fr);
+      overflow:visible;
+      gap:28px;
+      padding:20px 0 24px;
+    }
+    .slide{
+      flex:none;
+      padding:0;
+      scroll-snap-align:none;
+      transform:none !important;
+      opacity:1 !important;
+    }
+    .frame{ transition:transform .25s ease, box-shadow .25s ease; height:100%; }
+    .frame:hover{
+      transform:translateY(-6px);
+      box-shadow:0 20px 44px rgba(0,0,0,.5);
+    }
+  }
 </style>
 </head>
 <body>
@@ -242,6 +342,11 @@
   <div class="stars" id="stars"></div>
 
   <header>
+    <a href="cart.html" class="cart-link" aria-label="Voir le panier">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1 12H7L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+      <span class="cart-badge" data-cart-badge>0</span>
+    </a>
+    <img src="assets/logo-mark.png" alt="" class="brand-mark">
     <div class="eyebrow">Collection</div>
     <h1>Devercinge</h1>
     <p class="tagline">Deux créateurs, cinq pièces et mille quatre cent trente-quatre kilomètres à parcourir pour réaliser un seul rêve.</p>
@@ -333,6 +438,7 @@
     </p>
   </footer>
 
+<script src="assets/js/cart.js"></script>
 <script>
   const starsContainer = document.getElementById('stars');
   const STAR_COUNT = 70;
