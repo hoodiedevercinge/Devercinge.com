@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Devercinge — Galerie</title>
 <meta name="description" content="Devercinge : collection streetwear en édition limitée. T-shirts, shorts et hoodies imaginés par deux créateurs. Découvre la galerie et commande directement en ligne.">
 <meta name="theme-color" content="#0a0a0c">
@@ -12,6 +12,10 @@
 <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Devercinge">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Devercinge">
 <meta property="og:locale" content="fr_FR">
@@ -69,8 +73,8 @@
 
   .cart-link{
     position:absolute;
-    top:24px;
-    right:20px;
+    top:calc(24px + env(safe-area-inset-top));
+    right:max(20px, env(safe-area-inset-right));
     z-index:2;
     display:flex;
     align-items:center;
@@ -117,7 +121,7 @@
   header{
     position:relative;
     z-index:1;
-    padding:56px 24px 24px;
+    padding:calc(56px + env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) 24px max(24px, env(safe-area-inset-left));
     text-align:center;
   }
 
@@ -291,7 +295,7 @@
   footer{
     position:relative;
     z-index:1;
-    padding:52px 24px 48px;
+    padding:52px max(24px, env(safe-area-inset-right)) calc(48px + env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
     text-align:center;
     border-top:1px solid var(--line);
     margin-top:48px;

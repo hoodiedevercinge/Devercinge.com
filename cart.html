@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Devercinge — Panier</title>
 <meta name="description" content="Ton panier Devercinge : vérifie tes articles, tailles et quantités avant de passer commande par e-mail.">
 <meta name="theme-color" content="#0a0a0c">
@@ -12,6 +12,10 @@
 <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Devercinge">
 <meta name="robots" content="noindex">
 <style>
   :root{
@@ -52,14 +56,14 @@
   header{
     position:relative;
     z-index:1;
-    padding:60px 24px 36px;
+    padding:calc(60px + env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) 36px max(24px, env(safe-area-inset-left));
     text-align:center;
   }
 
   .back-link{
     position:absolute;
-    top:20px;
-    left:20px;
+    top:calc(20px + env(safe-area-inset-top));
+    left:max(20px, env(safe-area-inset-left));
     font-size:12px;
     letter-spacing:.05em;
     color:var(--ink-dim);
@@ -269,7 +273,7 @@
   footer{
     position:relative;
     z-index:1;
-    padding:40px 24px 48px;
+    padding:40px max(24px, env(safe-area-inset-right)) calc(48px + env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
     text-align:center;
     border-top:1px solid var(--line);
     margin-top:48px;
