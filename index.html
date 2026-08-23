@@ -197,7 +197,7 @@
     flex:0 0 100%;
     scroll-snap-align:center;
     padding:0 28px;
-    transition:transform .3s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity .3s ease;
+    transition:transform .1s ease-out, opacity .1s ease;
     will-change:transform, opacity;
     transform-style:preserve-3d;
   }
@@ -486,10 +486,11 @@
       const maxDist = galleryRect.width;
       const ratio = Math.min(absDist / maxDist, 1);
 
-      const rotationY = (dist / galleryRect.width) * 35;
-      const opacity = 1 - ratio * 0.4;
+      const rotationY = Math.max(-25, Math.min(25, (dist / galleryRect.width) * 50));
+      const opacity = 1 - ratio * 0.35;
+      const translateZ = (1 - ratio) * 100;
 
-      slide.style.transform = `rotateY(${rotationY}deg) perspective(1200px)`;
+      slide.style.transform = `rotateY(${rotationY}deg) translateZ(${translateZ}px)`;
       slide.style.opacity = opacity;
     });
 
