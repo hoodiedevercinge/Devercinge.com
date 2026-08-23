@@ -197,8 +197,8 @@
     flex:0 0 100%;
     scroll-snap-align:center;
     padding:0 28px;
-    transition:transform .05s linear, opacity .05s linear;
-    will-change:transform, opacity;
+    transition:filter .15s ease, opacity .15s ease;
+    will-change:filter, opacity;
   }
 
   .frame{
@@ -485,10 +485,10 @@
       const maxDist = galleryRect.width;
       const ratio = Math.min(absDist / maxDist, 1);
 
-      const scale = 1 - ratio * 0.12;
-      const opacity = 1 - ratio * 0.6;
+      const blurAmount = ratio * 8;
+      const opacity = 1 - ratio * 0.3;
 
-      slide.style.transform = `scale(${scale})`;
+      slide.style.filter = `blur(${blurAmount}px)`;
       slide.style.opacity = opacity;
     });
 
