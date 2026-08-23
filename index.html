@@ -95,7 +95,7 @@
     width:280px;
     height:auto;
     display:block;
-    margin-bottom:60px;
+    margin-bottom:34px;
     filter:drop-shadow(0 0 20px rgba(155,107,255,.2));
     animation:fadeInDown .8s ease, twinkle 3.5s ease-in-out infinite;
     cursor:pointer;
@@ -106,8 +106,41 @@
 
   .brand-mark.active{
     width:120px;
-    margin-bottom:40px;
+    margin-bottom:26px;
   }
+
+  .eyebrow{
+    font-size:11px;
+    letter-spacing:.28em;
+    text-transform:uppercase;
+    font-weight:600;
+    /* La lettre finale traine son interlettrage : on compense pour recentrer. */
+    padding-left:.28em;
+    background:linear-gradient(90deg, var(--violet), var(--green));
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+    color:transparent;
+  }
+
+  /* Les deux fragments se croisent au meme endroit : pas de saut de mise en page. */
+  .menu-words{
+    position:relative;
+    height:14px;
+    width:100%;
+    z-index:2;
+  }
+  .menu-words .eyebrow{
+    position:absolute;
+    left:50%;
+    top:0;
+    transform:translateX(-50%);
+    white-space:nowrap;
+    transition:opacity .6s ease;
+  }
+  .word-open{ opacity:0; }
+  body.opened .word-idle{ opacity:0; }
+  body.opened .word-open{ opacity:1; }
 
   .menu-nav{
     position:fixed;
@@ -232,6 +265,10 @@
 
   <div class="menu-container">
     <img src="assets/logo-mark.png" alt="Devercinge" class="brand-mark">
+    <div class="menu-words">
+      <div class="eyebrow word-idle">Deux créateurs</div>
+      <div class="eyebrow word-open">Un seul rêve</div>
+    </div>
   </div>
 
 <script src="assets/js/cart.js"></script>

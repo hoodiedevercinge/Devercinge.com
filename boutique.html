@@ -91,7 +91,24 @@
   }
   .back-link:hover{ opacity:.8; }
 
+  .eyebrow{
+    font-size:11px;
+    letter-spacing:.28em;
+    text-transform:uppercase;
+    font-weight:600;
+    /* La lettre finale traine son interlettrage : on compense pour recentrer. */
+    padding-left:.28em;
+    background:linear-gradient(90deg, var(--violet), var(--green));
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+    color:transparent;
+  }
+
+  .product-meta{ text-align:right; }
+
   .product-name{
+    margin-top:5px;
     font-size:12px;
     letter-spacing:.08em;
     text-transform:uppercase;
@@ -260,7 +277,10 @@
     <a href="index.html" class="back-link">
       <img src="assets/logo-mark.png" alt="Menu">
     </a>
-    <div class="product-name" id="productName">Sélectionne un article</div>
+    <div class="product-meta">
+      <div class="eyebrow">Cinq pièces</div>
+      <div class="product-name" id="productName">Sélectionne un article</div>
+    </div>
   </header>
 
   <div class="gallery-container">

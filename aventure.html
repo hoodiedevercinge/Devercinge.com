@@ -137,6 +137,25 @@
     text-align:center;
   }
 
+  .eyebrow{
+    font-size:11px;
+    letter-spacing:.28em;
+    text-transform:uppercase;
+    font-weight:600;
+    /* La lettre finale traine son interlettrage : on compense pour recentrer. */
+    padding-left:.28em;
+    background:linear-gradient(90deg, var(--violet), var(--green));
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+    color:transparent;
+  }
+
+  .info-panel .eyebrow{
+    line-height:1.7;
+    margin-bottom:10px;
+  }
+
   .journey-status{
     font-size:13px;
     color:var(--ink-dim);
@@ -164,6 +183,7 @@
   <div id="map"></div>
 
   <div class="info-panel">
+    <div class="eyebrow">Mille quatre cent trente-quatre kilomètres</div>
     <div class="journey-status">
       <strong>Nice</strong> → Marseille → Toulouse → Bordeaux → La Rochelle → Nantes → Rennes → Brest<br>
       <span id="journeyDate">Départ : 6 septembre 2026</span>
