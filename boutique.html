@@ -192,6 +192,9 @@
     flex:0 0 358px;
     /* Rectangle vertical, facon embrasure de porte. */
     height:min(620px, 100%);
+    /* Largeur de la fenetre. Le cadre et son reflet la partagent, le
+       vetement non : il garde toute la largeur de la carte. */
+    --fenetre:56%;
     display:flex;
     flex-direction:column;
     cursor:pointer;
@@ -204,44 +207,58 @@
     transform:scale(1) translateZ(50px);
   }
 
-  /* Le rectangle lui-meme : c'est lui qui se reflete, pas le vetement. */
-  .product-frame{
+  .product-stage{
     position:relative;
     flex:0 0 64%;
     min-height:0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:18px;
+  }
+
+  /* La fenetre : c'est elle qui se reflete, pas le vetement. */
+  .product-frame{
+    position:absolute;
+    top:0;
+    bottom:0;
+    left:50%;
+    transform:translateX(-50%);
+    width:var(--fenetre);
     border-radius:16px;
     background:radial-gradient(circle at 25% 15%, rgba(155,107,255,.22), transparent 58%),
                 radial-gradient(circle at 80% 85%, rgba(61,220,132,.18), transparent 58%);
     box-shadow:0 20px 60px rgba(0,0,0,.4);
   }
 
-  /* Le trait de lumiere ou le rectangle rencontre la surface. */
+  /* Le trait de lumiere ou la fenetre rencontre la surface. */
   .product-frame::after{
     content:'';
     position:absolute;
-    left:8%;
-    right:8%;
+    left:6%;
+    right:6%;
     bottom:0;
     height:1px;
     background:linear-gradient(90deg, transparent,
       rgba(155,107,255,.55), rgba(61,220,132,.45), transparent);
   }
 
+  /* Pose par-dessus la fenetre, et non dedans : le vetement garde sa
+     taille meme quand la fenetre se resserre. */
   .product-shot{
-    max-width:100%;
-    max-height:100%;
+    position:absolute;
+    inset:18px;
+    margin:auto;
+    max-width:calc(100% - 36px);
+    max-height:calc(100% - 36px);
+    width:auto;
+    height:auto;
     object-fit:contain;
     filter:drop-shadow(0 10px 30px rgba(155,107,255,.2));
   }
 
-  /* Le rectangle repris a l'envers sous la surface. */
+  /* La fenetre reprise a l'envers sous la surface. */
   .product-mirror{
     flex:1 1 auto;
     min-height:0;
+    width:var(--fenetre);
+    margin:0 auto;
     border-radius:16px;
     background:radial-gradient(circle at 25% 15%, rgba(155,107,255,.22), transparent 58%),
                 radial-gradient(circle at 80% 85%, rgba(61,220,132,.18), transparent 58%);
@@ -382,7 +399,8 @@
     div.className = 'product-item';
 
     div.innerHTML = `
-      <div class="product-frame">
+      <div class="product-stage">
+        <div class="product-frame"></div>
         <img src="${product.image}" alt="${product.name}" class="product-shot">
       </div>
       <div class="product-mirror"></div>`;
