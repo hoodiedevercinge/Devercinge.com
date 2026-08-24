@@ -155,7 +155,10 @@
     height:100%;
     display:flex;
     align-items:center;
-    justify-content:center;
+    /* Surtout pas center : le carrousel est plus large que la galerie,
+       le centrer le fait deborder a gauche dans une zone que le scroll
+       ne peut pas atteindre. */
+    justify-content:flex-start;
     overflow-x:auto;
     scroll-snap-type:x mandatory;
     scroll-behavior:smooth;
@@ -171,8 +174,15 @@
     display:flex;
     align-items:center;
     gap:40px;
-    padding:0 40px;
-    width:100%;
+    /* Largeur du contenu, pas celle du cadre : avec width:100% la marge
+       de fin tombe avant le dernier article, qui ne peut plus se
+       centrer sous le scroll-snap. flex-shrink:0 empeche la galerie de
+       la reduire. */
+    flex:0 0 auto;
+    width:max-content;
+    /* Au moins (480 - 358) / 2, de quoi centrer le premier et le
+       dernier article sur le cadre le plus large. */
+    padding:0 64px;
     /* Sans hauteur definie ici, le height:100% des articles ne se
        resout pas et chacun prend la taille de son image. */
     height:100%;
