@@ -135,6 +135,46 @@
   }
   @keyframes twinkle{ 0%,100%{opacity:.12;} 50%{opacity:.8;} }
 
+  /* Quelques etoiles lancent une etincelle de temps en temps. Elles ne
+     scintillent pas : l'opacite du parent multiplierait celle de
+     l'etincelle et le flash tomberait parfois dans un creux. */
+  .stars span.sparkle{
+    opacity:.85;
+    animation:etincelle-coeur 11s ease-in-out infinite;
+    animation-delay:var(--etincelle-delai, 0s);
+  }
+  .stars span.sparkle::before,
+  .stars span.sparkle::after{
+    content:'';
+    position:absolute;
+    left:50%;
+    top:50%;
+    opacity:0;
+    animation:etincelle 11s ease-in-out infinite;
+    animation-delay:var(--etincelle-delai, 0s);
+  }
+  .stars span.sparkle::before{
+    width:46px;
+    height:1px;
+    background:linear-gradient(90deg, transparent, var(--ink), transparent);
+  }
+  .stars span.sparkle::after{
+    width:1px;
+    height:46px;
+    background:linear-gradient(180deg, transparent, var(--ink), transparent);
+  }
+
+  @keyframes etincelle{
+    0%, 90%, 100%{ opacity:0; transform:translate(-50%,-50%) scale(.2); }
+    95%{ opacity:1; transform:translate(-50%,-50%) scale(1); }
+  }
+
+  /* Le point lui-meme s'embrase en meme temps que ses branches. */
+  @keyframes etincelle-coeur{
+    0%, 90%, 100%{ box-shadow:0 0 0 0 rgba(242,241,239,0); }
+    95%{ box-shadow:0 0 12px 2px rgba(242,241,239,.8); }
+  }
+
   .gallery-container{
     position:relative;
     z-index:1;
@@ -337,7 +377,8 @@
   }
 
   @media (prefers-reduced-motion: reduce){
-    .product-item, .back-link, .stars span{ animation:none; }
+    .product-item, .back-link, .stars span, .stars span.sparkle,
+    .stars span.sparkle::before, .stars span.sparkle::after{ animation:none; }
   }
 </style>
 </head>
@@ -386,6 +427,15 @@
     s.style.height = size + 'px';
     starsContainer.appendChild(s);
   }
+
+  // Une poignee d'etoiles recoit l'etincelle, a des moments differents.
+  const etincelles = [...starsContainer.children]
+    .sort(() => Math.random() - 0.5)
+    .slice(0, 6);
+  etincelles.forEach(s => {
+    s.classList.add('sparkle');
+    s.style.setProperty('--etincelle-delai', (Math.random() * 11).toFixed(1) + 's');
+  });
 
   const products = [
     { id: 'noir', name: 'Classique Dv Noir', image: 'assets/products/tshirt-noir.png' },
