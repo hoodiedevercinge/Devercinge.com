@@ -139,7 +139,7 @@
     position:relative;
     z-index:1;
     padding-top:60px;
-    padding-bottom:100px;
+    padding-bottom:0;
     height:100vh;
     display:flex;
     align-items:center;
@@ -190,8 +190,8 @@
 
   .product-item{
     flex:0 0 358px;
-    /* Rectangle vertical, facon embrasure de porte. */
-    height:min(620px, 100%);
+    /* Rectangle vertical, facon embrasure de porte, jusqu'en bas. */
+    height:100%;
     /* Largeur de la fenetre. Le cadre et son reflet la partagent, le
        vetement non : il garde toute la largeur de la carte. */
     --fenetre:44%;
@@ -200,6 +200,9 @@
     cursor:pointer;
     scroll-snap-align:center;
     transform:scale(0.95);
+    /* Le retrait se fait vers le haut : le bas du rectangle reste colle
+       au bord de l'ecran. */
+    transform-origin:bottom center;
     transition:transform .4s cubic-bezier(.25,.46,.45,.94);
   }
 
@@ -209,7 +212,7 @@
 
   .product-stage{
     position:relative;
-    flex:0 0 64%;
+    flex:0 0 min(400px, 55%);
     min-height:0;
   }
 
