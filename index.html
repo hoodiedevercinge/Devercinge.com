@@ -80,6 +80,46 @@
   }
   @keyframes twinkle{ 0%,100%{ opacity:.15; } 50%{ opacity:.85; } }
 
+  /* Quelques etoiles lancent une etincelle de temps en temps. Elles ne
+     scintillent pas : l'opacite du parent multiplierait celle de
+     l'etincelle et le flash tomberait parfois dans un creux. */
+  .stars span.sparkle{
+    opacity:.85;
+    animation:etincelle-coeur 8s ease-in-out infinite;
+    animation-delay:var(--etincelle-delai, 0s);
+  }
+  .stars span.sparkle::before,
+  .stars span.sparkle::after{
+    content:'';
+    position:absolute;
+    left:50%;
+    top:50%;
+    opacity:0;
+    animation:etincelle 8s ease-in-out infinite;
+    animation-delay:var(--etincelle-delai, 0s);
+  }
+  .stars span.sparkle::before{
+    width:46px;
+    height:1px;
+    background:linear-gradient(90deg, transparent, var(--ink), transparent);
+  }
+  .stars span.sparkle::after{
+    width:1px;
+    height:46px;
+    background:linear-gradient(180deg, transparent, var(--ink), transparent);
+  }
+
+  @keyframes etincelle{
+    0%, 90%, 100%{ opacity:0; transform:translate(-50%,-50%) scale(.2); }
+    95%{ opacity:1; transform:translate(-50%,-50%) scale(1); }
+  }
+
+  /* Le point lui-meme s'embrase en meme temps que ses branches. */
+  @keyframes etincelle-coeur{
+    0%, 90%, 100%{ box-shadow:0 0 0 0 rgba(242,241,239,0); }
+    95%{ box-shadow:0 0 12px 2px rgba(242,241,239,.8); }
+  }
+
   .menu-container{
     position:relative;
     z-index:1;
@@ -95,7 +135,7 @@
     width:280px;
     height:auto;
     display:block;
-    margin-bottom:60px;
+    margin-bottom:34px;
     filter:drop-shadow(0 0 20px rgba(155,107,255,.2));
     animation:fadeInDown .8s ease, twinkle 3.5s ease-in-out infinite;
     cursor:pointer;
@@ -106,8 +146,41 @@
 
   .brand-mark.active{
     width:120px;
-    margin-bottom:40px;
+    margin-bottom:26px;
   }
+
+  .eyebrow{
+    font-size:11px;
+    letter-spacing:.28em;
+    text-transform:uppercase;
+    font-weight:600;
+    /* La lettre finale traine son interlettrage : on compense pour recentrer. */
+    padding-left:.28em;
+    background:linear-gradient(90deg, var(--violet), var(--green));
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+    color:transparent;
+  }
+
+  /* Les deux fragments se croisent au meme endroit : pas de saut de mise en page. */
+  .menu-words{
+    position:relative;
+    height:14px;
+    width:100%;
+    z-index:2;
+  }
+  .menu-words .eyebrow{
+    position:absolute;
+    left:50%;
+    top:0;
+    transform:translateX(-50%);
+    white-space:nowrap;
+    transition:opacity .6s ease;
+  }
+  .word-open{ opacity:0; }
+  body.opened .word-idle{ opacity:0; }
+  body.opened .word-open{ opacity:1; }
 
   .menu-nav{
     position:fixed;
@@ -217,7 +290,8 @@
   }
 
   @media (prefers-reduced-motion: reduce){
-    .brand-mark, .stars span{ animation:none; }
+    .brand-mark, .stars span, .stars span.sparkle,
+    .stars span.sparkle::before, .stars span.sparkle::after{ animation:none; }
   }
 </style>
 </head>
@@ -232,6 +306,10 @@
 
   <div class="menu-container">
     <img src="assets/logo-mark.png" alt="Devercinge" class="brand-mark">
+    <div class="menu-words">
+      <div class="eyebrow word-idle">Deux créateurs</div>
+      <div class="eyebrow word-open">Un seul rêve</div>
+    </div>
   </div>
 
 <script src="assets/js/cart.js"></script>
@@ -252,6 +330,15 @@
     s.style.height = size + 'px';
     starsContainer.appendChild(s);
   }
+
+  // Une poignee d'etoiles recoit l'etincelle, a des moments differents.
+  const etincelles = [...starsContainer.children]
+    .sort(() => Math.random() - 0.5)
+    .slice(0, 6);
+  etincelles.forEach(s => {
+    s.classList.add('sparkle');
+    s.style.setProperty('--etincelle-delai', (Math.random() * 8).toFixed(1) + 's');
+  });
 
   // Add animation delay to each star
   const stars = starsContainer.querySelectorAll('span');

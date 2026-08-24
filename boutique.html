@@ -91,7 +91,24 @@
   }
   .back-link:hover{ opacity:.8; }
 
+  .eyebrow{
+    font-size:11px;
+    letter-spacing:.28em;
+    text-transform:uppercase;
+    font-weight:600;
+    /* La lettre finale traine son interlettrage : on compense pour recentrer. */
+    padding-left:.28em;
+    background:linear-gradient(90deg, var(--violet), var(--green));
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+    color:transparent;
+  }
+
+  .product-meta{ text-align:right; }
+
   .product-name{
+    margin-top:5px;
     font-size:12px;
     letter-spacing:.08em;
     text-transform:uppercase;
@@ -118,11 +135,51 @@
   }
   @keyframes twinkle{ 0%,100%{opacity:.12;} 50%{opacity:.8;} }
 
+  /* Quelques etoiles lancent une etincelle de temps en temps. Elles ne
+     scintillent pas : l'opacite du parent multiplierait celle de
+     l'etincelle et le flash tomberait parfois dans un creux. */
+  .stars span.sparkle{
+    opacity:.85;
+    animation:etincelle-coeur 8s ease-in-out infinite;
+    animation-delay:var(--etincelle-delai, 0s);
+  }
+  .stars span.sparkle::before,
+  .stars span.sparkle::after{
+    content:'';
+    position:absolute;
+    left:50%;
+    top:50%;
+    opacity:0;
+    animation:etincelle 8s ease-in-out infinite;
+    animation-delay:var(--etincelle-delai, 0s);
+  }
+  .stars span.sparkle::before{
+    width:46px;
+    height:1px;
+    background:linear-gradient(90deg, transparent, var(--ink), transparent);
+  }
+  .stars span.sparkle::after{
+    width:1px;
+    height:46px;
+    background:linear-gradient(180deg, transparent, var(--ink), transparent);
+  }
+
+  @keyframes etincelle{
+    0%, 90%, 100%{ opacity:0; transform:translate(-50%,-50%) scale(.2); }
+    95%{ opacity:1; transform:translate(-50%,-50%) scale(1); }
+  }
+
+  /* Le point lui-meme s'embrase en meme temps que ses branches. */
+  @keyframes etincelle-coeur{
+    0%, 90%, 100%{ box-shadow:0 0 0 0 rgba(242,241,239,0); }
+    95%{ box-shadow:0 0 12px 2px rgba(242,241,239,.8); }
+  }
+
   .gallery-container{
     position:relative;
     z-index:1;
     padding-top:60px;
-    padding-bottom:100px;
+    padding-bottom:0;
     height:100vh;
     display:flex;
     align-items:center;
@@ -134,10 +191,14 @@
   .gallery{
     position:relative;
     width:100%;
-    height:500px;
+    /* Remplit le cadre : donne une hauteur definie aux articles. */
+    height:100%;
     display:flex;
     align-items:center;
-    justify-content:center;
+    /* Surtout pas center : le carrousel est plus large que la galerie,
+       le centrer le fait deborder a gauche dans une zone que le scroll
+       ne peut pas atteindre. */
+    justify-content:flex-start;
     overflow-x:auto;
     scroll-snap-type:x mandatory;
     scroll-behavior:smooth;
@@ -151,25 +212,37 @@
 
   .product-carousel{
     display:flex;
+    align-items:center;
     gap:40px;
-    padding:0 40px;
-    width:100%;
+    /* Largeur du contenu, pas celle du cadre : avec width:100% la marge
+       de fin tombe avant le dernier article, qui ne peut plus se
+       centrer sous le scroll-snap. flex-shrink:0 empeche la galerie de
+       la reduire. */
+    flex:0 0 auto;
+    width:max-content;
+    /* Au moins (480 - 358) / 2, de quoi centrer le premier et le
+       dernier article sur le cadre le plus large. */
+    padding:0 64px;
+    /* Sans hauteur definie ici, le height:100% des articles ne se
+       resout pas et chacun prend la taille de son image. */
+    height:100%;
   }
 
   .product-item{
-    flex:0 0 320px;
-    height:420px;
+    flex:0 0 358px;
+    /* Rectangle vertical, facon embrasure de porte, jusqu'en bas. */
+    height:100%;
+    /* Largeur de la fenetre. Le cadre et son reflet la partagent, le
+       vetement non : il garde toute la largeur de la carte. */
+    --fenetre:44%;
     display:flex;
-    align-items:center;
-    justify-content:center;
-    background:radial-gradient(circle at 25% 15%, rgba(155,107,255,.12), transparent 55%),
-                radial-gradient(circle at 80% 85%, rgba(61,220,132,.1), transparent 55%);
-    border-radius:16px;
-    padding:30px;
+    flex-direction:column;
     cursor:pointer;
     scroll-snap-align:center;
-    box-shadow:0 20px 60px rgba(0,0,0,.4);
     transform:scale(0.95);
+    /* Le retrait se fait vers le haut : le bas du rectangle reste colle
+       au bord de l'ecran. */
+    transform-origin:bottom center;
     transition:transform .4s cubic-bezier(.25,.46,.45,.94);
   }
 
@@ -177,11 +250,65 @@
     transform:scale(1) translateZ(50px);
   }
 
-  .product-item img{
-    width:100%;
-    height:100%;
+  .product-stage{
+    position:relative;
+    flex:0 0 min(400px, 55%);
+    min-height:0;
+  }
+
+  /* La fenetre : c'est elle qui se reflete, pas le vetement. */
+  .product-frame{
+    position:absolute;
+    top:0;
+    bottom:0;
+    left:50%;
+    transform:translateX(-50%);
+    width:var(--fenetre);
+    background:radial-gradient(circle at 25% 15%, rgba(155,107,255,.22), transparent 58%),
+                radial-gradient(circle at 80% 85%, rgba(61,220,132,.18), transparent 58%);
+    box-shadow:0 20px 60px rgba(0,0,0,.4);
+  }
+
+  /* Le trait de lumiere ou la fenetre rencontre la surface. */
+  .product-frame::after{
+    content:'';
+    position:absolute;
+    left:6%;
+    right:6%;
+    bottom:0;
+    height:1px;
+    background:linear-gradient(90deg, transparent,
+      rgba(155,107,255,.55), rgba(61,220,132,.45), transparent);
+  }
+
+  /* Pose par-dessus la fenetre, et non dedans : le vetement garde sa
+     taille meme quand la fenetre se resserre. */
+  .product-shot{
+    position:absolute;
+    inset:18px;
+    margin:auto;
+    max-width:calc(100% - 36px);
+    max-height:calc(100% - 36px);
+    width:auto;
+    height:auto;
     object-fit:contain;
     filter:drop-shadow(0 10px 30px rgba(155,107,255,.2));
+  }
+
+  /* La fenetre reprise a l'envers sous la surface. */
+  .product-mirror{
+    flex:1 1 auto;
+    min-height:0;
+    width:var(--fenetre);
+    margin:0 auto;
+    background:radial-gradient(circle at 25% 15%, rgba(155,107,255,.22), transparent 58%),
+                radial-gradient(circle at 80% 85%, rgba(61,220,132,.18), transparent 58%);
+    transform:scaleY(-1);
+    /* Opaque en bas dans le repere local : une fois retourne, c'est le
+       haut du reflet, contre la surface. */
+    -webkit-mask-image:linear-gradient(to top, #000, transparent 88%);
+    mask-image:linear-gradient(to top, #000, transparent 88%);
+    pointer-events:none;
   }
 
   .shortcuts-bar{
@@ -205,6 +332,8 @@
     display:flex;
     flex-direction:column;
     align-items:center;
+    justify-content:center;
+    min-width:110px;
     gap:8px;
     text-decoration:none;
     color:var(--ink-dim);
@@ -248,7 +377,8 @@
   }
 
   @media (prefers-reduced-motion: reduce){
-    .product-item, .back-link, .stars span{ animation:none; }
+    .product-item, .back-link, .stars span, .stars span.sparkle,
+    .stars span.sparkle::before, .stars span.sparkle::after{ animation:none; }
   }
 </style>
 </head>
@@ -260,7 +390,10 @@
     <a href="index.html" class="back-link">
       <img src="assets/logo-mark.png" alt="Menu">
     </a>
-    <div class="product-name" id="productName">Sélectionne un article</div>
+    <div class="product-meta">
+      <div class="eyebrow">Cinq pièces</div>
+      <div class="product-name" id="productName">Sélectionne un article</div>
+    </div>
   </header>
 
   <div class="gallery-container">
@@ -270,10 +403,6 @@
   </div>
 
   <div class="shortcuts-bar">
-    <a href="index.html" class="shortcut-item">
-      <div class="shortcut-line"></div>
-      <div class="shortcut-label">Menu</div>
-    </a>
     <a href="cart.html" class="shortcut-item">
       <div class="shortcut-line"></div>
       <div class="shortcut-label">Panier <span class="shortcut-count" data-cart-badge>0</span></div>
@@ -299,6 +428,15 @@
     starsContainer.appendChild(s);
   }
 
+  // Une poignee d'etoiles recoit l'etincelle, a des moments differents.
+  const etincelles = [...starsContainer.children]
+    .sort(() => Math.random() - 0.5)
+    .slice(0, 6);
+  etincelles.forEach(s => {
+    s.classList.add('sparkle');
+    s.style.setProperty('--etincelle-delai', (Math.random() * 8).toFixed(1) + 's');
+  });
+
   const products = [
     { id: 'noir', name: 'Classique Dv Noir', image: 'assets/products/tshirt-noir.png' },
     { id: 'blanc', name: 'Classique Dv Blanc', image: 'assets/products/tshirt-blanc.png' },
@@ -311,7 +449,12 @@
     const div = document.createElement('div');
     div.className = 'product-item';
 
-    div.innerHTML = `<img src="${product.image}" alt="${product.name}">`;
+    div.innerHTML = `
+      <div class="product-stage">
+        <div class="product-frame"></div>
+        <img src="${product.image}" alt="${product.name}" class="product-shot">
+      </div>
+      <div class="product-mirror"></div>`;
 
     div.addEventListener('click', () => {
       window.location.href = `product.html?item=${product.id}`;
