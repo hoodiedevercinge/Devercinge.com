@@ -211,7 +211,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="assets/js/cart.js"></script>
 <script>
-  const map = L.map('map').setView([46.2, 0], 5);
+  // zoomSnap:0 : le survol a besoin de zooms fractionnaires, sinon la camera
+  // avance par paliers d'un cran entier et saccade.
+  const map = L.map('map', { zoomSnap: 0 }).setView([46.2, 0], 5);
 
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -237,13 +239,19 @@
   // Tracer la ligne du trajet. Le temps de l'ouverture elle est pleine : un
   // pointille dont on decale l'offset fait defiler les tirets au lieu de se
   // devoiler. Elle reprend son pointille une fois le trajet pose.
+  //
+  // noClip : par defaut Leaflet rogne la polyligne sur la zone visible. Des
+  // que la camera descend sur une etape, le trace ne contiendrait plus que le
+  // morceau a l'ecran et sa longueur mesuree n'aurait plus rien a voir avec
+  // celle de la route.
   const line = L.polyline(
     waypoints.map(p => [p.lat, p.lng]),
     {
       color: '#9b6bff',
       weight: 2,
       opacity: 0.6,
-      dashArray: doux ? POINTILLE : null
+      dashArray: doux ? POINTILLE : null,
+      noClip: true
     }
   ).addTo(map);
 
@@ -271,27 +279,30 @@
 
   const trace = line.getElement();
 
+  // Vue de repos : le trajet entier, cadre par la carte plutot qu'a la main.
+  const etendue = L.latLngBounds(waypoints.map(p => [p.lat, p.lng]));
+  const VUE_LARGE = {
+    centre: etendue.getCenter(),
+    zoom: map.getBoundsZoom(etendue, false, L.point(50, 90))
+  };
+
   if (doux || !trace) {
+    map.setView(VUE_LARGE.centre, VUE_LARGE.zoom, { animate: false });
     poser();
   } else {
     ouvrir();
   }
 
   function ouvrir(){
-    // La longueur se mesure sur le trace projete. Si la carte bouge pendant
-    // l'ouverture, Leaflet le redessine et la mesure ne vaut plus rien : on
-    // rend la carte inerte jusqu'a Brest.
     const gestes = [map.dragging, map.touchZoom, map.doubleClickZoom,
                     map.scrollWheelZoom, map.tap].filter(Boolean);
     gestes.forEach(g => g.disable());
 
-    const longueur = trace.getTotalLength();
-    trace.style.strokeDasharray = longueur;
-    trace.style.strokeDashoffset = longueur;
-
-    // Chaque ville se pose quand le trait l'atteint : les distances sont
-    // cumulees dans le repere projete, celui-la meme du trace.
-    const pts = waypoints.map(p => map.latLngToLayerPoint([p.lat, p.lng]));
+    // Les distances sont cumulees dans un repere projete fixe : changer de
+    // zoom multiplie toutes les coordonnees par un meme facteur, donc les
+    // proportions ne bougent pas et ces seuils restent valables partout.
+    const ZREF = 8;
+    const pts = waypoints.map(p => map.project([p.lat, p.lng], ZREF));
     const cumul = [0];
     for (let i = 1; i < pts.length; i++) {
       cumul.push(cumul[i - 1] + pts[i].distanceTo(pts[i - 1]));
@@ -299,27 +310,96 @@
     const totale = cumul[cumul.length - 1] || 1;
     const seuils = cumul.map(d => d / totale);
 
-    const DUREE = 2800;
-    const lisse = x => x * x * (3 - 2 * x);
-    let debut = null;
+    // Un zoom de survol par etape : une etape courte se regarde de plus pres
+    // qu'une longue.
+    const zSurvol = pts.slice(0, -1).map((_, i) => map.getBoundsZoom(
+      L.latLngBounds([waypoints[i].lat, waypoints[i].lng],
+                     [waypoints[i + 1].lat, waypoints[i + 1].lng]),
+      false, L.point(60, 110)) - 0.5);
 
-    requestAnimationFrame(function marcher(t){
-      if (debut === null) debut = t;
-      const brut = Math.min(1, (t - debut) / DUREE);
-      const p = lisse(brut);
-      trace.style.strokeDashoffset = longueur * (1 - p);
-      seuils.forEach((s, i) => {
-        if (p >= s) {
+    const POUSSEE = 0.8;   // le drone se rapproche au milieu de chaque etape
+
+    function surLaRoute(p){
+      let j = 0;
+      while (j < seuils.length - 2 && p > seuils[j + 1]) j++;
+      const u = (p - seuils[j]) / ((seuils[j + 1] - seuils[j]) || 1);
+      const a = pts[j], b = pts[j + 1];
+      return {
+        centre: map.unproject(a.add(b.subtract(a).multiplyBy(u)), ZREF),
+        // Un aller-retour en sinus : on plonge vers la route puis on reprend
+        // de la hauteur en arrivant sur la ville. Sans ce retour, le zoom
+        // retomberait d'un coup au depart de l'etape suivante.
+        zoom: zSurvol[j] + POUSSEE * Math.sin(Math.PI * Math.min(1, Math.max(0, u)))
+      };
+    }
+
+    // La progression est la seule verite : la longueur du trace change chaque
+    // fois que Leaflet le redessine, on la relit donc a chaque image.
+    function avancer(p){
+      const L2 = trace.getTotalLength();
+      trace.style.strokeDasharray = L2;
+      trace.style.strokeDashoffset = L2 * (1 - p);
+      for (let i = 0; i < seuils.length; i++) {
+        if (p >= seuils[i]) {
           const el = marqueurs[i].getElement();
           if (el) el.classList.add('posee');
         }
-      });
-      if (brut < 1) requestAnimationFrame(marcher);
-      else {
-        gestes.forEach(g => g.enable());
-        poser();
       }
+    }
+
+    function cadrer(centre, zoom){ map.setView(centre, zoom, { animate: false }); }
+
+    function melange(a, b, t){
+      const pa = map.project(a, ZREF), pb = map.project(b, ZREF);
+      return map.unproject(pa.add(pb.subtract(pa).multiplyBy(t)), ZREF);
+    }
+
+    const DESCENTE = 700, MARCHE = 3600, REMONTEE = 900;
+    const lisse = x => x * x * (3 - 2 * x);
+    const depart = surLaRoute(0), arrivee = surLaRoute(1);
+    let t0 = null, fini = false;
+
+    // Une pression sur la carte coupe court : cinq secondes d'ouverture, ce
+    // n'est pas a l'ecran de decider quand on peut enfin toucher.
+    map.getContainer().addEventListener('pointerdown', sauter, { once: true });
+
+    avancer(0);
+    cadrer(VUE_LARGE.centre, VUE_LARGE.zoom);
+
+    requestAnimationFrame(function image(t){
+      if (fini) return;
+      if (t0 === null) t0 = t;
+      const dt = t - t0;
+
+      if (dt < DESCENTE) {
+        const k = lisse(dt / DESCENTE);
+        cadrer(melange(VUE_LARGE.centre, depart.centre, k),
+               VUE_LARGE.zoom + (depart.zoom - VUE_LARGE.zoom) * k);
+      } else if (dt < DESCENTE + MARCHE) {
+        const p = lisse((dt - DESCENTE) / MARCHE);
+        const vue = surLaRoute(p);
+        cadrer(vue.centre, vue.zoom);
+        avancer(p);
+      } else if (dt < DESCENTE + MARCHE + REMONTEE) {
+        const k = lisse((dt - DESCENTE - MARCHE) / REMONTEE);
+        avancer(1);
+        cadrer(melange(arrivee.centre, VUE_LARGE.centre, k),
+               arrivee.zoom + (VUE_LARGE.zoom - arrivee.zoom) * k);
+      } else {
+        sauter();
+        return;
+      }
+      requestAnimationFrame(image);
     });
+
+    function sauter(){
+      if (fini) return;
+      fini = true;
+      map.getContainer().removeEventListener('pointerdown', sauter);
+      cadrer(VUE_LARGE.centre, VUE_LARGE.zoom);
+      gestes.forEach(g => g.enable());
+      poser();
+    }
   }
 
   function poser(){
