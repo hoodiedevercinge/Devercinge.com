@@ -231,6 +231,16 @@
     top:calc(20px + env(safe-area-inset-top));
   }
 
+  /* « Mode Aventure » est long : sous 360px les deux liens se touchaient.
+     On resserre leur cadre plutot que de raccourcir le mot. */
+  @media (max-width: 360px){
+    .menu-link{
+      font-size:11px;
+      letter-spacing:.06em;
+      padding:8px 10px;
+    }
+  }
+
   @keyframes fadeInDown{
     from{
       opacity:0;
@@ -300,7 +310,7 @@
   <div class="stars" id="stars"></div>
 
   <div class="menu-nav">
-    <a href="aventure.html" class="menu-link left">← Aventure</a>
+    <a href="aventure.html" class="menu-link left">← Mode Aventure</a>
     <a href="boutique.html" class="menu-link right">Boutique →</a>
   </div>
 

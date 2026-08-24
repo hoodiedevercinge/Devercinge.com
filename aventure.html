@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Devercinge — Aventure</title>
+<title>Devercinge — Mode Aventure</title>
 <meta name="description" content="Aventure Devercinge : marche de Nice à Brest.">
 <meta name="theme-color" content="#0a0a0c">
 <link rel="canonical" href="https://hoodiedevercinge.github.io/Devercinge.com/aventure.html">
@@ -11,11 +11,11 @@
 <meta property="og:site_name" content="Devercinge">
 <meta property="og:locale" content="fr_FR">
 <meta property="og:url" content="https://hoodiedevercinge.github.io/Devercinge.com/aventure.html">
-<meta property="og:title" content="Devercinge — Aventure">
+<meta property="og:title" content="Devercinge — Mode Aventure">
 <meta property="og:description" content="Suis l'aventure Devercinge : la marche de Nice à Brest, étape par étape.">
 <meta property="og:image" content="https://hoodiedevercinge.github.io/Devercinge.com/assets/og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Devercinge — Aventure">
+<meta name="twitter:title" content="Devercinge — Mode Aventure">
 <meta name="twitter:description" content="Suis l'aventure Devercinge : la marche de Nice à Brest, étape par étape.">
 <meta name="twitter:image" content="https://hoodiedevercinge.github.io/Devercinge.com/assets/og-image.jpg">
 <link rel="icon" href="assets/favicon.ico" sizes="any">
@@ -162,8 +162,31 @@
     margin-bottom:12px;
   }
 
+  /* Ouverture du mode aventure : le trace part de Nice et chaque ville se
+     pose quand le trait l'atteint. Le panneau du bas suit une fois arrive. */
+  .etape{
+    opacity:0;
+    transform-box:fill-box;
+    transform-origin:center;
+  }
+  .etape.posee{ animation:etape-posee .5s cubic-bezier(.2,.85,.3,1) forwards; }
+  @keyframes etape-posee{
+    0%{ opacity:0; transform:scale(.2); }
+    60%{ opacity:1; transform:scale(1.3); }
+    100%{ opacity:1; transform:scale(1); }
+  }
+
+  .info-panel{
+    opacity:0;
+    transition:opacity .9s ease;
+  }
+  body.arrive .info-panel{ opacity:1; }
+
   @media (prefers-reduced-motion: reduce){
     .gps-button{ transition:none; }
+    /* Rien ne se dessine : tout est deja en place au chargement. */
+    .etape, .etape.posee{ opacity:1; animation:none; }
+    .info-panel{ opacity:1; transition:none; }
   }
 </style>
 </head>
@@ -208,8 +231,24 @@
     { lat: 48.3905, lng: -4.4860, name: 'Brest', date: 'À venir' }
   ];
 
+  const doux = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const POINTILLE = '5, 10';
+
+  // Tracer la ligne du trajet. Le temps de l'ouverture elle est pleine : un
+  // pointille dont on decale l'offset fait defiler les tirets au lieu de se
+  // devoiler. Elle reprend son pointille une fois le trajet pose.
+  const line = L.polyline(
+    waypoints.map(p => [p.lat, p.lng]),
+    {
+      color: '#9b6bff',
+      weight: 2,
+      opacity: 0.6,
+      dashArray: doux ? POINTILLE : null
+    }
+  ).addTo(map);
+
   // Afficher les points
-  waypoints.forEach((point, i) => {
+  const marqueurs = waypoints.map((point, i) => {
     const isStart = i === 0;
     const isEnd = i === waypoints.length - 1;
 
@@ -219,25 +258,81 @@
       color: isStart ? '#3ddc84' : (isEnd ? '#9b6bff' : '#9d9ba3'),
       weight: 2,
       opacity: 1,
-      fillOpacity: 0.8
+      fillOpacity: 0.8,
+      className: 'etape'
     }).addTo(map);
 
     marker.bindPopup(`
       <strong>${point.name}</strong><br>
       ${point.date ? `<small>${point.date}</small>` : '<small>En route...</small>'}
     `);
+    return marker;
   });
 
-  // Tracer la ligne du trajet
-  const line = L.polyline(
-    waypoints.map(p => [p.lat, p.lng]),
-    {
-      color: '#9b6bff',
-      weight: 2,
-      opacity: 0.6,
-      dashArray: '5, 10'
+  const trace = line.getElement();
+
+  if (doux || !trace) {
+    poser();
+  } else {
+    ouvrir();
+  }
+
+  function ouvrir(){
+    // La longueur se mesure sur le trace projete. Si la carte bouge pendant
+    // l'ouverture, Leaflet le redessine et la mesure ne vaut plus rien : on
+    // rend la carte inerte jusqu'a Brest.
+    const gestes = [map.dragging, map.touchZoom, map.doubleClickZoom,
+                    map.scrollWheelZoom, map.tap].filter(Boolean);
+    gestes.forEach(g => g.disable());
+
+    const longueur = trace.getTotalLength();
+    trace.style.strokeDasharray = longueur;
+    trace.style.strokeDashoffset = longueur;
+
+    // Chaque ville se pose quand le trait l'atteint : les distances sont
+    // cumulees dans le repere projete, celui-la meme du trace.
+    const pts = waypoints.map(p => map.latLngToLayerPoint([p.lat, p.lng]));
+    const cumul = [0];
+    for (let i = 1; i < pts.length; i++) {
+      cumul.push(cumul[i - 1] + pts[i].distanceTo(pts[i - 1]));
     }
-  ).addTo(map);
+    const totale = cumul[cumul.length - 1] || 1;
+    const seuils = cumul.map(d => d / totale);
+
+    const DUREE = 2800;
+    const lisse = x => x * x * (3 - 2 * x);
+    let debut = null;
+
+    requestAnimationFrame(function marcher(t){
+      if (debut === null) debut = t;
+      const brut = Math.min(1, (t - debut) / DUREE);
+      const p = lisse(brut);
+      trace.style.strokeDashoffset = longueur * (1 - p);
+      seuils.forEach((s, i) => {
+        if (p >= s) {
+          const el = marqueurs[i].getElement();
+          if (el) el.classList.add('posee');
+        }
+      });
+      if (brut < 1) requestAnimationFrame(marcher);
+      else {
+        gestes.forEach(g => g.enable());
+        poser();
+      }
+    });
+  }
+
+  function poser(){
+    if (trace) {
+      trace.style.strokeDasharray = POINTILLE;
+      trace.style.strokeDashoffset = 0;
+    }
+    marqueurs.forEach(m => {
+      const el = m.getElement();
+      if (el) el.classList.add('posee');
+    });
+    document.body.classList.add('arrive');
+  }
 
   // Bouton GPS (pour plus tard)
   document.getElementById('gpsBtn').addEventListener('click', () => {
