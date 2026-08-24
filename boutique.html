@@ -311,6 +311,24 @@
     pointer-events:none;
   }
 
+  /* Au clic, toute la scene se rapproche du vetement : la fenetre reste
+     derriere lui pendant le mouvement. */
+  .gallery-container{
+    transition:transform .45s cubic-bezier(.4,0,.6,1), opacity .45s ease-in;
+  }
+  body.zoom .gallery-container{
+    /* Assez pour sentir qu'on entre dans la piece, pas au point de
+       n'avoir plus qu'un aplat de tissu a l'ecran. */
+    transform:scale(1.7);
+    opacity:0;
+  }
+  body.zoom header,
+  body.zoom .shortcuts-bar{
+    opacity:0;
+    transition:opacity .25s ease;
+  }
+  body.zoom{ pointer-events:none; }
+
   .shortcuts-bar{
     position:fixed;
     bottom:0;
@@ -457,7 +475,21 @@
       <div class="product-mirror"></div>`;
 
     div.addEventListener('click', () => {
-      window.location.href = `product.html?item=${product.id}`;
+      const url = `product.html?item=${product.id}`;
+      const doux = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (doux || document.body.classList.contains('zoom')) {
+        window.location.href = url;
+        return;
+      }
+      // Le zoom part du vetement clique, pas du centre de l'ecran.
+      const scene = document.querySelector('.gallery-container');
+      const vetement = div.querySelector('.product-shot').getBoundingClientRect();
+      const cadre = scene.getBoundingClientRect();
+      scene.style.transformOrigin =
+        (vetement.left + vetement.width / 2 - cadre.left) + 'px ' +
+        (vetement.top + vetement.height / 2 - cadre.top) + 'px';
+      document.body.classList.add('zoom');
+      setTimeout(() => { window.location.href = url; }, 430);
     });
 
     return div;
