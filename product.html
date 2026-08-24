@@ -260,6 +260,40 @@
     cursor:grabbing;
   }
 
+  /* Bascule devant / dos, dans le meme langage que la barre de la boutique. */
+  .vues{
+    display:flex;
+    justify-content:center;
+    gap:40px;
+    padding:16px 0 4px;
+    border-top:1px solid var(--line);
+  }
+  .vue{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+    min-width:90px;
+    background:none;
+    border:none;
+    padding:0;
+    cursor:pointer;
+    font-size:11px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+    font-family:inherit;
+    transition:color .2s ease;
+  }
+  .vue-trait{
+    width:40px;
+    height:1px;
+    background:var(--line);
+    transition:background .2s ease;
+  }
+  .vue.active{ color:var(--ink); }
+  .vue.active .vue-trait{ background:var(--ink); }
+
   .product-info{ padding:22px; }
 
   .product-info h2{
@@ -458,6 +492,15 @@
       <div class="product-visual" id="visualWrap">
       </div>
 
+      <div class="vues">
+        <button class="vue active" data-vue="photo">
+          <span class="vue-trait"></span>Devant
+        </button>
+        <button class="vue" data-vue="dos">
+          <span class="vue-trait"></span>Dos
+        </button>
+      </div>
+
       <div class="product-info">
         <h2 id="productName">Classique Dv Noir</h2>
         <div class="price" id="productPrice">34,44 €</div>
@@ -511,25 +554,36 @@
       name: 'Classique Dv Noir',
       price: '34,44 €',
       desc: "Coton épais 100%, coupe unisexe. T-shirt noir avec logo brodé au niveau du buste.",
-      photo: 'assets/products/tshirt-noir.png'
+      photo: 'assets/products/tshirt-noir.png',
+      dos: 'assets/products/tshirt-noir-dos.png'
     },
     blanc: {
       name: 'Classique Dv Blanc',
       price: '34,44 €',
       desc: "Coton épais 100%, coupe unisexe. T-shirt blanc avec logo brodé au niveau du buste.",
-      photo: 'assets/products/tshirt-blanc.png'
+      photo: 'assets/products/tshirt-blanc.png',
+      dos: 'assets/products/tshirt-blanc-dos.png'
     },
     'short-noir': {
       name: 'Le Short Dv Noir',
       price: '24,44 €',
       desc: "Short léger, taille élastiquée, logo Devercinge brodé sur le côté gauche.",
-      photo: 'assets/products/short-noir.png'
+      photo: 'assets/products/short-noir.png',
+      dos: 'assets/products/short-noir-dos.png'
+    },
+    'sans-manches': {
+      name: 'Le Classique Dv Sans Manche',
+      price: '28,44 €',
+      desc: "Coton épais 100%, coupe ample sans manches, logo brodé au niveau du buste.",
+      photo: 'assets/products/sans-manches.png',
+      dos: 'assets/products/sans-manches-dos.png'
     },
     sweat: {
       name: 'Hoodie Confort DV',
       price: '74,44 €',
       desc: "Sweat épais, intérieur molletonné, coupe confort, logo brodé au niveau du buste.",
-      photo: 'assets/products/hoodie.png'
+      photo: 'assets/products/hoodie.png',
+      dos: 'assets/products/hoodie-dos.png'
     }
   };
 
@@ -592,6 +646,22 @@
 
   productPhoto.addEventListener('pointerup', releasePhoto);
   productPhoto.addEventListener('pointercancel', releasePhoto);
+
+  // Devant / dos : on echange la source, l'element reste le meme donc le
+  // glisser continue de fonctionner sans avoir a se rebrancher.
+  const vues = [...document.querySelectorAll('.vue')];
+  vues.forEach(b => b.addEventListener('click', () => {
+    const cible = item[b.dataset.vue];
+    if (!cible || b.classList.contains('active')) return;
+    vues.forEach(a => a.classList.toggle('active', a === b));
+    releasePhoto();
+    productPhoto.style.opacity = '0';
+    setTimeout(() => {
+      productPhoto.src = cible;
+      productPhoto.style.opacity = '1';
+    }, 160);
+  }));
+  productPhoto.style.transition += ', opacity .16s ease';
 
   const sizeButtons = document.querySelectorAll('.size-btn');
   let selectedSize = 'M';
