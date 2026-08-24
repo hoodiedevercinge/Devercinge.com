@@ -194,46 +194,62 @@
     height:min(620px, 100%);
     display:flex;
     flex-direction:column;
-    background:radial-gradient(circle at 25% 15%, rgba(155,107,255,.12), transparent 55%),
-                radial-gradient(circle at 80% 85%, rgba(61,220,132,.1), transparent 55%);
-    border-radius:16px;
-    padding:18px;
     cursor:pointer;
     scroll-snap-align:center;
-    box-shadow:0 20px 60px rgba(0,0,0,.4);
     transform:scale(0.95);
     transition:transform .4s cubic-bezier(.25,.46,.45,.94);
-    overflow:hidden;
   }
 
   .product-item:hover{
     transform:scale(1) translateZ(50px);
   }
 
-  .product-shot{
-    flex:0 0 58%;
+  /* Le rectangle lui-meme : c'est lui qui se reflete, pas le vetement. */
+  .product-frame{
+    position:relative;
+    flex:0 0 64%;
     min-height:0;
-    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:18px;
+    border-radius:16px;
+    background:radial-gradient(circle at 25% 15%, rgba(155,107,255,.22), transparent 58%),
+                radial-gradient(circle at 80% 85%, rgba(61,220,132,.18), transparent 58%);
+    box-shadow:0 20px 60px rgba(0,0,0,.4);
+  }
+
+  /* Le trait de lumiere ou le rectangle rencontre la surface. */
+  .product-frame::after{
+    content:'';
+    position:absolute;
+    left:8%;
+    right:8%;
+    bottom:0;
+    height:1px;
+    background:linear-gradient(90deg, transparent,
+      rgba(155,107,255,.55), rgba(61,220,132,.45), transparent);
+  }
+
+  .product-shot{
+    max-width:100%;
+    max-height:100%;
     object-fit:contain;
-    object-position:center bottom;
     filter:drop-shadow(0 10px 30px rgba(155,107,255,.2));
   }
 
-  /* Le vetement repris a l'envers sous lui, comme un reflet dans l'eau. */
-  .product-reflection{
+  /* Le rectangle repris a l'envers sous la surface. */
+  .product-mirror{
     flex:1 1 auto;
     min-height:0;
-    width:100%;
-    /* cover, pas contain : le reflet garde l'echelle du vetement au lieu
-       d'etre reduit pour tenir dans une case plus basse. */
-    object-fit:cover;
-    object-position:center bottom;
+    border-radius:16px;
+    background:radial-gradient(circle at 25% 15%, rgba(155,107,255,.22), transparent 58%),
+                radial-gradient(circle at 80% 85%, rgba(61,220,132,.18), transparent 58%);
     transform:scaleY(-1);
-    opacity:.3;
-    /* Opaque en bas dans le repere de l'image : une fois retournee,
-       c'est le haut du reflet, du cote du vetement. */
-    -webkit-mask-image:linear-gradient(to top, #000, transparent 72%);
-    mask-image:linear-gradient(to top, #000, transparent 72%);
+    /* Opaque en bas dans le repere local : une fois retourne, c'est le
+       haut du reflet, contre la surface. */
+    -webkit-mask-image:linear-gradient(to top, #000, transparent 88%);
+    mask-image:linear-gradient(to top, #000, transparent 88%);
     pointer-events:none;
   }
 
@@ -366,8 +382,10 @@
     div.className = 'product-item';
 
     div.innerHTML = `
-      <img src="${product.image}" alt="${product.name}" class="product-shot">
-      <img src="${product.image}" alt="" aria-hidden="true" class="product-reflection">`;
+      <div class="product-frame">
+        <img src="${product.image}" alt="${product.name}" class="product-shot">
+      </div>
+      <div class="product-mirror"></div>`;
 
     div.addEventListener('click', () => {
       window.location.href = `product.html?item=${product.id}`;
