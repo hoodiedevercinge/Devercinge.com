@@ -151,7 +151,8 @@
   .gallery{
     position:relative;
     width:100%;
-    height:500px;
+    /* Remplit le cadre : donne une hauteur definie aux articles. */
+    height:100%;
     display:flex;
     align-items:center;
     justify-content:center;
@@ -168,21 +169,25 @@
 
   .product-carousel{
     display:flex;
+    align-items:center;
     gap:40px;
     padding:0 40px;
     width:100%;
+    /* Sans hauteur definie ici, le height:100% des articles ne se
+       resout pas et chacun prend la taille de son image. */
+    height:100%;
   }
 
   .product-item{
-    flex:0 0 320px;
-    height:420px;
+    flex:0 0 358px;
+    height:min(470px, 100%);
     display:flex;
     align-items:center;
     justify-content:center;
     background:radial-gradient(circle at 25% 15%, rgba(155,107,255,.12), transparent 55%),
                 radial-gradient(circle at 80% 85%, rgba(61,220,132,.1), transparent 55%);
     border-radius:16px;
-    padding:30px;
+    padding:18px;
     cursor:pointer;
     scroll-snap-align:center;
     box-shadow:0 20px 60px rgba(0,0,0,.4);
