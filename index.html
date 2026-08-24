@@ -85,7 +85,7 @@
      l'etincelle et le flash tomberait parfois dans un creux. */
   .stars span.sparkle{
     opacity:.85;
-    animation:etincelle-coeur 11s ease-in-out infinite;
+    animation:etincelle-coeur 8s ease-in-out infinite;
     animation-delay:var(--etincelle-delai, 0s);
   }
   .stars span.sparkle::before,
@@ -95,7 +95,7 @@
     left:50%;
     top:50%;
     opacity:0;
-    animation:etincelle 11s ease-in-out infinite;
+    animation:etincelle 8s ease-in-out infinite;
     animation-delay:var(--etincelle-delai, 0s);
   }
   .stars span.sparkle::before{
@@ -337,7 +337,7 @@
     .slice(0, 6);
   etincelles.forEach(s => {
     s.classList.add('sparkle');
-    s.style.setProperty('--etincelle-delai', (Math.random() * 11).toFixed(1) + 's');
+    s.style.setProperty('--etincelle-delai', (Math.random() * 8).toFixed(1) + 's');
   });
 
   // Add animation delay to each star
