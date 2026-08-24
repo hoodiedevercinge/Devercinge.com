@@ -246,12 +246,6 @@
     transition:transform .4s cubic-bezier(.25,.46,.45,.94);
   }
 
-  /* Espace au-dessus de la fenetre : c'est lui qui fait descendre le
-     vetement au milieu de la page. */
-  .product-item::before{
-    content:'';
-    flex:0 0 20.5%;
-  }
 
   .product-item:hover{
     transform:scale(1) translateZ(50px);
@@ -259,7 +253,7 @@
 
   .product-stage{
     position:relative;
-    flex:0 0 46%;
+    flex:0 0 68%;
     min-height:0;
   }
 
@@ -280,8 +274,11 @@
      taille meme quand la fenetre se resserre. */
   .product-shot{
     position:absolute;
-    inset:18px;
-    margin:auto;
+    left:18px;
+    right:18px;
+    top:64%;
+    transform:translateY(-50%);
+    margin:0 auto;
     max-width:calc(100% - 36px);
     max-height:calc(100% - 36px);
     width:auto;
