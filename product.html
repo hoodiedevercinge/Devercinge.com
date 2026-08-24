@@ -213,18 +213,47 @@
 
   .product-visual{
     aspect-ratio:1/1;
-    background:
-      radial-gradient(circle at 25% 15%, rgba(155,107,255,.16), transparent 55%),
-      radial-gradient(circle at 80% 85%, rgba(61,220,132,.12), transparent 55%),
-      #0f0f12;
+    background:#0f0f12;
     display:flex;
     align-items:center;
     justify-content:center;
     position:relative;
     overflow:hidden;
+    /* Prolonge le zoom lance depuis la galerie, puis se pose. */
+    animation:arrivee .5s cubic-bezier(.2,.7,.3,1);
+  }
+
+  /* La meme fenetre fine que dans la galerie, posee derriere la piece. */
+  .product-frame{
+    position:absolute;
+    top:0;
+    bottom:0;
+    left:50%;
+    transform:translateX(-50%);
+    width:44%;
+    background:radial-gradient(circle at 25% 15%, rgba(155,107,255,.22), transparent 58%),
+                radial-gradient(circle at 80% 85%, rgba(61,220,132,.18), transparent 58%);
+  }
+
+  .product-frame::after{
+    content:'';
+    position:absolute;
+    left:6%;
+    right:6%;
+    bottom:0;
+    height:1px;
+    background:linear-gradient(90deg, transparent,
+      rgba(155,107,255,.55), rgba(61,220,132,.45), transparent);
+  }
+
+  @keyframes arrivee{
+    from{ opacity:0; transform:scale(1.18); }
+    to{ opacity:1; transform:scale(1); }
   }
 
   .product-photo{
+    position:relative;
+    z-index:1;
     width:82%;
     height:82%;
     object-fit:contain;
@@ -401,6 +430,11 @@
     border-bottom:1px solid var(--line);
   }
 
+  @media (prefers-reduced-motion: reduce){
+    .product-visual{ animation:none; }
+    .product-photo{ transition:none; }
+  }
+
   @media (min-width:860px){
     body{ max-width:900px; }
     header{ padding-top:80px; }
@@ -526,7 +560,9 @@
   document.getElementById('productDesc').textContent = item.desc;
 
   const visualWrap = document.getElementById('visualWrap');
-  visualWrap.innerHTML = `<img src="${item.photo}" alt="${item.name}" class="product-photo" draggable="false">`;
+  visualWrap.innerHTML = `
+    <div class="product-frame"></div>
+    <img src="${item.photo}" alt="${item.name}" class="product-photo" draggable="false">`;
 
   document.title = 'Devercinge — ' + item.name;
 
