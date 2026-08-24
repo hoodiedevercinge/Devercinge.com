@@ -246,13 +246,20 @@
     transition:transform .4s cubic-bezier(.25,.46,.45,.94);
   }
 
+  /* Espace au-dessus de la fenetre : c'est lui qui fait descendre le
+     vetement au milieu de la page. */
+  .product-item::before{
+    content:'';
+    flex:0 0 20.5%;
+  }
+
   .product-item:hover{
     transform:scale(1) translateZ(50px);
   }
 
   .product-stage{
     position:relative;
-    flex:0 0 min(400px, 55%);
+    flex:0 0 46%;
     min-height:0;
   }
 
@@ -267,18 +274,6 @@
     background:radial-gradient(circle at 25% 15%, rgba(155,107,255,.22), transparent 58%),
                 radial-gradient(circle at 80% 85%, rgba(61,220,132,.18), transparent 58%);
     box-shadow:0 20px 60px rgba(0,0,0,.4);
-  }
-
-  /* Le trait de lumiere ou la fenetre rencontre la surface. */
-  .product-frame::after{
-    content:'';
-    position:absolute;
-    left:6%;
-    right:6%;
-    bottom:0;
-    height:1px;
-    background:linear-gradient(90deg, transparent,
-      rgba(155,107,255,.55), rgba(61,220,132,.45), transparent);
   }
 
   /* Pose par-dessus la fenetre, et non dedans : le vetement garde sa
