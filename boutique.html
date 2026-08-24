@@ -246,13 +246,20 @@
     transition:transform .4s cubic-bezier(.25,.46,.45,.94);
   }
 
+  /* Espace au-dessus de la fenetre : c'est lui qui fait descendre le
+     vetement au milieu de la page. */
+  .product-item::before{
+    content:'';
+    flex:0 0 20.5%;
+  }
+
   .product-item:hover{
     transform:scale(1) translateZ(50px);
   }
 
   .product-stage{
     position:relative;
-    flex:0 0 min(400px, 55%);
+    flex:0 0 46%;
     min-height:0;
   }
 
