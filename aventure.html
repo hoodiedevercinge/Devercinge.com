@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Devercinge — Aventure</title>
+<title>Devercinge — Mode Aventure</title>
 <meta name="description" content="Aventure Devercinge : marche de Nice à Brest.">
 <meta name="theme-color" content="#0a0a0c">
 <link rel="canonical" href="https://hoodiedevercinge.github.io/Devercinge.com/aventure.html">
@@ -11,11 +11,11 @@
 <meta property="og:site_name" content="Devercinge">
 <meta property="og:locale" content="fr_FR">
 <meta property="og:url" content="https://hoodiedevercinge.github.io/Devercinge.com/aventure.html">
-<meta property="og:title" content="Devercinge — Aventure">
+<meta property="og:title" content="Devercinge — Mode Aventure">
 <meta property="og:description" content="Suis l'aventure Devercinge : la marche de Nice à Brest, étape par étape.">
 <meta property="og:image" content="https://hoodiedevercinge.github.io/Devercinge.com/assets/og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Devercinge — Aventure">
+<meta name="twitter:title" content="Devercinge — Mode Aventure">
 <meta name="twitter:description" content="Suis l'aventure Devercinge : la marche de Nice à Brest, étape par étape.">
 <meta name="twitter:image" content="https://hoodiedevercinge.github.io/Devercinge.com/assets/og-image.jpg">
 <link rel="icon" href="assets/favicon.ico" sizes="any">
@@ -162,8 +162,31 @@
     margin-bottom:12px;
   }
 
+  /* Ouverture du mode aventure : le trace part de Nice et chaque ville se
+     pose quand le trait l'atteint. Le panneau du bas suit une fois arrive. */
+  .etape{
+    opacity:0;
+    transform-box:fill-box;
+    transform-origin:center;
+  }
+  .etape.posee{ animation:etape-posee .5s cubic-bezier(.2,.85,.3,1) forwards; }
+  @keyframes etape-posee{
+    0%{ opacity:0; transform:scale(.2); }
+    60%{ opacity:1; transform:scale(1.3); }
+    100%{ opacity:1; transform:scale(1); }
+  }
+
+  .info-panel{
+    opacity:0;
+    transition:opacity .9s ease;
+  }
+  body.arrive .info-panel{ opacity:1; }
+
   @media (prefers-reduced-motion: reduce){
     .gps-button{ transition:none; }
+    /* Rien ne se dessine : tout est deja en place au chargement. */
+    .etape, .etape.posee{ opacity:1; animation:none; }
+    .info-panel{ opacity:1; transition:none; }
   }
 </style>
 </head>
@@ -188,7 +211,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="assets/js/cart.js"></script>
 <script>
-  const map = L.map('map').setView([46.2, 0], 5);
+  // zoomSnap:0 : le survol a besoin de zooms fractionnaires, sinon la camera
+  // avance par paliers d'un cran entier et saccade.
+  const map = L.map('map', { zoomSnap: 0 }).setView([46.2, 0], 5);
 
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -208,8 +233,30 @@
     { lat: 48.3905, lng: -4.4860, name: 'Brest', date: 'À venir' }
   ];
 
+  const doux = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const POINTILLE = '5, 10';
+
+  // Tracer la ligne du trajet. Le temps de l'ouverture elle est pleine : un
+  // pointille dont on decale l'offset fait defiler les tirets au lieu de se
+  // devoiler. Elle reprend son pointille une fois le trajet pose.
+  //
+  // noClip : par defaut Leaflet rogne la polyligne sur la zone visible. Des
+  // que la camera descend sur une etape, le trace ne contiendrait plus que le
+  // morceau a l'ecran et sa longueur mesuree n'aurait plus rien a voir avec
+  // celle de la route.
+  const line = L.polyline(
+    waypoints.map(p => [p.lat, p.lng]),
+    {
+      color: '#9b6bff',
+      weight: 2,
+      opacity: 0.6,
+      dashArray: doux ? POINTILLE : null,
+      noClip: true
+    }
+  ).addTo(map);
+
   // Afficher les points
-  waypoints.forEach((point, i) => {
+  const marqueurs = waypoints.map((point, i) => {
     const isStart = i === 0;
     const isEnd = i === waypoints.length - 1;
 
@@ -219,25 +266,153 @@
       color: isStart ? '#3ddc84' : (isEnd ? '#9b6bff' : '#9d9ba3'),
       weight: 2,
       opacity: 1,
-      fillOpacity: 0.8
+      fillOpacity: 0.8,
+      className: 'etape'
     }).addTo(map);
 
     marker.bindPopup(`
       <strong>${point.name}</strong><br>
       ${point.date ? `<small>${point.date}</small>` : '<small>En route...</small>'}
     `);
+    return marker;
   });
 
-  // Tracer la ligne du trajet
-  const line = L.polyline(
-    waypoints.map(p => [p.lat, p.lng]),
-    {
-      color: '#9b6bff',
-      weight: 2,
-      opacity: 0.6,
-      dashArray: '5, 10'
+  const trace = line.getElement();
+
+  // Vue de repos : le trajet entier, cadre par la carte plutot qu'a la main.
+  const etendue = L.latLngBounds(waypoints.map(p => [p.lat, p.lng]));
+  const VUE_LARGE = {
+    centre: etendue.getCenter(),
+    zoom: map.getBoundsZoom(etendue, false, L.point(50, 90))
+  };
+
+  if (doux || !trace) {
+    map.setView(VUE_LARGE.centre, VUE_LARGE.zoom, { animate: false });
+    poser();
+  } else {
+    ouvrir();
+  }
+
+  function ouvrir(){
+    const gestes = [map.dragging, map.touchZoom, map.doubleClickZoom,
+                    map.scrollWheelZoom, map.tap].filter(Boolean);
+    gestes.forEach(g => g.disable());
+
+    // Les distances sont cumulees dans un repere projete fixe : changer de
+    // zoom multiplie toutes les coordonnees par un meme facteur, donc les
+    // proportions ne bougent pas et ces seuils restent valables partout.
+    const ZREF = 8;
+    const pts = waypoints.map(p => map.project([p.lat, p.lng], ZREF));
+    const cumul = [0];
+    for (let i = 1; i < pts.length; i++) {
+      cumul.push(cumul[i - 1] + pts[i].distanceTo(pts[i - 1]));
     }
-  ).addTo(map);
+    const totale = cumul[cumul.length - 1] || 1;
+    const seuils = cumul.map(d => d / totale);
+
+    // Un zoom de survol par etape : une etape courte se regarde de plus pres
+    // qu'une longue.
+    const zSurvol = pts.slice(0, -1).map((_, i) => map.getBoundsZoom(
+      L.latLngBounds([waypoints[i].lat, waypoints[i].lng],
+                     [waypoints[i + 1].lat, waypoints[i + 1].lng]),
+      false, L.point(60, 110)) - 0.5);
+
+    const POUSSEE = 0.8;   // le drone se rapproche au milieu de chaque etape
+
+    function surLaRoute(p){
+      let j = 0;
+      while (j < seuils.length - 2 && p > seuils[j + 1]) j++;
+      const u = (p - seuils[j]) / ((seuils[j + 1] - seuils[j]) || 1);
+      const a = pts[j], b = pts[j + 1];
+      return {
+        centre: map.unproject(a.add(b.subtract(a).multiplyBy(u)), ZREF),
+        // Un aller-retour en sinus : on plonge vers la route puis on reprend
+        // de la hauteur en arrivant sur la ville. Sans ce retour, le zoom
+        // retomberait d'un coup au depart de l'etape suivante.
+        zoom: zSurvol[j] + POUSSEE * Math.sin(Math.PI * Math.min(1, Math.max(0, u)))
+      };
+    }
+
+    // La progression est la seule verite : la longueur du trace change chaque
+    // fois que Leaflet le redessine, on la relit donc a chaque image.
+    function avancer(p){
+      const L2 = trace.getTotalLength();
+      trace.style.strokeDasharray = L2;
+      trace.style.strokeDashoffset = L2 * (1 - p);
+      for (let i = 0; i < seuils.length; i++) {
+        if (p >= seuils[i]) {
+          const el = marqueurs[i].getElement();
+          if (el) el.classList.add('posee');
+        }
+      }
+    }
+
+    function cadrer(centre, zoom){ map.setView(centre, zoom, { animate: false }); }
+
+    function melange(a, b, t){
+      const pa = map.project(a, ZREF), pb = map.project(b, ZREF);
+      return map.unproject(pa.add(pb.subtract(pa).multiplyBy(t)), ZREF);
+    }
+
+    const DESCENTE = 700, MARCHE = 3600, REMONTEE = 900;
+    const lisse = x => x * x * (3 - 2 * x);
+    const depart = surLaRoute(0), arrivee = surLaRoute(1);
+    let t0 = null, fini = false;
+
+    // Une pression sur la carte coupe court : cinq secondes d'ouverture, ce
+    // n'est pas a l'ecran de decider quand on peut enfin toucher.
+    map.getContainer().addEventListener('pointerdown', sauter, { once: true });
+
+    avancer(0);
+    cadrer(VUE_LARGE.centre, VUE_LARGE.zoom);
+
+    requestAnimationFrame(function image(t){
+      if (fini) return;
+      if (t0 === null) t0 = t;
+      const dt = t - t0;
+
+      if (dt < DESCENTE) {
+        const k = lisse(dt / DESCENTE);
+        cadrer(melange(VUE_LARGE.centre, depart.centre, k),
+               VUE_LARGE.zoom + (depart.zoom - VUE_LARGE.zoom) * k);
+      } else if (dt < DESCENTE + MARCHE) {
+        const p = lisse((dt - DESCENTE) / MARCHE);
+        const vue = surLaRoute(p);
+        cadrer(vue.centre, vue.zoom);
+        avancer(p);
+      } else if (dt < DESCENTE + MARCHE + REMONTEE) {
+        const k = lisse((dt - DESCENTE - MARCHE) / REMONTEE);
+        avancer(1);
+        cadrer(melange(arrivee.centre, VUE_LARGE.centre, k),
+               arrivee.zoom + (VUE_LARGE.zoom - arrivee.zoom) * k);
+      } else {
+        sauter();
+        return;
+      }
+      requestAnimationFrame(image);
+    });
+
+    function sauter(){
+      if (fini) return;
+      fini = true;
+      map.getContainer().removeEventListener('pointerdown', sauter);
+      cadrer(VUE_LARGE.centre, VUE_LARGE.zoom);
+      gestes.forEach(g => g.enable());
+      poser();
+    }
+  }
+
+  function poser(){
+    if (trace) {
+      trace.style.strokeDasharray = POINTILLE;
+      trace.style.strokeDashoffset = 0;
+    }
+    marqueurs.forEach(m => {
+      const el = m.getElement();
+      if (el) el.classList.add('posee');
+    });
+    document.body.classList.add('arrive');
+  }
 
   // Bouton GPS (pour plus tard)
   document.getElementById('gpsBtn').addEventListener('click', () => {
