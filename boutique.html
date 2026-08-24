@@ -190,10 +190,10 @@
 
   .product-item{
     flex:0 0 358px;
-    height:min(470px, 100%);
+    /* Rectangle vertical, facon embrasure de porte. */
+    height:min(620px, 100%);
     display:flex;
-    align-items:center;
-    justify-content:center;
+    flex-direction:column;
     background:radial-gradient(circle at 25% 15%, rgba(155,107,255,.12), transparent 55%),
                 radial-gradient(circle at 80% 85%, rgba(61,220,132,.1), transparent 55%);
     border-radius:16px;
@@ -203,17 +203,38 @@
     box-shadow:0 20px 60px rgba(0,0,0,.4);
     transform:scale(0.95);
     transition:transform .4s cubic-bezier(.25,.46,.45,.94);
+    overflow:hidden;
   }
 
   .product-item:hover{
     transform:scale(1) translateZ(50px);
   }
 
-  .product-item img{
+  .product-shot{
+    flex:0 0 58%;
+    min-height:0;
     width:100%;
-    height:100%;
     object-fit:contain;
+    object-position:center bottom;
     filter:drop-shadow(0 10px 30px rgba(155,107,255,.2));
+  }
+
+  /* Le vetement repris a l'envers sous lui, comme un reflet dans l'eau. */
+  .product-reflection{
+    flex:1 1 auto;
+    min-height:0;
+    width:100%;
+    /* cover, pas contain : le reflet garde l'echelle du vetement au lieu
+       d'etre reduit pour tenir dans une case plus basse. */
+    object-fit:cover;
+    object-position:center bottom;
+    transform:scaleY(-1);
+    opacity:.3;
+    /* Opaque en bas dans le repere de l'image : une fois retournee,
+       c'est le haut du reflet, du cote du vetement. */
+    -webkit-mask-image:linear-gradient(to top, #000, transparent 72%);
+    mask-image:linear-gradient(to top, #000, transparent 72%);
+    pointer-events:none;
   }
 
   .shortcuts-bar{
@@ -344,7 +365,9 @@
     const div = document.createElement('div');
     div.className = 'product-item';
 
-    div.innerHTML = `<img src="${product.image}" alt="${product.name}">`;
+    div.innerHTML = `
+      <img src="${product.image}" alt="${product.name}" class="product-shot">
+      <img src="${product.image}" alt="" aria-hidden="true" class="product-reflection">`;
 
     div.addEventListener('click', () => {
       window.location.href = `product.html?item=${product.id}`;
