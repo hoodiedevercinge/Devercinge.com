@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Devercinge — Mode Aventure</title>
-<meta name="description" content="Aventure Devercinge : marche de Nice à Brest.">
+<meta name="description" content="Aventure Devercinge : marche de Nice à Saint-Malo.">
 <meta name="theme-color" content="#0a0a0c">
 <link rel="canonical" href="https://hoodiedevercinge.github.io/Devercinge.com/aventure.html">
 <meta property="og:type" content="website">
@@ -12,11 +12,11 @@
 <meta property="og:locale" content="fr_FR">
 <meta property="og:url" content="https://hoodiedevercinge.github.io/Devercinge.com/aventure.html">
 <meta property="og:title" content="Devercinge — Mode Aventure">
-<meta property="og:description" content="Suis l'aventure Devercinge : la marche de Nice à Brest, étape par étape.">
+<meta property="og:description" content="Suis l'aventure Devercinge : la marche de Nice à Saint-Malo, étape par étape.">
 <meta property="og:image" content="https://hoodiedevercinge.github.io/Devercinge.com/assets/og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Devercinge — Mode Aventure">
-<meta name="twitter:description" content="Suis l'aventure Devercinge : la marche de Nice à Brest, étape par étape.">
+<meta name="twitter:description" content="Suis l'aventure Devercinge : la marche de Nice à Saint-Malo, étape par étape.">
 <meta name="twitter:image" content="https://hoodiedevercinge.github.io/Devercinge.com/assets/og-image.jpg">
 <link rel="icon" href="assets/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="256x256" href="assets/favicon-256.png">
@@ -162,6 +162,26 @@
     margin-bottom:12px;
   }
 
+  /* Les chiffres du parcours : distance et denivele. */
+  .chiffres{
+    display:flex;
+    justify-content:center;
+    gap:26px;
+    margin-bottom:12px;
+    font-size:11px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+  }
+  .chiffres b{
+    display:block;
+    font-size:15px;
+    letter-spacing:.04em;
+    font-weight:700;
+    color:var(--ink);
+    margin-bottom:2px;
+  }
+
   /* Ouverture du mode aventure : le trace part de Nice et chaque ville se
      pose quand le trait l'atteint. Le panneau du bas suit une fois arrive. */
   .etape{
@@ -200,9 +220,23 @@
   .nom-texte{
     display:inline-block;
     opacity:0;
-    transition:opacity .45s ease;
+    /* Sert a l'effacement quand on quitte la ville ; l'arrivee, elle, se
+       joue lettre par lettre. */
+    transition:opacity .4s ease;
   }
-  .nom-ville.posee .nom-texte{ opacity:1; }
+  .nom-ville.posee .nom-texte{ opacity:1; transition:none; }
+  .nom-texte i{ display:inline-block; font-style:normal; }
+  /* « backwards » tient la lettre invisible pendant son retard, et la laisse
+     a son etat normal une fois finie : elle reste donc visible pour le fondu
+     de sortie du bloc. */
+  .nom-ville.posee .nom-texte i{
+    animation:lettre-decouverte .28s cubic-bezier(.2,.8,.3,1) backwards;
+    animation-delay:var(--retard, 0s);
+  }
+  @keyframes lettre-decouverte{
+    from{ opacity:0; transform:translateY(7px); filter:blur(4px); }
+    to{ opacity:1; transform:translateY(0); filter:blur(0); }
+  }
 
   .info-panel{
     opacity:0;
@@ -215,6 +249,7 @@
     /* Rien ne se dessine : tout est deja en place au chargement. */
     .etape, .etape.posee{ opacity:1; animation:none; }
     .nom-texte{ transition:none; }
+    .nom-ville.posee .nom-texte i{ animation:none; }
     .info-panel{ opacity:1; transition:none; }
   }
 </style>
@@ -231,9 +266,14 @@
   <div id="map"></div>
 
   <div class="info-panel">
-    <div class="eyebrow">Mille quatre cent trente-quatre kilomètres</div>
+    <div class="eyebrow">Mille quatre cent huit kilomètres</div>
+    <div class="chiffres">
+      <span><b>1408</b> km</span>
+      <span><b>+7005</b> m</span>
+      <span><b>−7016</b> m</span>
+    </div>
     <div class="journey-status">
-      <span id="journeyDate">Départ : 6 septembre 2026</span>
+      <span id="journeyDate">Nice → Saint-Malo · départ le 6 septembre 2026</span>
     </div>
   </div>
 
@@ -254,12 +294,15 @@
   const waypoints = [
     { lat: 43.7102, lng: 7.2620, name: 'Nice', date: '6 sept 2026', cote: 'top' },
     { lat: 43.2965, lng: 5.3698, name: 'Marseille', date: '', cote: 'bottom' },
+    { lat: 43.6108, lng: 3.8767, name: 'Montpellier', date: '', cote: 'top' },
+    { lat: 43.1836, lng: 3.0036, name: 'Narbonne', date: '', cote: 'bottom' },
     { lat: 43.6047, lng: 1.4442, name: 'Toulouse', date: '', cote: 'top' },
     { lat: 44.8378, lng: -0.5792, name: 'Bordeaux', date: '', cote: 'left' },
-    { lat: 46.1591, lng: -1.1578, name: 'La Rochelle', date: '', cote: 'right' },
-    { lat: 47.2199, lng: -1.5582, name: 'Nantes', date: '', cote: 'right' },
+    { lat: 46.1591, lng: -1.1578, name: 'La Rochelle', date: '', cote: 'left' },
+    { lat: 47.2199, lng: -1.5582, name: 'Nantes', date: '', cote: 'bottom' },
+    { lat: 47.4784, lng: -0.5632, name: 'Angers', date: '', cote: 'right' },
     { lat: 48.1173, lng: -1.6778, name: 'Rennes', date: '', cote: 'right' },
-    { lat: 48.3905, lng: -4.4860, name: 'Brest', date: 'À venir', cote: 'top' }
+    { lat: 48.6493, lng: -2.0257, name: 'Saint-Malo', date: 'Arrivée', cote: 'top' }
   ];
 
   // De quoi degager le nom du disque, dont le rayon monte a 12 px.
@@ -269,6 +312,16 @@
     top:    L.point(0, -16),
     bottom: L.point(0, 16)
   };
+  // Le nom se decouvre lettre a lettre. Le retard est une fraction du nom et
+  // non un pas fixe : « Nice » et « La Rochelle » mettent ainsi le meme temps
+  // a se lire, et la revelation tient dans l'arret sur la ville quelle que
+  // soit la longueur du mot.
+  const CASCADE = 0.15;  // secondes entre la premiere lettre et la derniere
+  function enLettres(nom){
+    const n = Math.max(1, nom.length - 1);
+    return [...nom].map((c, k) => c === ' ' ? ' '
+      : `<i style="--retard:${(k / n * CASCADE).toFixed(3)}s">${c}</i>`).join('');
+  }
 
   const doux = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const POINTILLE = '5, 10';
@@ -320,7 +373,8 @@
       className: 'nom-ville',
       opacity: 1
     });
-    marker.getTooltip().getElement().querySelector('.nom-texte').textContent = point.name;
+    marker.getTooltip().getElement()
+          .querySelector('.nom-texte').innerHTML = enLettres(point.name);
 
     marker.bindPopup(`
       <strong>${point.name}</strong><br>
@@ -337,13 +391,25 @@
   // Les deux seules villes nommees une fois la carte au repos.
   const bornes = i => i === 0 || i === waypoints.length - 1;
 
+
   const trace = line.getElement();
 
   // Vue de repos : le trajet entier, cadre par la carte plutot qu'a la main.
+  //
+  // Le cadrage se calcule sur les points, mais ce sont les noms qui touchent
+  // les bords. « Saint-Malo » se pose au-dessus de son point a l'extremite
+  // ouest et deborde de part et d'autre, la ou « Nice » est court a l'autre
+  // bout : le bloc penche a gauche. Plutot que d'elargir le cadre, ce qui
+  // rapetisserait le trajet, on decale la vue de quelques pixels pour
+  // egaliser les deux marges.
   const etendue = L.latLngBounds(waypoints.map(p => [p.lat, p.lng]));
+  const DEPORT = 14;   // pixels, mesures a l'ecran
+  const zoomLarge = map.getBoundsZoom(etendue, false, L.point(110, 90));
   const VUE_LARGE = {
-    centre: etendue.getCenter(),
-    zoom: map.getBoundsZoom(etendue, false, L.point(110, 90))
+    centre: map.unproject(
+      map.project(etendue.getCenter(), zoomLarge).subtract(L.point(DEPORT, 0)),
+      zoomLarge),
+    zoom: zoomLarge
   };
 
   if (doux || !trace) {
@@ -377,22 +443,6 @@
                      [waypoints[i + 1].lat, waypoints[i + 1].lng]),
       false, L.point(60, 110)) - 0.5);
 
-    const POUSSEE = 0.8;   // le drone se rapproche au milieu de chaque etape
-
-    function surLaRoute(p){
-      let j = 0;
-      while (j < seuils.length - 2 && p > seuils[j + 1]) j++;
-      const u = (p - seuils[j]) / ((seuils[j + 1] - seuils[j]) || 1);
-      const a = pts[j], b = pts[j + 1];
-      return {
-        centre: map.unproject(a.add(b.subtract(a).multiplyBy(u)), ZREF),
-        // Un aller-retour en sinus : on plonge vers la route puis on reprend
-        // de la hauteur en arrivant sur la ville. Sans ce retour, le zoom
-        // retomberait d'un coup au depart de l'etape suivante.
-        zoom: zSurvol[j] + POUSSEE * Math.sin(Math.PI * Math.min(1, Math.max(0, u)))
-      };
-    }
-
     // La progression est la seule verite : la longueur du trace change chaque
     // fois que Leaflet le redessine, on la relit donc a chaque image.
     //
@@ -425,13 +475,37 @@
       return map.unproject(pa.add(pb.subtract(pa).multiplyBy(t)), ZREF);
     }
 
-    const DESCENTE = 700, MARCHE = 3600, REMONTEE = 900;
+    // Le drone se pose sur chaque ville, le temps qu'on lise son nom, puis
+    // reprend de l'altitude pour rejoindre la suivante et redescendre dessus.
+    const DESCENTE = 500, ARRET = 480, TRAJET = 280, REMONTEE = 750;
+    const RECUL = 0.9;    // hauteur reprise entre deux villes
     const lisse = x => x * x * (3 - 2 * x);
-    const depart = surLaRoute(0), arrivee = surLaRoute(1);
+
+    const villes = waypoints.map((w, i) => map.unproject(pts[i], ZREF));
+    // Au-dessus d'une ville on est plus bas qu'en chemin : c'est l'arret qui
+    // porte le regard, le trajet ne sert qu'a relier.
+    const zVille = waypoints.map((_, i) =>
+      zSurvol[Math.min(i, zSurvol.length - 1)] + RECUL);
+
+    // Le plan de vol, dresse une fois : chaque temps sait quand il commence.
+    const plan = [];
+    let curseur = 0;
+    const poser_temps = (type, duree, i) => {
+      plan.push({ type, debut: curseur, duree, i });
+      curseur += duree;
+    };
+    poser_temps('descente', DESCENTE);
+    for (let i = 0; i < waypoints.length; i++) {
+      poser_temps('arret', ARRET, i);
+      if (i < waypoints.length - 1) poser_temps('trajet', TRAJET, i);
+    }
+    poser_temps('remontee', REMONTEE);
+    const TOTAL = curseur;
+
     let t0 = null, fini = false;
 
-    // Une pression sur la carte coupe court : cinq secondes d'ouverture, ce
-    // n'est pas a l'ecran de decider quand on peut enfin toucher.
+    // Une pression sur la carte coupe court : l'ouverture dure ce qu'elle
+    // dure, ce n'est pas a l'ecran de decider quand on peut enfin toucher.
     map.getContainer().addEventListener('pointerdown', sauter, { once: true });
 
     avancer(0);
@@ -441,26 +515,32 @@
       if (fini) return;
       if (t0 === null) t0 = t;
       const dt = t - t0;
+      if (dt >= TOTAL) { sauter(); return; }
 
-      if (dt < DESCENTE) {
-        const k = lisse(dt / DESCENTE);
-        cadrer(melange(VUE_LARGE.centre, depart.centre, k),
-               VUE_LARGE.zoom + (depart.zoom - VUE_LARGE.zoom) * k);
-      } else if (dt < DESCENTE + MARCHE) {
-        const p = lisse((dt - DESCENTE) / MARCHE);
-        const vue = surLaRoute(p);
-        cadrer(vue.centre, vue.zoom);
-        avancer(p);
-      } else if (dt < DESCENTE + MARCHE + REMONTEE) {
-        const k = lisse((dt - DESCENTE - MARCHE) / REMONTEE);
-        // Brest garde son moment a lui : Nice ne revient qu'une fois la
-        // camera partie vers le haut.
-        avancer(1, k > 0.35);
-        cadrer(melange(arrivee.centre, VUE_LARGE.centre, k),
-               arrivee.zoom + (VUE_LARGE.zoom - arrivee.zoom) * k);
+      const temps = plan.find(e => dt < e.debut + e.duree) || plan[plan.length - 1];
+      const u = (dt - temps.debut) / temps.duree;
+      const k = lisse(Math.min(1, Math.max(0, u)));
+      const i = temps.i;
+      const dernier = waypoints.length - 1;
+
+      if (temps.type === 'descente') {
+        cadrer(melange(VUE_LARGE.centre, villes[0], k),
+               VUE_LARGE.zoom + (zVille[0] - VUE_LARGE.zoom) * k);
+      } else if (temps.type === 'arret') {
+        // Camera immobile : le nom se decouvre, rien d'autre ne bouge.
+        cadrer(villes[i], zVille[i]);
+        avancer(seuils[i]);
+      } else if (temps.type === 'trajet') {
+        cadrer(melange(villes[i], villes[i + 1], k),
+               zVille[i] + (zVille[i + 1] - zVille[i]) * k
+                         - RECUL * Math.sin(Math.PI * k));
+        avancer(seuils[i] + (seuils[i + 1] - seuils[i]) * k);
       } else {
-        sauter();
-        return;
+        // Saint-Malo garde son moment a lui : Nice ne revient qu'une fois
+        // la camera partie vers le haut.
+        avancer(1, k > 0.35);
+        cadrer(melange(villes[dernier], VUE_LARGE.centre, k),
+               zVille[dernier] + (VUE_LARGE.zoom - zVille[dernier]) * k);
       }
       requestAnimationFrame(image);
     });
