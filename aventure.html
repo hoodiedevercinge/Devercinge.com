@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Devercinge — Mode Aventure</title>
-<meta name="description" content="Aventure Devercinge : marche de Nice à Brest.">
+<meta name="description" content="Aventure Devercinge : marche de Nice à Saint-Malo.">
 <meta name="theme-color" content="#0a0a0c">
 <link rel="canonical" href="https://hoodiedevercinge.github.io/Devercinge.com/aventure.html">
 <meta property="og:type" content="website">
@@ -12,11 +12,11 @@
 <meta property="og:locale" content="fr_FR">
 <meta property="og:url" content="https://hoodiedevercinge.github.io/Devercinge.com/aventure.html">
 <meta property="og:title" content="Devercinge — Mode Aventure">
-<meta property="og:description" content="Suis l'aventure Devercinge : la marche de Nice à Brest, étape par étape.">
+<meta property="og:description" content="Suis l'aventure Devercinge : la marche de Nice à Saint-Malo, étape par étape.">
 <meta property="og:image" content="https://hoodiedevercinge.github.io/Devercinge.com/assets/og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Devercinge — Mode Aventure">
-<meta name="twitter:description" content="Suis l'aventure Devercinge : la marche de Nice à Brest, étape par étape.">
+<meta name="twitter:description" content="Suis l'aventure Devercinge : la marche de Nice à Saint-Malo, étape par étape.">
 <meta name="twitter:image" content="https://hoodiedevercinge.github.io/Devercinge.com/assets/og-image.jpg">
 <link rel="icon" href="assets/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="256x256" href="assets/favicon-256.png">
@@ -162,6 +162,26 @@
     margin-bottom:12px;
   }
 
+  /* Les chiffres du parcours : distance et denivele. */
+  .chiffres{
+    display:flex;
+    justify-content:center;
+    gap:26px;
+    margin-bottom:12px;
+    font-size:11px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+  }
+  .chiffres b{
+    display:block;
+    font-size:15px;
+    letter-spacing:.04em;
+    font-weight:700;
+    color:var(--ink);
+    margin-bottom:2px;
+  }
+
   /* Ouverture du mode aventure : le trace part de Nice et chaque ville se
      pose quand le trait l'atteint. Le panneau du bas suit une fois arrive. */
   .etape{
@@ -210,7 +230,7 @@
      a son etat normal une fois finie : elle reste donc visible pour le fondu
      de sortie du bloc. */
   .nom-ville.posee .nom-texte i{
-    animation:lettre-decouverte .32s cubic-bezier(.2,.8,.3,1) backwards;
+    animation:lettre-decouverte .28s cubic-bezier(.2,.8,.3,1) backwards;
     animation-delay:var(--retard, 0s);
   }
   @keyframes lettre-decouverte{
@@ -246,9 +266,14 @@
   <div id="map"></div>
 
   <div class="info-panel">
-    <div class="eyebrow">Mille quatre cent trente-quatre kilomètres</div>
+    <div class="eyebrow">Mille quatre cent huit kilomètres</div>
+    <div class="chiffres">
+      <span><b>1408</b> km</span>
+      <span><b>+7005</b> m</span>
+      <span><b>−7016</b> m</span>
+    </div>
     <div class="journey-status">
-      <span id="journeyDate">Départ : 6 septembre 2026</span>
+      <span id="journeyDate">Nice → Saint-Malo · départ le 6 septembre 2026</span>
     </div>
   </div>
 
@@ -269,12 +294,15 @@
   const waypoints = [
     { lat: 43.7102, lng: 7.2620, name: 'Nice', date: '6 sept 2026', cote: 'top' },
     { lat: 43.2965, lng: 5.3698, name: 'Marseille', date: '', cote: 'bottom' },
+    { lat: 43.6108, lng: 3.8767, name: 'Montpellier', date: '', cote: 'top' },
+    { lat: 43.1836, lng: 3.0036, name: 'Narbonne', date: '', cote: 'bottom' },
     { lat: 43.6047, lng: 1.4442, name: 'Toulouse', date: '', cote: 'top' },
     { lat: 44.8378, lng: -0.5792, name: 'Bordeaux', date: '', cote: 'left' },
-    { lat: 46.1591, lng: -1.1578, name: 'La Rochelle', date: '', cote: 'right' },
-    { lat: 47.2199, lng: -1.5582, name: 'Nantes', date: '', cote: 'right' },
+    { lat: 46.1591, lng: -1.1578, name: 'La Rochelle', date: '', cote: 'left' },
+    { lat: 47.2199, lng: -1.5582, name: 'Nantes', date: '', cote: 'bottom' },
+    { lat: 47.4784, lng: -0.5632, name: 'Angers', date: '', cote: 'right' },
     { lat: 48.1173, lng: -1.6778, name: 'Rennes', date: '', cote: 'right' },
-    { lat: 48.3905, lng: -4.4860, name: 'Brest', date: 'À venir', cote: 'top' }
+    { lat: 48.6493, lng: -2.0257, name: 'Saint-Malo', date: 'Arrivée', cote: 'right' }
   ];
 
   // De quoi degager le nom du disque, dont le rayon monte a 12 px.
@@ -288,7 +316,7 @@
   // non un pas fixe : « Nice » et « La Rochelle » mettent ainsi le meme temps
   // a se lire, et la revelation tient dans l'arret sur la ville quelle que
   // soit la longueur du mot.
-  const CASCADE = 0.2;   // secondes entre la premiere lettre et la derniere
+  const CASCADE = 0.15;  // secondes entre la premiere lettre et la derniere
   function enLettres(nom){
     const n = Math.max(1, nom.length - 1);
     return [...nom].map((c, k) => c === ' ' ? ' '
@@ -370,7 +398,7 @@
   const etendue = L.latLngBounds(waypoints.map(p => [p.lat, p.lng]));
   const VUE_LARGE = {
     centre: etendue.getCenter(),
-    zoom: map.getBoundsZoom(etendue, false, L.point(110, 90))
+    zoom: map.getBoundsZoom(etendue, false, L.point(80, 90))
   };
 
   if (doux || !trace) {
@@ -438,7 +466,7 @@
 
     // Le drone se pose sur chaque ville, le temps qu'on lise son nom, puis
     // reprend de l'altitude pour rejoindre la suivante et redescendre dessus.
-    const DESCENTE = 550, ARRET = 620, TRAJET = 340, REMONTEE = 800;
+    const DESCENTE = 500, ARRET = 480, TRAJET = 280, REMONTEE = 750;
     const RECUL = 0.9;    // hauteur reprise entre deux villes
     const lisse = x => x * x * (3 - 2 * x);
 
@@ -497,8 +525,8 @@
                          - RECUL * Math.sin(Math.PI * k));
         avancer(seuils[i] + (seuils[i + 1] - seuils[i]) * k);
       } else {
-        // Brest garde son moment a lui : Nice ne revient qu'une fois la
-        // camera partie vers le haut.
+        // Saint-Malo garde son moment a lui : Nice ne revient qu'une fois
+        // la camera partie vers le haut.
         avancer(1, k > 0.35);
         cadrer(melange(villes[dernier], VUE_LARGE.centre, k),
                zVille[dernier] + (VUE_LARGE.zoom - zVille[dernier]) * k);
