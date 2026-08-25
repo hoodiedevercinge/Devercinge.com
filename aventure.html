@@ -392,17 +392,24 @@
 
     // La progression est la seule verite : la longueur du trace change chaque
     // fois que Leaflet le redessine, on la relit donc a chaque image.
-    function avancer(p){
+    //
+    // Les disques restent une fois poses, ils dessinent la route. Les noms,
+    // eux, se relaient : pendant le survol on est au ras du sol et un seul
+    // nom a la fois se lit, celui de la ville qu'on vient d'atteindre.
+    // « tous » les rallume ensemble pour la remontee sur le trajet entier.
+    function avancer(p, tous){
       const L2 = trace.getTotalLength();
       trace.style.strokeDasharray = L2;
       trace.style.strokeDashoffset = L2 * (1 - p);
+      let courant = -1;
+      for (let i = 0; i < seuils.length; i++) if (p >= seuils[i]) courant = i;
       for (let i = 0; i < seuils.length; i++) {
         if (p >= seuils[i]) {
           const el = marqueurs[i].getElement();
           if (el) el.classList.add('posee');
-          const nom = nomDe(marqueurs[i]);
-          if (nom) nom.classList.add('posee');
         }
+        const nom = nomDe(marqueurs[i]);
+        if (nom) nom.classList.toggle('posee', tous || i === courant);
       }
     }
 
@@ -441,7 +448,9 @@
         avancer(p);
       } else if (dt < DESCENTE + MARCHE + REMONTEE) {
         const k = lisse((dt - DESCENTE - MARCHE) / REMONTEE);
-        avancer(1);
+        // Brest garde son moment a lui : les autres noms ne se rallument
+        // qu'une fois la camera partie vers le haut.
+        avancer(1, k > 0.35);
         cadrer(melange(arrivee.centre, VUE_LARGE.centre, k),
                arrivee.zoom + (VUE_LARGE.zoom - arrivee.zoom) * k);
       } else {
