@@ -214,7 +214,7 @@
     .gps-button{ transition:none; }
     /* Rien ne se dessine : tout est deja en place au chargement. */
     .etape, .etape.posee{ opacity:1; animation:none; }
-    .nom-texte{ opacity:1; transition:none; }
+    .nom-texte{ transition:none; }
     .info-panel{ opacity:1; transition:none; }
   }
 </style>
@@ -334,6 +334,9 @@
     return t ? t.getElement() : null;
   }
 
+  // Les deux seules villes nommees une fois la carte au repos.
+  const bornes = i => i === 0 || i === waypoints.length - 1;
+
   const trace = line.getElement();
 
   // Vue de repos : le trajet entier, cadre par la carte plutot qu'a la main.
@@ -396,8 +399,10 @@
     // Les disques restent une fois poses, ils dessinent la route. Les noms,
     // eux, se relaient : pendant le survol on est au ras du sol et un seul
     // nom a la fois se lit, celui de la ville qu'on vient d'atteindre.
-    // « tous » les rallume ensemble pour la remontee sur le trajet entier.
-    function avancer(p, tous){
+    // « finale » passe a la lecture de repos, ou seuls le depart et le
+    // terminus sont nommes ; les etapes du milieu n'existent que le temps
+    // du survol, la carte large reste ainsi lisible.
+    function avancer(p, finale){
       const L2 = trace.getTotalLength();
       trace.style.strokeDasharray = L2;
       trace.style.strokeDashoffset = L2 * (1 - p);
@@ -409,7 +414,7 @@
           if (el) el.classList.add('posee');
         }
         const nom = nomDe(marqueurs[i]);
-        if (nom) nom.classList.toggle('posee', tous || i === courant);
+        if (nom) nom.classList.toggle('posee', finale ? bornes(i) : i === courant);
       }
     }
 
@@ -448,8 +453,8 @@
         avancer(p);
       } else if (dt < DESCENTE + MARCHE + REMONTEE) {
         const k = lisse((dt - DESCENTE - MARCHE) / REMONTEE);
-        // Brest garde son moment a lui : les autres noms ne se rallument
-        // qu'une fois la camera partie vers le haut.
+        // Brest garde son moment a lui : Nice ne revient qu'une fois la
+        // camera partie vers le haut.
         avancer(1, k > 0.35);
         cadrer(melange(arrivee.centre, VUE_LARGE.centre, k),
                arrivee.zoom + (VUE_LARGE.zoom - arrivee.zoom) * k);
@@ -475,11 +480,11 @@
       trace.style.strokeDasharray = POINTILLE;
       trace.style.strokeDashoffset = 0;
     }
-    marqueurs.forEach(m => {
+    marqueurs.forEach((m, i) => {
       const el = m.getElement();
       if (el) el.classList.add('posee');
       const nom = nomDe(m);
-      if (nom) nom.classList.add('posee');
+      if (nom) nom.classList.toggle('posee', bornes(i));
     });
     document.body.classList.add('arrive');
   }
