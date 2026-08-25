@@ -302,7 +302,7 @@
     { lat: 47.2199, lng: -1.5582, name: 'Nantes', date: '', cote: 'bottom' },
     { lat: 47.4784, lng: -0.5632, name: 'Angers', date: '', cote: 'right' },
     { lat: 48.1173, lng: -1.6778, name: 'Rennes', date: '', cote: 'right' },
-    { lat: 48.6493, lng: -2.0257, name: 'Saint-Malo', date: 'Arrivée', cote: 'right' }
+    { lat: 48.6493, lng: -2.0257, name: 'Saint-Malo', date: 'Arrivée', cote: 'top' }
   ];
 
   // De quoi degager le nom du disque, dont le rayon monte a 12 px.
@@ -395,10 +395,21 @@
   const trace = line.getElement();
 
   // Vue de repos : le trajet entier, cadre par la carte plutot qu'a la main.
+  //
+  // Le cadrage se calcule sur les points, mais ce sont les noms qui touchent
+  // les bords. « Saint-Malo » se pose au-dessus de son point a l'extremite
+  // ouest et deborde de part et d'autre, la ou « Nice » est court a l'autre
+  // bout : le bloc penche a gauche. Plutot que d'elargir le cadre, ce qui
+  // rapetisserait le trajet, on decale la vue de quelques pixels pour
+  // egaliser les deux marges.
   const etendue = L.latLngBounds(waypoints.map(p => [p.lat, p.lng]));
+  const DEPORT = 14;   // pixels, mesures a l'ecran
+  const zoomLarge = map.getBoundsZoom(etendue, false, L.point(110, 90));
   const VUE_LARGE = {
-    centre: etendue.getCenter(),
-    zoom: map.getBoundsZoom(etendue, false, L.point(80, 90))
+    centre: map.unproject(
+      map.project(etendue.getCenter(), zoomLarge).subtract(L.point(DEPORT, 0)),
+      zoomLarge),
+    zoom: zoomLarge
   };
 
   if (doux || !trace) {
