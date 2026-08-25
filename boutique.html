@@ -201,7 +201,10 @@
     justify-content:flex-start;
     overflow-x:auto;
     scroll-snap-type:x mandatory;
-    scroll-behavior:smooth;
+    /* Pas de scroll-behavior ici : le recalage du defilement infini se fait
+       par un bond instantane, qu'un smooth pose en CSS transformerait en
+       longue glissade bien visible. Chaque deplacement dit lui-meme s'il
+       veut etre doux. */
     -webkit-overflow-scrolling:touch;
     scrollbar-width:none;
   }
@@ -487,43 +490,119 @@
     return div;
   }
 
+  // Trois jeux d'articles a la suite. On vit dans celui du milieu : des
+  // qu'on en sort, le defilement est recale d'une largeur de jeu. Comme les
+  // trois jeux sont identiques et regulierement espaces -- l'ecart de 40 px
+  // vaut aussi entre le dernier d'un jeu et le premier du suivant -- le bond
+  // tombe sur une image identique et ne se voit pas.
+  const JEUX = 3;
+
   function render() {
     const carousel = document.getElementById('carousel');
     carousel.innerHTML = '';
-
-    products.forEach((product) => {
-      carousel.appendChild(createProductElement(product));
-    });
-
+    for (let j = 0; j < JEUX; j++) {
+      products.forEach((product) => {
+        const el = createProductElement(product);
+        // L'article porte sa piece : avec les copies, sa place dans le DOM
+        // ne dit plus de quel produit il s'agit.
+        el.produit = product;
+        carousel.appendChild(el);
+      });
+    }
     updateProductName();
   }
 
-  function updateProductName() {
-    const gallery = document.getElementById('gallery');
-    const rect = gallery.getBoundingClientRect();
-    const center = rect.left + rect.width / 2;
+  const gallery = document.getElementById('gallery');
+  const carousel = document.getElementById('carousel');
+  const articles = () => [...carousel.children];
 
-    let closestProduct = products[0];
-    let closestDist = Infinity;
-
-    document.querySelectorAll('.product-item').forEach((item, i) => {
-      const itemRect = item.getBoundingClientRect();
-      const itemCenter = itemRect.left + itemRect.width / 2;
-      const dist = Math.abs(itemCenter - center);
-
-      if (dist < closestDist) {
-        closestDist = dist;
-        closestProduct = products[i];
-      }
+  function auCentre() {
+    const items = articles();
+    const centre = gallery.scrollLeft + gallery.clientWidth / 2;
+    let plusProche = items[0], ecart = Infinity, rang = 0;
+    items.forEach((el, j) => {
+      const d = Math.abs(el.offsetLeft + el.offsetWidth / 2 - centre);
+      if (d < ecart) { ecart = d; plusProche = el; rang = j; }
     });
+    return { el: plusProche, rang };
+  }
 
-    document.getElementById('productName').textContent = closestProduct.name;
+  function updateProductName() {
+    const { el } = auCentre();
+    if (el && el.produit) {
+      document.getElementById('productName').textContent = el.produit.name;
+    }
+  }
+
+  function largeurJeu() {
+    const items = articles();
+    return items.length > products.length
+      ? items[products.length].offsetLeft - items[0].offsetLeft : 0;
+  }
+
+  function centrer(el, doux) {
+    gallery.scrollTo({
+      left: el.offsetLeft - (gallery.clientWidth - el.offsetWidth) / 2,
+      behavior: doux ? 'smooth' : 'auto'
+    });
+  }
+
+  // Ramene le defilement dans le jeu du milieu, d'un bond sec.
+  function recadrer() {
+    const w = largeurJeu();
+    if (!w) return;
+    if (gallery.scrollLeft < w * 0.5) gallery.scrollLeft += w;
+    else if (gallery.scrollLeft >= w * 1.5) gallery.scrollLeft -= w;
   }
 
   render();
 
-  const gallery = document.getElementById('gallery');
-  gallery.addEventListener('scroll', updateProductName);
+  const doux = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const CADENCE = 2800;   // le temps de regarder une piece avant la suivante
+  const REPRISE = 4000;   // apres une manipulation, avant que ca reparte
+  let minuteur = null, reprise = null, pose = null;
+
+  function suivant() {
+    const items = articles();
+    const { rang } = auCentre();
+    centrer(items[Math.min(rang + 1, items.length - 1)], true);
+  }
+
+  function lancer() {
+    if (doux || minuteur) return;
+    minuteur = setInterval(suivant, CADENCE);
+  }
+
+  function suspendre() {
+    clearInterval(minuteur); minuteur = null;
+    clearTimeout(reprise);
+    reprise = setTimeout(lancer, REPRISE);
+  }
+
+  // Le recalage attend que tout se soit pose : le faire pendant un
+  // deplacement doux l'interromprait au milieu.
+  gallery.addEventListener('scroll', () => {
+    updateProductName();
+    clearTimeout(pose);
+    pose = setTimeout(recadrer, 140);
+  }, { passive: true });
+
+  ['pointerdown', 'touchstart', 'wheel'].forEach((ev) =>
+    gallery.addEventListener(ev, suspendre, { passive: true }));
+
+  // Onglet en arriere-plan : inutile de faire defiler dans le vide.
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) { clearInterval(minuteur); minuteur = null; }
+    else lancer();
+  });
+
+  // On demarre sur le premier article du jeu du milieu, pour avoir autant
+  // de marge d'un cote que de l'autre.
+  requestAnimationFrame(() => {
+    centrer(articles()[products.length], false);
+    updateProductName();
+    lancer();
+  });
 </script>
 
 </body>
