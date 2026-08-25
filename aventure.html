@@ -200,9 +200,23 @@
   .nom-texte{
     display:inline-block;
     opacity:0;
-    transition:opacity .45s ease;
+    /* Sert a l'effacement quand on quitte la ville ; l'arrivee, elle, se
+       joue lettre par lettre. */
+    transition:opacity .4s ease;
   }
-  .nom-ville.posee .nom-texte{ opacity:1; }
+  .nom-ville.posee .nom-texte{ opacity:1; transition:none; }
+  .nom-texte i{ display:inline-block; font-style:normal; }
+  /* « backwards » tient la lettre invisible pendant son retard, et la laisse
+     a son etat normal une fois finie : elle reste donc visible pour le fondu
+     de sortie du bloc. */
+  .nom-ville.posee .nom-texte i{
+    animation:lettre-decouverte .32s cubic-bezier(.2,.8,.3,1) backwards;
+    animation-delay:var(--retard, 0s);
+  }
+  @keyframes lettre-decouverte{
+    from{ opacity:0; transform:translateY(7px); filter:blur(4px); }
+    to{ opacity:1; transform:translateY(0); filter:blur(0); }
+  }
 
   .info-panel{
     opacity:0;
@@ -215,6 +229,7 @@
     /* Rien ne se dessine : tout est deja en place au chargement. */
     .etape, .etape.posee{ opacity:1; animation:none; }
     .nom-texte{ transition:none; }
+    .nom-ville.posee .nom-texte i{ animation:none; }
     .info-panel{ opacity:1; transition:none; }
   }
 </style>
@@ -269,6 +284,16 @@
     top:    L.point(0, -16),
     bottom: L.point(0, 16)
   };
+  // Le nom se decouvre lettre a lettre. Le retard est une fraction du nom et
+  // non un pas fixe : « Nice » et « La Rochelle » mettent ainsi le meme temps
+  // a se lire, et la revelation tient dans l'arret sur la ville quelle que
+  // soit la longueur du mot.
+  const CASCADE = 0.2;   // secondes entre la premiere lettre et la derniere
+  function enLettres(nom){
+    const n = Math.max(1, nom.length - 1);
+    return [...nom].map((c, k) => c === ' ' ? ' '
+      : `<i style="--retard:${(k / n * CASCADE).toFixed(3)}s">${c}</i>`).join('');
+  }
 
   const doux = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const POINTILLE = '5, 10';
@@ -320,7 +345,8 @@
       className: 'nom-ville',
       opacity: 1
     });
-    marker.getTooltip().getElement().querySelector('.nom-texte').textContent = point.name;
+    marker.getTooltip().getElement()
+          .querySelector('.nom-texte').innerHTML = enLettres(point.name);
 
     marker.bindPopup(`
       <strong>${point.name}</strong><br>
@@ -336,6 +362,7 @@
 
   // Les deux seules villes nommees une fois la carte au repos.
   const bornes = i => i === 0 || i === waypoints.length - 1;
+
 
   const trace = line.getElement();
 
@@ -377,22 +404,6 @@
                      [waypoints[i + 1].lat, waypoints[i + 1].lng]),
       false, L.point(60, 110)) - 0.5);
 
-    const POUSSEE = 0.8;   // le drone se rapproche au milieu de chaque etape
-
-    function surLaRoute(p){
-      let j = 0;
-      while (j < seuils.length - 2 && p > seuils[j + 1]) j++;
-      const u = (p - seuils[j]) / ((seuils[j + 1] - seuils[j]) || 1);
-      const a = pts[j], b = pts[j + 1];
-      return {
-        centre: map.unproject(a.add(b.subtract(a).multiplyBy(u)), ZREF),
-        // Un aller-retour en sinus : on plonge vers la route puis on reprend
-        // de la hauteur en arrivant sur la ville. Sans ce retour, le zoom
-        // retomberait d'un coup au depart de l'etape suivante.
-        zoom: zSurvol[j] + POUSSEE * Math.sin(Math.PI * Math.min(1, Math.max(0, u)))
-      };
-    }
-
     // La progression est la seule verite : la longueur du trace change chaque
     // fois que Leaflet le redessine, on la relit donc a chaque image.
     //
@@ -425,13 +436,37 @@
       return map.unproject(pa.add(pb.subtract(pa).multiplyBy(t)), ZREF);
     }
 
-    const DESCENTE = 700, MARCHE = 3600, REMONTEE = 900;
+    // Le drone se pose sur chaque ville, le temps qu'on lise son nom, puis
+    // reprend de l'altitude pour rejoindre la suivante et redescendre dessus.
+    const DESCENTE = 550, ARRET = 620, TRAJET = 340, REMONTEE = 800;
+    const RECUL = 0.9;    // hauteur reprise entre deux villes
     const lisse = x => x * x * (3 - 2 * x);
-    const depart = surLaRoute(0), arrivee = surLaRoute(1);
+
+    const villes = waypoints.map((w, i) => map.unproject(pts[i], ZREF));
+    // Au-dessus d'une ville on est plus bas qu'en chemin : c'est l'arret qui
+    // porte le regard, le trajet ne sert qu'a relier.
+    const zVille = waypoints.map((_, i) =>
+      zSurvol[Math.min(i, zSurvol.length - 1)] + RECUL);
+
+    // Le plan de vol, dresse une fois : chaque temps sait quand il commence.
+    const plan = [];
+    let curseur = 0;
+    const poser_temps = (type, duree, i) => {
+      plan.push({ type, debut: curseur, duree, i });
+      curseur += duree;
+    };
+    poser_temps('descente', DESCENTE);
+    for (let i = 0; i < waypoints.length; i++) {
+      poser_temps('arret', ARRET, i);
+      if (i < waypoints.length - 1) poser_temps('trajet', TRAJET, i);
+    }
+    poser_temps('remontee', REMONTEE);
+    const TOTAL = curseur;
+
     let t0 = null, fini = false;
 
-    // Une pression sur la carte coupe court : cinq secondes d'ouverture, ce
-    // n'est pas a l'ecran de decider quand on peut enfin toucher.
+    // Une pression sur la carte coupe court : l'ouverture dure ce qu'elle
+    // dure, ce n'est pas a l'ecran de decider quand on peut enfin toucher.
     map.getContainer().addEventListener('pointerdown', sauter, { once: true });
 
     avancer(0);
@@ -441,26 +476,32 @@
       if (fini) return;
       if (t0 === null) t0 = t;
       const dt = t - t0;
+      if (dt >= TOTAL) { sauter(); return; }
 
-      if (dt < DESCENTE) {
-        const k = lisse(dt / DESCENTE);
-        cadrer(melange(VUE_LARGE.centre, depart.centre, k),
-               VUE_LARGE.zoom + (depart.zoom - VUE_LARGE.zoom) * k);
-      } else if (dt < DESCENTE + MARCHE) {
-        const p = lisse((dt - DESCENTE) / MARCHE);
-        const vue = surLaRoute(p);
-        cadrer(vue.centre, vue.zoom);
-        avancer(p);
-      } else if (dt < DESCENTE + MARCHE + REMONTEE) {
-        const k = lisse((dt - DESCENTE - MARCHE) / REMONTEE);
+      const temps = plan.find(e => dt < e.debut + e.duree) || plan[plan.length - 1];
+      const u = (dt - temps.debut) / temps.duree;
+      const k = lisse(Math.min(1, Math.max(0, u)));
+      const i = temps.i;
+      const dernier = waypoints.length - 1;
+
+      if (temps.type === 'descente') {
+        cadrer(melange(VUE_LARGE.centre, villes[0], k),
+               VUE_LARGE.zoom + (zVille[0] - VUE_LARGE.zoom) * k);
+      } else if (temps.type === 'arret') {
+        // Camera immobile : le nom se decouvre, rien d'autre ne bouge.
+        cadrer(villes[i], zVille[i]);
+        avancer(seuils[i]);
+      } else if (temps.type === 'trajet') {
+        cadrer(melange(villes[i], villes[i + 1], k),
+               zVille[i] + (zVille[i + 1] - zVille[i]) * k
+                         - RECUL * Math.sin(Math.PI * k));
+        avancer(seuils[i] + (seuils[i + 1] - seuils[i]) * k);
+      } else {
         // Brest garde son moment a lui : Nice ne revient qu'une fois la
         // camera partie vers le haut.
         avancer(1, k > 0.35);
-        cadrer(melange(arrivee.centre, VUE_LARGE.centre, k),
-               arrivee.zoom + (VUE_LARGE.zoom - arrivee.zoom) * k);
-      } else {
-        sauter();
-        return;
+        cadrer(melange(villes[dernier], VUE_LARGE.centre, k),
+               zVille[dernier] + (VUE_LARGE.zoom - zVille[dernier]) * k);
       }
       requestAnimationFrame(image);
     });
