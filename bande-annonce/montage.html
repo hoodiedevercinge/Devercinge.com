@@ -1,0 +1,342 @@
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<title>Devercinge — bande-annonce</title>
+<style>
+  :root{ --bg:#0a0a0c; --ink:#f2f1ef; --dim:#9d9ba3; --violet:#9b6bff; --green:#3ddc84; }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ width:1080px; height:1920px; overflow:hidden; background:var(--bg); }
+  body{ position:relative; font-family:'Liberation Sans','DejaVu Sans',sans-serif; color:var(--ink); }
+
+  #stars{ position:absolute; inset:0; }
+  #stars span{ position:absolute; background:var(--ink); border-radius:50%; }
+  .flare{ position:absolute; }
+  .flare i{
+    position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); display:block;
+    background:linear-gradient(90deg,transparent,var(--ink),transparent);
+  }
+  .flare i.v{ background:linear-gradient(180deg,transparent,var(--ink),transparent); }
+
+  .layer{ position:absolute; inset:0; }
+
+  .eyebrow{
+    position:absolute; left:0; right:0; text-align:center;
+    font-size:36px; font-weight:700; letter-spacing:.34em;
+    text-transform:uppercase; padding-left:.34em; line-height:1.7;
+    background:linear-gradient(90deg,var(--violet),var(--green));
+    -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+
+  #logo{
+    position:absolute; left:50%; top:880px; width:540px;
+    transform:translate(-50%,-50%);
+    filter:drop-shadow(0 0 70px rgba(155,107,255,.38));
+  }
+
+  /* Cinq fenetres closes : une par piece. */
+  #vitrines{ position:absolute; left:50%; top:600px; width:770px; transform:translateX(-50%); }
+  .slot{ position:absolute; top:0; width:110px; }
+  .bar{
+    height:540px; transform-origin:bottom center;
+    background:
+      radial-gradient(circle at 22% 18%, rgba(155,107,255,.32), transparent 62%),
+      radial-gradient(circle at 82% 84%, rgba(61,220,132,.24), transparent 62%);
+    background-size:770px 540px; background-repeat:no-repeat;
+  }
+  .mir{
+    position:absolute; top:540px; left:0; right:0; height:0; overflow:hidden;
+    -webkit-mask-image:linear-gradient(to bottom,#000,transparent 86%);
+    mask-image:linear-gradient(to bottom,#000,transparent 86%);
+  }
+  .mirin{
+    height:380px; transform:scaleY(-1);
+    background:
+      radial-gradient(circle at 22% 18%, rgba(155,107,255,.32), transparent 62%),
+      radial-gradient(circle at 82% 84%, rgba(61,220,132,.24), transparent 62%);
+    background-size:770px 540px; background-position-y:-160px; background-repeat:no-repeat;
+  }
+
+  /* La carte : le meme trace que le mode aventure, dessine point par point. */
+  #carte{ position:absolute; inset:0; }
+  #trace{ fill:none; stroke:var(--violet); stroke-width:6; stroke-linecap:round;
+          stroke-linejoin:round; opacity:.9; }
+  #tete{ fill:var(--green); }
+  .etape-pt{ fill:#1a1a20; stroke:var(--dim); stroke-width:4; }
+  .etape-pt.debut{ fill:var(--green); stroke:none; }
+  .etape-pt.fin{ fill:var(--violet); stroke:none; }
+  .nom-ville{
+    fill:var(--ink); font-size:36px; font-weight:700; letter-spacing:.16em;
+    text-transform:uppercase;
+  }
+  #dateline{
+    position:absolute; left:0; right:0; text-align:center;
+    font-size:31px; letter-spacing:.22em; text-transform:uppercase; color:var(--dim);
+    padding-left:.22em;
+  }
+
+  /* Le defile des monuments */
+  #route{ position:absolute; left:0; right:0; top:620px; height:640px; overflow:hidden;
+    -webkit-mask-image:linear-gradient(to right,transparent,#000 16%,#000 84%,transparent);
+    mask-image:linear-gradient(to right,transparent,#000 16%,#000 84%,transparent);
+  }
+  #bande{ position:absolute; top:0; left:0; height:640px; }
+  .etape{ position:absolute; top:0; width:560px; text-align:center; }
+  .etape svg{ display:block; margin:0 auto; }
+  .etape p{
+    margin-top:30px; font-size:32px; letter-spacing:.24em;
+    text-transform:uppercase; color:var(--dim);
+  }
+  .trait{ fill:none; stroke:var(--ink); stroke-width:5; stroke-linecap:round; stroke-linejoin:round; opacity:.92; }
+  #sol{
+    position:absolute; left:0; right:0; top:1085px; height:2px;
+    background:linear-gradient(90deg,transparent,rgba(155,107,255,.55) 20%,rgba(61,220,132,.45) 80%,transparent);
+  }
+
+  #url{
+    position:absolute; left:0; right:0; text-align:center;
+    font-size:36px; letter-spacing:.3em; text-transform:uppercase;
+    color:var(--dim); padding-left:.3em;
+  }
+</style>
+
+<div id="stars"></div>
+
+<div class="layer" id="scene1">
+  <img id="logo" src="../assets/logo-mark.png" alt="">
+  <div class="eyebrow" id="t1" style="top:1300px">Deux créateurs</div>
+</div>
+
+<div class="layer" id="scene2">
+  <div id="vitrines"></div>
+  <div class="eyebrow" id="t2" style="top:1650px">Cinq pièces</div>
+</div>
+
+<div class="layer" id="scene3">
+  <svg id="carte" viewBox="0 0 1080 1920">
+    <defs>
+      <filter id="lueur" x="-40%" y="-40%" width="180%" height="180%">
+        <feGaussianBlur stdDeviation="9" result="f"/>
+        <feMerge><feMergeNode in="f"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+    <path id="trace" filter="url(#lueur)"/>
+    <circle id="tete" r="11" filter="url(#lueur)"/>
+    <g id="pts"></g>
+    <g id="noms"></g>
+  </svg>
+  <div class="eyebrow" id="t3" style="top:1508px">Nice → Saint-Malo</div>
+  <div id="dateline" style="top:1600px">6 septembre 2026</div>
+</div>
+
+<div class="layer" id="scene4">
+  <div id="route"><div id="bande"></div></div>
+  <div id="sol"></div>
+  <div class="eyebrow" id="t4" style="top:1400px">Mille quatre cent<br>huit kilomètres</div>
+</div>
+
+<div class="layer" id="scene5">
+  <img id="logo2" src="../assets/logo-mark.png" alt=""
+       style="position:absolute;left:50%;top:820px;width:310px;transform:translate(-50%,-50%)">
+  <div class="eyebrow" id="t5" style="top:1040px">Un seul rêve</div>
+  <div id="url" style="top:1200px">devercinge.com</div>
+</div>
+
+<script src="monuments.js"></script>
+<script>
+const lisse = x => x<0?0 : x>1?1 : x*x*(3-2*x);
+const seg = (t,a,b) => lisse((t-a)/(b-a));
+const fen = (t,a,b,c,d) => Math.min(seg(t,a,b), 1-seg(t,c,d));
+
+function graine(s){ return function(){ s=(s*1664525+1013904223)%4294967296; return s/4294967296; }; }
+const alea = graine(20260906);
+
+const ciel = document.getElementById('stars');
+const etoiles = [];
+for (let i=0;i<170;i++){
+  const s=document.createElement('span'); const d=2+alea()*4;
+  s.style.left=(alea()*1080)+'px'; s.style.top=(alea()*1920)+'px';
+  s.style.width=d+'px'; s.style.height=d+'px';
+  ciel.appendChild(s);
+  etoiles.push({el:s, base:.25+alea()*.5, vitesse:.6+alea()*1.4, phase:alea()*6.28});
+}
+const flares=[];
+[[0.30,0.22,2.1],[0.76,0.30,6.2],[0.16,0.74,15.9],[0.84,0.68,24.4]].forEach(([x,y,quand])=>{
+  const f=document.createElement('div'); f.className='flare';
+  f.style.left=(x*1080)+'px'; f.style.top=(y*1920)+'px';
+  f.innerHTML='<i class="h"></i><i class="v"></i>';
+  ciel.appendChild(f);
+  flares.push({el:f,h:f.querySelector('.h'),v:f.querySelector('.v'),quand});
+});
+
+// --- cinq fenetres
+const vit = document.getElementById('vitrines');
+const slots = [];
+for (let i=0;i<5;i++){
+  const d=document.createElement('div');
+  d.className='slot'; d.style.left=(i*165)+'px';
+  d.innerHTML='<div class="bar"></div><div class="mir"><div class="mirin"></div></div>';
+  vit.appendChild(d);
+  const bar=d.querySelector('.bar'), mirin=d.querySelector('.mirin');
+  bar.style.backgroundPositionX=(-i*165)+'px';
+  mirin.style.backgroundPositionX=(-i*165)+'px';
+  slots.push({bar:bar, mir:d.querySelector('.mir')});
+}
+
+// --- la carte : coordonnees reprises telles quelles d'aventure.html
+const VILLES = [
+  { lat:43.7102, lng: 7.2620, nom:'Nice',        cote:'top' },
+  { lat:43.2965, lng: 5.3698, nom:'Marseille',   cote:'bottom' },
+  { lat:43.6108, lng: 3.8767, nom:'Montpellier', cote:'top' },
+  { lat:43.1836, lng: 3.0036, nom:'Narbonne',    cote:'bottom' },
+  { lat:43.6047, lng: 1.4442, nom:'Toulouse',    cote:'top' },
+  { lat:44.8378, lng:-0.5792, nom:'Bordeaux',    cote:'left' },
+  { lat:46.1591, lng:-1.1578, nom:'La Rochelle', cote:'left' },
+  { lat:47.2199, lng:-1.5582, nom:'Nantes',      cote:'bottom' },
+  { lat:47.4784, lng:-0.5632, nom:'Angers',      cote:'right' },
+  { lat:48.1173, lng:-1.6778, nom:'Rennes',      cote:'right' },
+  { lat:48.6493, lng:-2.0257, nom:'Saint-Malo',  cote:'top' }
+];
+
+// Mercator, puis cadrage dans la fenetre de la carte.
+const CADRE = { x:200, y:470, w:680, h:880 };
+const merc = lat => Math.log(Math.tan(Math.PI/4 + lat*Math.PI/360));
+const bx = VILLES.map(v => v.lng*Math.PI/180), by = VILLES.map(v => merc(v.lat));
+const x0=Math.min(...bx), x1=Math.max(...bx), y0=Math.min(...by), y1=Math.max(...by);
+const ech = Math.min(CADRE.w/(x1-x0), CADRE.h/(y1-y0));
+const dx = CADRE.x + (CADRE.w - (x1-x0)*ech)/2, dy = CADRE.y + (CADRE.h - (y1-y0)*ech)/2;
+const P = VILLES.map((v,i) => [dx + (bx[i]-x0)*ech, dy + (y1-by[i])*ech]);
+
+const trace = document.getElementById('trace');
+trace.setAttribute('d', P.map((p,i)=>(i?'L ':'M ')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' '));
+const LONG = [0]; // longueur cumulee jusqu'a chaque ville
+for (let i=1;i<P.length;i++)
+  LONG.push(LONG[i-1] + Math.hypot(P[i][0]-P[i-1][0], P[i][1]-P[i-1][1]));
+const TOTAL = LONG[LONG.length-1];
+trace.style.strokeDasharray = TOTAL;
+
+const gPts = document.getElementById('pts'), gNoms = document.getElementById('noms');
+const tete = document.getElementById('tete');
+const BORNES = [0, VILLES.length-1];
+const pastilles = [], etiquettes = {};
+VILLES.forEach((v,i)=>{
+  const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  c.setAttribute('cx', P[i][0]); c.setAttribute('cy', P[i][1]);
+  c.setAttribute('r', i===0||i===VILLES.length-1 ? 20 : 14);
+  c.setAttribute('class','etape-pt'+(i===0?' debut':i===VILLES.length-1?' fin':''));
+  gPts.appendChild(c); pastilles.push(c);
+
+  if (BORNES.indexOf(i) < 0) return;
+  const tx = document.createElementNS('http://www.w3.org/2000/svg','text');
+  tx.setAttribute('x', P[i][0]); tx.setAttribute('y', P[i][1]-42);
+  tx.setAttribute('class','nom-ville');
+  tx.setAttribute('text-anchor','middle');
+  tx.textContent = v.nom;
+  gNoms.appendChild(tx); etiquettes[i] = tx;
+});
+// Saint-Malo est le point le plus a l'ouest : son nom deborderait a gauche.
+Object.values(etiquettes).forEach(tx=>{
+  const b = tx.getBBox(), MARGE = 56;
+  const d = Math.max(0, MARGE - b.x) - Math.max(0, b.x + b.width - (1080 - MARGE));
+  if (d) tx.setAttribute('x', +tx.getAttribute('x') + d);
+});
+
+// --- la bande des monuments
+const PAS = 560;
+const bande = document.getElementById('bande');
+bande.style.width = (MONUMENTS.length*PAS)+'px';
+MONUMENTS.forEach((m,i)=>{
+  const d=document.createElement('div');
+  d.className='etape'; d.style.left=(i*PAS)+'px';
+  d.innerHTML='<svg width="460" height="505" viewBox="-14 -30 228 250">'+
+      m.traits.map(t=>'<path class="trait" d="'+t+'"/>').join('')+
+    '</svg><p>'+m.ville+'</p>';
+  bande.appendChild(d);
+});
+
+// ------------------------------------------------------------- montage
+const CARTE_T0 = 10.2, HALTE = 0.22, JAMBE = 0.34;
+const CARTE_T1 = CARTE_T0 + VILLES.length*HALTE + (VILLES.length-1)*JAMBE;
+const ARRIVEE = CARTE_T0 + (VILLES.length-1)*(HALTE+JAMBE);   // le pied pose a Saint-Malo
+
+/** Ou en est la marche sur la carte, en indice de ville (0 a 10). */
+function avancee(t){
+  let u = t - CARTE_T0;
+  if (u <= 0) return 0;
+  for (let i=0;i<VILLES.length;i++){
+    if (u < HALTE) return i;
+    u -= HALTE;
+    if (i === VILLES.length-1) return VILLES.length-1;
+    if (u < JAMBE) return i + lisse(u/JAMBE);
+    u -= JAMBE;
+  }
+  return VILLES.length-1;
+}
+
+const DUREE = 30.5;
+window.__duree = DUREE;
+
+window.__render = function(t){
+  etoiles.forEach(e=>{
+    const s=e.base*(0.45+0.55*Math.abs(Math.sin(e.phase+t*e.vitesse)));
+    e.el.style.opacity=(s*Math.min(1,seg(t,0,1.1))).toFixed(3);
+  });
+  flares.forEach(f=>{
+    const d=t-f.quand, k=(d<0||d>0.9)?0:Math.sin(Math.PI*d/0.9), taille=60+110*k;
+    f.el.style.opacity=k.toFixed(3);
+    f.h.style.width=taille+'px'; f.h.style.height='2px';
+    f.v.style.width='2px'; f.v.style.height=taille+'px';
+  });
+
+  // 1 — le logo
+  document.getElementById('scene1').style.opacity = fen(t,0.4,2.0, 4.1,4.8).toFixed(3);
+  const g=0.88+0.12*seg(t,0.4,2.4);
+  document.getElementById('logo').style.transform='translate(-50%,-50%) scale('+g.toFixed(4)+')';
+  document.getElementById('logo').style.top=(900-40*seg(t,0.4,2.4)).toFixed(0)+'px';
+  document.getElementById('t1').style.opacity = fen(t,2.2,3.2, 4.1,4.7).toFixed(3);
+
+  // 2 — les cinq fenetres, l'une apres l'autre
+  document.getElementById('scene2').style.opacity = fen(t,4.6,5.2, 9.2,9.9).toFixed(3);
+  slots.forEach((s,i)=>{
+    const p = seg(t, 4.9+i*0.38, 5.6+i*0.38);
+    s.bar.style.transform = 'scaleY('+p.toFixed(4)+')';
+    s.mir.style.height = (380*p).toFixed(1)+'px';
+  });
+  document.getElementById('t2').style.opacity = fen(t,7.2,7.9, 9.1,9.7).toFixed(3);
+
+  // 3 — le trace se dessine, ville apres ville
+  document.getElementById('scene3').style.opacity = fen(t,9.8,10.4, 17.9,18.6).toFixed(3);
+  const a = avancee(t);
+  const i0 = Math.min(VILLES.length-1, Math.floor(a)), f = a - i0;
+  const parcouru = LONG[i0] + (i0<VILLES.length-1 ? f*(LONG[i0+1]-LONG[i0]) : 0);
+  trace.style.strokeDashoffset = (TOTAL - parcouru).toFixed(1);
+  const q = trace.getPointAtLength(parcouru);
+  tete.setAttribute('cx', q.x.toFixed(1)); tete.setAttribute('cy', q.y.toFixed(1));
+  tete.style.opacity = fen(t, CARTE_T0, CARTE_T0+0.3, ARRIVEE-0.1, ARRIVEE+0.3).toFixed(3);
+  pastilles.forEach((c,i)=>{
+    // au temps plutot qu'a l'indice : a la derniere ville l'indice plafonne
+    // a 10 et la pastille d'arrivee n'aurait jamais fini d'eclore.
+    const k = seg(t, CARTE_T0 + i*(HALTE+JAMBE), CARTE_T0 + i*(HALTE+JAMBE) + 0.26);
+    c.style.opacity = k.toFixed(3);
+    c.setAttribute('transform','translate('+P[i][0]+','+P[i][1]+') scale('+
+      (0.4+0.6*k).toFixed(3)+') translate('+(-P[i][0])+','+(-P[i][1])+')');
+  });
+  // Nice est la des le depart, Saint-Malo se pose a l'arrivee.
+  etiquettes[0].style.opacity = seg(t, CARTE_T0, CARTE_T0+0.55).toFixed(3);
+  etiquettes[VILLES.length-1].style.opacity = seg(t, ARRIVEE, ARRIVEE+0.55).toFixed(3);
+  document.getElementById('t3').style.opacity   = fen(t,10.5,11.3, 17.8,18.4).toFixed(3);
+  document.getElementById('dateline').style.opacity = fen(t,CARTE_T1+0.2,CARTE_T1+0.9, 17.8,18.4).toFixed(3);
+
+  // 4 — le defile des onze monuments
+  document.getElementById('scene4').style.opacity = fen(t,18.4,19.1, 27.6,28.3).toFixed(3);
+  const marche = seg(t, 18.7, 27.5);              // 0 = Nice centre, 1 = Saint-Malo centre
+  const depart = 540 - PAS/2;
+  bande.style.transform = 'translateX('+(depart - marche*(MONUMENTS.length-1)*PAS).toFixed(1)+'px)';
+  document.getElementById('t4').style.opacity = fen(t,19.1,19.9, 27.5,28.1).toFixed(3);
+
+  // 5 — la chute
+  document.getElementById('scene5').style.opacity = seg(t,28.2,29.0).toFixed(3);
+  document.getElementById('t5').style.opacity  = seg(t,28.5,29.3).toFixed(3);
+  document.getElementById('url').style.opacity = seg(t,29.4,30.0).toFixed(3);
+};
+window.__render(0);
+</script>
