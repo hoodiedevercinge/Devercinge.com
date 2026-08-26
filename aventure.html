@@ -244,6 +244,16 @@
   }
   body.arrive .info-panel{ opacity:1; }
 
+  /* L'attribution du fond de carte, obligatoire, posee dans notre pied de
+     page plutot que dans le controle de Leaflet, que le panneau recouvrait. */
+  .credit{
+    font-size:10px;
+    letter-spacing:.04em;
+    color:var(--ink-dim);
+    opacity:.7;
+  }
+  .credit a{ color:inherit; }
+
   @media (prefers-reduced-motion: reduce){
     .gps-button{ transition:none; }
     /* Rien ne se dessine : tout est deja en place au chargement. */
@@ -275,6 +285,9 @@
     <div class="journey-status">
       <span id="journeyDate">Nice → Saint-Malo · départ le 6 septembre 2026</span>
     </div>
+    <div class="credit">Fond de carte
+      <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap</a>
+    </div>
   </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -282,10 +295,16 @@
 <script>
   // zoomSnap:0 : le survol a besoin de zooms fractionnaires, sinon la camera
   // avance par paliers d'un cran entier et saccade.
-  const map = L.map('map', { zoomSnap: 0 }).setView([46.2, 0], 5);
+  //
+  // attributionControl:false : le controle de Leaflet se posait en bas a
+  // droite, sous le panneau du bas qui le recouvrait entierement -- il ne
+  // remplissait donc plus son role. L'attribution est reprise a la main dans
+  // le pied de page, ou elle se lit et se clique vraiment. Le logo et le nom
+  // de Leaflet, eux, ne sont qu'une courtoisie et disparaissent au passage.
+  const map = L.map('map', { zoomSnap: 0, attributionControl: false })
+               .setView([46.2, 0], 5);
 
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     subdomains:'abcd',
     maxZoom:19
   }).addTo(map);
