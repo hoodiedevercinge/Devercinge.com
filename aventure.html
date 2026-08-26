@@ -477,7 +477,13 @@
 
     // Le drone se pose sur chaque ville, le temps qu'on lise son nom, puis
     // reprend de l'altitude pour rejoindre la suivante et redescendre dessus.
-    const DESCENTE = 500, ARRET = 480, TRAJET = 280, REMONTEE = 750;
+    //
+    // Un nom reste lisible pendant ARRET + TRAJET : il parait au debut de
+    // l'arret et ne cede la place qu'a la toute fin du trajet suivant. Sur
+    // ce total, la decouverte lettre par lettre en mange environ 430 ms
+    // (CASCADE 150 ms + 280 ms pour la derniere lettre). C'est ce qui reste
+    // qu'on a le temps de lire, d'ou des valeurs genereuses.
+    const DESCENTE = 500, ARRET = 820, TRAJET = 460, REMONTEE = 750;
     const RECUL = 0.9;    // hauteur reprise entre deux villes
     const lisse = x => x * x * (3 - 2 * x);
 
