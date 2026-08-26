@@ -160,17 +160,7 @@
     font-size:13px;
     color:var(--ink);
     letter-spacing:.06em;
-    margin-bottom:4px;
-  }
-
-  /* Le point de depart en coordonnees. La distance est deja dite en toutes
-     lettres juste au-dessus, la redire en chiffres ferait doublon. */
-  .coordonnees{
-    font-size:12px;
-    letter-spacing:.16em;
-    color:var(--ink-dim);
-    margin-bottom:14px;
-    font-variant-numeric:tabular-nums;
+    margin-bottom:6px;
   }
 
   .depart{
@@ -275,7 +265,6 @@
 
   <div class="info-panel">
     <div class="eyebrow">Mille quatre cent huit kilomètres</div>
-    <div class="coordonnees" id="coordonnees"></div>
     <div class="journey-status">Nice → Saint-Malo</div>
     <div class="depart">Départ : 6 septembre 2026</div>
     <div class="credit">Fond de carte
@@ -402,17 +391,6 @@
 
   // Les deux seules villes nommees une fois la carte au repos.
   const bornes = i => i === 0 || i === waypoints.length - 1;
-
-
-  // Le depart, ecrit depuis les donnees du trajet : une coordonnee recopiee
-  // a la main finirait par mentir le jour ou le point bouge.
-  (function ecrireDepart(){
-    const d = waypoints[0];
-    const tour = (v, pos, neg) =>
-      Math.abs(v).toFixed(4) + '° ' + (v >= 0 ? pos : neg);
-    document.getElementById('coordonnees').textContent =
-      tour(d.lat, 'N', 'S') + ' · ' + tour(d.lng, 'E', 'O');
-  })();
 
   const trace = line.getElement();
 
