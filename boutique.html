@@ -540,11 +540,32 @@
       ? items[products.length].offsetLeft - items[0].offsetLeft : 0;
   }
 
-  function centrer(el, doux) {
-    gallery.scrollTo({
-      left: el.offsetLeft - (gallery.clientWidth - el.offsetWidth) / 2,
-      behavior: doux ? 'smooth' : 'auto'
-    });
+  const placeDe = (el) =>
+    el.offsetLeft - (gallery.clientWidth - el.offsetWidth) / 2;
+
+  function centrer(el) { gallery.scrollLeft = placeDe(el); }
+
+  // On mene le defilement nous-memes, image par image, plutot que de le
+  // confier a scrollTo({behavior:'smooth'}) : le calage magnetique se bat
+  // avec un defilement pilote et Safari annule le mouvement, si bien que le
+  // carrousel ne demarre jamais. On retire le calage pendant l'animation et
+  // on le rend au doigt aussitot apres.
+  let glissee = null;
+
+  function glisser(el) {
+    cancelAnimationFrame(glissee);
+    const depart = gallery.scrollLeft;
+    const delta = placeDe(el) - depart;
+    if (Math.abs(delta) < 1) return;
+    gallery.style.scrollSnapType = 'none';
+    const lisse = (x) => x * x * (3 - 2 * x);
+    const t0 = performance.now();
+    (function pas(t) {
+      const k = Math.min(1, (t - t0) / GLISSEE);
+      gallery.scrollLeft = depart + delta * lisse(k);
+      if (k < 1) glissee = requestAnimationFrame(pas);
+      else { gallery.style.scrollSnapType = ''; recadrer(); }
+    })(t0);
   }
 
   // Ramene le defilement dans le jeu du milieu, d'un bond sec.
@@ -559,13 +580,14 @@
 
   const doux = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const CADENCE = 2800;   // le temps de regarder une piece avant la suivante
+  const GLISSEE = 650;    // la duree du passage d'un article au suivant
   const REPRISE = 4000;   // apres une manipulation, avant que ca reparte
   let minuteur = null, reprise = null, pose = null;
 
   function suivant() {
     const items = articles();
     const { rang } = auCentre();
-    centrer(items[Math.min(rang + 1, items.length - 1)], true);
+    glisser(items[Math.min(rang + 1, items.length - 1)]);
   }
 
   function lancer() {
@@ -574,6 +596,10 @@
   }
 
   function suspendre() {
+    // Le doigt reprend la main : on coupe l'animation en cours et on lui
+    // rend le calage magnetique tout de suite.
+    cancelAnimationFrame(glissee);
+    gallery.style.scrollSnapType = '';
     clearInterval(minuteur); minuteur = null;
     clearTimeout(reprise);
     reprise = setTimeout(lancer, REPRISE);
@@ -592,14 +618,17 @@
 
   // Onglet en arriere-plan : inutile de faire defiler dans le vide.
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) { clearInterval(minuteur); minuteur = null; }
+    if (document.hidden) {
+      cancelAnimationFrame(glissee);
+      clearInterval(minuteur); minuteur = null;
+    }
     else lancer();
   });
 
   // On demarre sur le premier article du jeu du milieu, pour avoir autant
   // de marge d'un cote que de l'autre.
   requestAnimationFrame(() => {
-    centrer(articles()[products.length], false);
+    centrer(articles()[products.length]);
     updateProductName();
     lancer();
   });
