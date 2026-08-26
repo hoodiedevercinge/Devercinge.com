@@ -158,28 +158,26 @@
 
   .journey-status{
     font-size:13px;
-    color:var(--ink-dim);
-    margin-bottom:12px;
+    color:var(--ink);
+    letter-spacing:.06em;
+    margin-bottom:4px;
   }
 
-  /* Les chiffres du parcours : distance et denivele. */
-  .chiffres{
-    display:flex;
-    justify-content:center;
-    gap:26px;
-    margin-bottom:12px;
-    font-size:11px;
-    letter-spacing:.12em;
-    text-transform:uppercase;
+  /* Le point de depart en coordonnees. La distance est deja dite en toutes
+     lettres juste au-dessus, la redire en chiffres ferait doublon. */
+  .coordonnees{
+    font-size:12px;
+    letter-spacing:.16em;
     color:var(--ink-dim);
+    margin-bottom:14px;
+    font-variant-numeric:tabular-nums;
   }
-  .chiffres b{
-    display:block;
-    font-size:15px;
-    letter-spacing:.04em;
-    font-weight:700;
-    color:var(--ink);
-    margin-bottom:2px;
+
+  .depart{
+    font-size:12px;
+    color:var(--ink-dim);
+    opacity:.75;
+    margin-bottom:10px;
   }
 
   /* Ouverture du mode aventure : le trace part de Nice et chaque ville se
@@ -277,14 +275,9 @@
 
   <div class="info-panel">
     <div class="eyebrow">Mille quatre cent huit kilomètres</div>
-    <div class="chiffres">
-      <span><b>1408</b> km</span>
-      <span><b>+7005</b> m</span>
-      <span><b>−7016</b> m</span>
-    </div>
-    <div class="journey-status">
-      <span id="journeyDate">Nice → Saint-Malo · départ le 6 septembre 2026</span>
-    </div>
+    <div class="coordonnees" id="coordonnees"></div>
+    <div class="journey-status">Nice → Saint-Malo</div>
+    <div class="depart">Départ : 6 septembre 2026</div>
     <div class="credit">Fond de carte
       <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap</a>
     </div>
@@ -410,6 +403,16 @@
   // Les deux seules villes nommees une fois la carte au repos.
   const bornes = i => i === 0 || i === waypoints.length - 1;
 
+
+  // Le depart, ecrit depuis les donnees du trajet : une coordonnee recopiee
+  // a la main finirait par mentir le jour ou le point bouge.
+  (function ecrireDepart(){
+    const d = waypoints[0];
+    const tour = (v, pos, neg) =>
+      Math.abs(v).toFixed(4) + '° ' + (v >= 0 ? pos : neg);
+    document.getElementById('coordonnees').textContent =
+      tour(d.lat, 'N', 'S') + ' · ' + tour(d.lng, 'E', 'O');
+  })();
 
   const trace = line.getElement();
 
