@@ -550,21 +550,29 @@
   // avec un defilement pilote et Safari annule le mouvement, si bien que le
   // carrousel ne demarre jamais. On retire le calage pendant l'animation et
   // on le rend au doigt aussitot apres.
-  let glissee = null;
+  let glissee = null, enGlissade = false;
 
   function glisser(el) {
     cancelAnimationFrame(glissee);
     const depart = gallery.scrollLeft;
     const delta = placeDe(el) - depart;
     if (Math.abs(delta) < 1) return;
+    enGlissade = true;
     gallery.style.scrollSnapType = 'none';
     const lisse = (x) => x * x * (3 - 2 * x);
     const t0 = performance.now();
     (function pas(t) {
       const k = Math.min(1, (t - t0) / GLISSEE);
       gallery.scrollLeft = depart + delta * lisse(k);
-      if (k < 1) glissee = requestAnimationFrame(pas);
-      else { gallery.style.scrollSnapType = ''; recadrer(); }
+      if (k < 1) { glissee = requestAnimationFrame(pas); return; }
+      // Le bond de recalage se fait tant que le calage magnetique est
+      // encore coupe. Rendu avant le bond, le navigateur se bat avec un
+      // saut qu'il n'a pas decide et repose la galerie entre deux
+      // articles -- ce qui se voit surtout sur le dernier du jeu, juste
+      // la ou tombe le recalage.
+      recadrer();
+      enGlissade = false;
+      requestAnimationFrame(() => { gallery.style.scrollSnapType = ''; });
     })(t0);
   }
 
@@ -599,6 +607,7 @@
     // Le doigt reprend la main : on coupe l'animation en cours et on lui
     // rend le calage magnetique tout de suite.
     cancelAnimationFrame(glissee);
+    enGlissade = false;
     gallery.style.scrollSnapType = '';
     clearInterval(minuteur); minuteur = null;
     clearTimeout(reprise);
@@ -610,6 +619,12 @@
   gallery.addEventListener('scroll', () => {
     updateProductName();
     clearTimeout(pose);
+    // Une glissade recale elle-meme en arrivant. Si le compte a rebours
+    // arrivait au bout pendant qu'elle court -- une image en retard sur un
+    // telephone charge suffit --, la galerie sauterait d'un jeu entier
+    // pendant que la glissade continue d'interpoler depuis son ancien
+    // point de depart, et l'article vise finirait a cote de l'ecran.
+    if (enGlissade) return;
     pose = setTimeout(recadrer, 140);
   }, { passive: true });
 
@@ -620,6 +635,7 @@
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
       cancelAnimationFrame(glissee);
+      enGlissade = false;
       clearInterval(minuteur); minuteur = null;
     }
     else lancer();
