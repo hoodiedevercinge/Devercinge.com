@@ -67,6 +67,26 @@
   .reel #url{ width:1080px; top:1445px; font-size:26px; }
   .reel .borne{ font-size:32px; }
   .reel #distance{ left:0; top:1385px; font-size:27px; }
+
+  /* Le numero d'episode : dans le creux de la route, au centre de ce qui
+     survit au rognage. Le chiffre est blanc, le plus contraste possible,
+     avec un halo violet qui le detache du ciel sans le colorer. */
+  #episode{ display:none; position:absolute; left:0; right:0; top:0; height:1px; }
+  .avec-episode #episode{ display:block; }
+  #ep-label{
+    position:absolute; left:0; right:0; top:808px; text-align:center;
+    font-size:38px; font-weight:700; letter-spacing:.42em; padding-left:.42em;
+    text-transform:uppercase;
+    background:linear-gradient(90deg,var(--violet),var(--green));
+    -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+  #ep-num{
+    position:absolute; left:0; right:0; top:835px; text-align:center;
+    font-size:400px; line-height:1; font-weight:700; letter-spacing:0;
+    color:#fff; font-variant-numeric:tabular-nums;
+    text-shadow:0 0 50px rgba(155,107,255,.55), 0 0 12px rgba(155,107,255,.35);
+  }
 </style>
 
 <div id="stars"></div>
@@ -94,6 +114,7 @@
   <g id="noms"></g>
 </svg>
 <div id="distance"></div>
+<div id="episode"><div id="ep-label">Épisode</div><div id="ep-num"></div></div>
 
 <script>
 // Paysage par defaut ; ?reel pour la version verticale 1080x1920.
@@ -101,6 +122,12 @@ const REEL = /[?&]reel/.test(location.search);
 document.documentElement.classList.toggle('reel', REEL);
 const W = REEL ? 1080 : 1920, H = REEL ? 1920 : 1080;
 document.getElementById('carte').setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+
+// ?reel&episode=3 : affiche « Episode 3 » au centre. Sans ce parametre, ou en
+// paysage, la banniere reste la banniere generique, sans numero.
+const EPISODE = REEL ? ((location.search.match(/episode=(\d+)/) || [])[1] || null) : null;
+
+document.documentElement.classList.toggle('avec-episode', !!EPISODE);
 
 const lisse = x => x<0?0 : x>1?1 : x*x*(3-2*x);
 const seg = (t,a,b) => lisse((t-a)/(b-a));
@@ -185,6 +212,16 @@ const bornes = Object.entries(NOMS).map(([i,nom])=>{
 });
 document.getElementById('distance').textContent = 'Mille quatre cent huit kilomètres';
 
+const epNum = document.getElementById('ep-num');
+if (EPISODE){
+  epNum.textContent = EPISODE;
+  // Deux chiffres sont plus larges : le creux de la route fait environ 470 px,
+  // le chiffre reduit sa taille plutot que de toucher le trace.
+  const g = document.createRange(); g.selectNodeContents(epNum);
+  const l = g.getBoundingClientRect().width;
+  if (l > 440) epNum.style.fontSize = (400*440/l).toFixed(1) + 'px';
+}
+
 // ------------------------------------------------------------- le montage
 const T_DEBUT = 0.8, T_FIN = 6.6;      // le trait part de Nice, arrive a Saint-Malo
 const quand = i => T_DEBUT + (LONG[i]/TOTAL)*(T_FIN - T_DEBUT);
@@ -222,6 +259,13 @@ window.__render = function(t){
   bornes.forEach(b=>{
     b.el.style.opacity = (Math.min(seg(t, quand(b.i)+0.05, quand(b.i)+0.6), sortie)).toFixed(3);
   });
+  if (EPISODE){
+    const a = seg(t, 0.35, 1.25), ec = Math.min(a, sortie);
+    document.getElementById('ep-label').style.opacity = ec.toFixed(3);
+    epNum.style.opacity = ec.toFixed(3);
+    // le chiffre se pose en grossissant legerement, puis ne bouge plus
+    epNum.style.transform = 'scale(' + (0.9 + 0.1*a).toFixed(4) + ')';
+  }
   document.getElementById('distance').style.opacity =
     (Math.min(seg(t, T_FIN+0.2, T_FIN+1.0), sortie)).toFixed(3);
 };

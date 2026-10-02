@@ -9,12 +9,14 @@ qu'attend Instagram, sinon imageio elargit a 1088.
     python3 rendu.py etape.html           # etape.html   -> etape-muet.mp4
     python3 rendu.py etape.html paysage   # 1920x1080    -> etape-paysage-muet.mp4
     python3 rendu.py banniere.html reel   # 1080x1920    -> banniere-reel-muet.mp4
+    python3 rendu.py banniere.html "reel&episode=3"
+                                          # avec le numero -> banniere-reel-episode-3-muet.mp4
 
 Si Chromium n'est pas la ou playwright l'attend, donnez son chemin :
 
     CHROMIUM=/opt/pw-browsers/chromium python3 rendu.py
 """
-import io, os, sys, time
+import io, os, re, sys, time
 import numpy as np, imageio_ffmpeg
 from PIL import Image
 from playwright.sync_api import sync_playwright
@@ -26,9 +28,11 @@ PAGE = sys.argv[1] if len(sys.argv) > 1 else 'montage.html'
 # Le format : portrait par defaut, ou 'paysage' (1920x1080), ou 'reel' (1080x1920
 # lui aussi, mais pour la page de banniere dont le defaut est le paysage).
 FORMAT = sys.argv[2] if len(sys.argv) > 2 else ''
-LARGEUR, HAUTEUR = (1920, 1080) if FORMAT == 'paysage' else (1080, 1920)
+LARGEUR, HAUTEUR = (1920, 1080) if FORMAT.startswith('paysage') else (1080, 1920)
 SORTIE = ('muet.mp4' if PAGE == 'montage.html'
-          else os.path.splitext(PAGE)[0] + ('-' + FORMAT if FORMAT else '') + '-muet.mp4')
+          else os.path.splitext(PAGE)[0]
+               + ('-' + re.sub(r'[^a-z0-9]+', '-', FORMAT.lower()).strip('-') if FORMAT else '')
+               + '-muet.mp4')
 
 with sync_playwright() as p:
     b = p.chromium.launch(**({'executable_path': CHROMIUM} if CHROMIUM else {}))

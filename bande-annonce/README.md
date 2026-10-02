@@ -19,6 +19,9 @@ calcul. Aucune source exterieure, donc rien a crediter ni a licencier.
 | `devercinge-etape-montpellier-paysage.mp4` | la meme, en paysage (1920x1080). |
 | `devercinge-banniere.mp4` | la banniere, 1920x1080, 12 s, sans son, faite pour boucler. |
 | `devercinge-banniere-reel.mp4` | la banniere pour Instagram, 1080x1920, 12 s, avec son, en boucle. |
+| `devercinge-episode-1-reel.mp4` | la meme avec « Episode 1 » en grand au centre. |
+| `couverture-episode-1.png` | l'image de couverture du Reel, celle que montre la grille du profil. |
+| `couverture.py` | enregistre une image d'une page de montage. |
 
 ## Refaire le film
 
@@ -179,6 +182,35 @@ d'une cloche qui depasse la fin revient par le debut. Mesure : le saut entre
 le dernier et le premier echantillon (0,0004) est plus petit qu'un saut
 ordinaire entre deux voisins (0,0018). Le fichier AAC ajoute un silence de
 quelques millisecondes au raccord, imperceptible.
+
+## Le numero d'episode
+
+`banniere.html?reel&episode=3` ajoute « Episode 3 » en grand au centre du
+Reel, dans le creux de la route -- la ou rien d'autre n'est dessine. Sans le
+parametre `episode`, ou en paysage, la banniere reste la banniere generique :
+verifie, les deux versions sont identiques au pixel pres a ce qu'elles
+etaient avant l'ajout.
+
+```sh
+python3 son-banniere.py
+python3 rendu.py banniere.html "reel&episode=3"     # -> banniere-reel-episode-3-muet.mp4
+ffmpeg -y -i banniere-reel-episode-3-muet.mp4 -i habillage-banniere.wav \
+       -c:v copy -c:a aac -b:a 192k -shortest devercinge-episode-3-reel.mp4
+python3 couverture.py banniere.html "reel&episode=3" 7.6 couverture-episode-3.png
+```
+
+Le chiffre est blanc pur, a un halo violet, et fait **274 px de haut, soit 14 %
+de l'image** : lisible meme sur la vignette d'une grille. Mesure sur les pixels
+reels : centre a ±6 px du milieu, au moins 76 px de la route pour un chiffre.
+A deux chiffres il reduit sa taille pour tenir dans le creux (« 12 » : 21 px de
+la route, il ne la touche pas) ; au-dela, a trois chiffres, il faudrait
+revoir la mise en page.
+
+**La couverture compte plus que la video.** Sur la grille du profil, un Reel
+est represente par sa couverture, pas par ses images : c'est `couverture.py`
+qui produit celle ou le numero se lit. A choisir a l'import dans Instagram
+(« Choisir dans la galerie »). Elle est prise a 7,6 s, quand la composition
+est complete.
 
 ## Deux choses a savoir avant d'y toucher
 
