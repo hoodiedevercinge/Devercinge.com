@@ -22,6 +22,7 @@ calcul. Aucune source exterieure, donc rien a crediter ni a licencier.
 | `devercinge-episode-1-reel.mp4` | la meme avec « Episode 1 » en grand au centre. |
 | `couverture-episode-1.png` | l'image de couverture du Reel, celle que montre la grille du profil. |
 | `couverture.py` | enregistre une image d'une page de montage. |
+| `episodes.py` | produit d'un coup les Reels numerotes et leurs couvertures (dossier `episodes/`, non versionne). |
 
 ## Refaire le film
 
@@ -202,9 +203,29 @@ python3 couverture.py banniere.html "reel&episode=3" 7.6 couverture-episode-3.pn
 Le chiffre est blanc pur, a un halo violet, et fait **274 px de haut, soit 14 %
 de l'image** : lisible meme sur la vignette d'une grille. Mesure sur les pixels
 reels : centre a ±6 px du milieu, au moins 76 px de la route pour un chiffre.
-A deux chiffres il reduit sa taille pour tenir dans le creux (« 12 » : 21 px de
-la route, il ne la touche pas) ; au-dela, a trois chiffres, il faudrait
-revoir la mise en page.
+A deux chiffres il reduit sa taille pour garder au moins 40 px entre lui et la
+route, halo compris ; a trois chiffres il faudrait revoir la mise en page.
+
+### Toute la serie d'un coup
+
+```sh
+CHROMIUM=/opt/pw-browsers/chromium python3 episodes.py        # 1 a 25
+python3 episodes.py 1 8                                        # ou une partie
+```
+
+Quatre rendus en parallele, environ **8 minutes pour 25 Reels**. Pour chaque
+numero N, dans `episodes/` : `devercinge-episode-NN-reel.mp4` (1080x1920, 12 s,
+avec son) et `couverture-episode-NN.png`. Le dossier n'est **pas versionne** :
+28 Mo de fichiers qui se regenerent en une commande n'ont ni a alourdir
+l'historique ni a etre publies avec le site. Le son est le meme pour tous.
+
+Mesure sur les 25 numeros : le chiffre est dans la zone qui survit au rognage,
+sans chevaucher aucun autre texte, a **58 px au moins de la route** (les numeros
+de 10 a 25 reduisent leur taille a 346 px de corps, soit 243 px de haut, pour
+cela ; de 1 a 9 il fait 274 px). Verifie aussi sur les fichiers produits : les 25
+font 12 s en 1080x1920 avec une piste son, la couverture correspond a
+l'image de la video a 7,6 s (ecart moyen 0,6 sur 255), et les 25 chiffres sont
+bien differents.
 
 **La couverture compte plus que la video.** Sur la grille du profil, un Reel
 est represente par sa couverture, pas par ses images : c'est `couverture.py`

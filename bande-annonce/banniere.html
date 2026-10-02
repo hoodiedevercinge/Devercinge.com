@@ -215,11 +215,13 @@ document.getElementById('distance').textContent = 'Mille quatre cent huit kilomÃ
 const epNum = document.getElementById('ep-num');
 if (EPISODE){
   epNum.textContent = EPISODE;
-  // Deux chiffres sont plus larges : le creux de la route fait environ 470 px,
-  // le chiffre reduit sa taille plutot que de toucher le trace.
+  // Deux chiffres sont plus larges et le creux de la route se resserre sur
+  // la gauche : le chiffre reduit sa taille plutot que de toucher le trace.
+  // 385 px laisse au moins 40 px entre le chiffre et la route, halo compris,
+  // pour tous les numeros de 10 a 25 (mesure, voir README).
   const g = document.createRange(); g.selectNodeContents(epNum);
   const l = g.getBoundingClientRect().width;
-  if (l > 440) epNum.style.fontSize = (400*440/l).toFixed(1) + 'px';
+  if (l > 385) epNum.style.fontSize = (400*385/l).toFixed(1) + 'px';
 }
 
 // ------------------------------------------------------------- le montage
