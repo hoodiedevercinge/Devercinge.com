@@ -61,6 +61,33 @@
     color:#b5b3bb; padding-left:.18em;
   }
 
+  /* La vitrine de fin : les cinq pieces, comme dans la boutique --
+     une fenetre en degrade derriere, le vetement pose par-dessus. */
+  #vitrine{ position:absolute; left:50%; top:820px; width:1000px;
+            transform:translateX(-50%); height:420px; }
+  .piece{ position:absolute; bottom:0; width:200px; text-align:center; }
+  .piece .fenetre{
+    position:absolute; left:50%; bottom:0; width:104px; height:330px;
+    transform:translateX(-50%); transform-origin:bottom center;
+    background:
+      radial-gradient(circle at 24% 16%, rgba(155,107,255,.34), transparent 60%),
+      radial-gradient(circle at 80% 84%, rgba(61,220,132,.26), transparent 60%);
+    background-size:1000px 330px; background-repeat:no-repeat;
+  }
+  .piece img{
+    position:relative; display:block; margin:0 auto;
+    width:186px; height:330px; object-fit:contain;
+    filter:drop-shadow(0 12px 28px rgba(155,107,255,.25));
+  }
+  #collection{
+    position:absolute; left:0; right:0; top:1340px; text-align:center;
+    font-size:40px; font-weight:700; letter-spacing:.3em;
+    text-transform:uppercase; padding-left:.3em;
+    background:linear-gradient(90deg,var(--violet),var(--green));
+    -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+
   #url{
     position:absolute; left:0; right:0; text-align:center;
     font-size:34px; letter-spacing:.3em; text-transform:uppercase;
@@ -97,6 +124,14 @@
 </div>
 
 <div class="layer" id="scene3">
+  <img id="logo3" src="../assets/logo-mark.png" alt=""
+       style="position:absolute;left:50%;top:430px;width:160px;transform:translate(-50%,-50%);
+              filter:drop-shadow(0 0 40px rgba(155,107,255,.3))">
+  <div id="vitrine"></div>
+  <div id="collection">Cinq pièces</div>
+</div>
+
+<div class="layer" id="scene4">
   <img id="logo2" src="../assets/logo-mark.png" alt=""
        style="position:absolute;left:50%;top:840px;width:300px;transform:translate(-50%,-50%)">
   <div class="eyebrow" id="fin" style="top:1060px">La route continue</div>
@@ -211,6 +246,22 @@ const traits = [...svgMon.querySelectorAll('.trait')].map(p=>{
   return { el:p, L:L };
 });
 
+// ──────────────────────── la vitrine de fin : l'ordre est celui de la boutique
+const PIECES = ['tshirt-noir', 'tshirt-blanc', 'short-noir', 'sans-manches', 'hoodie'];
+const vitrine = document.getElementById('vitrine');
+const etals = PIECES.map((nom, i) => {
+  const d = document.createElement('div');
+  d.className = 'piece';
+  d.style.left = (i * 200) + 'px';
+  d.innerHTML = '<div class="fenetre"></div>' +
+                '<img src="../assets/products/' + nom + '.png" alt="">';
+  vitrine.appendChild(d);
+  // Chaque fenetre montre sa part du degrade, comme une seule lumiere
+  // derriere toute la rangee plutot que cinq lampes identiques.
+  d.querySelector('.fenetre').style.backgroundPositionX = (-i * 200) + 'px';
+  return d;
+});
+
 // ───────────────────────────────────────────── les mots
 const UNITES = ['zéro','un','deux','trois','quatre','cinq','six','sept','huit','neuf','dix',
   'onze','douze','treize','quatorze','quinze','seize','dix-sept','dix-huit','dix-neuf'];
@@ -242,7 +293,7 @@ document.getElementById('compte').textContent =
 document.getElementById('km').textContent = enLettres(KM_FAITS) + ' kilomètres';
 
 // ───────────────────────────────────────────── le montage
-const DUREE = 15.0;
+const DUREE = 20.0;
 window.__duree = DUREE;
 
 // Chaque ville franchie s'allume quand le trait l'atteint.
@@ -288,10 +339,19 @@ window.__render = function(t){
   document.getElementById('compte').style.opacity  = seg(t,10.9,11.6).toFixed(3);
   document.getElementById('km').style.opacity      = seg(t,11.3,12.0).toFixed(3);
 
-  // 3 — la chute
-  document.getElementById('scene3').style.opacity = seg(t,12.7,13.4).toFixed(3);
-  document.getElementById('fin').style.opacity    = seg(t,13.0,13.7).toFixed(3);
-  document.getElementById('url').style.opacity    = seg(t,13.8,14.4).toFixed(3);
+  // 3 — la vitrine : ce qu'on trouve sur le site
+  document.getElementById('scene3').style.opacity = fen(t,12.7,13.4, 16.8,17.5).toFixed(3);
+  etals.forEach((d,i)=>{
+    const k = seg(t, 13.1 + i*0.30, 13.9 + i*0.30);
+    d.style.opacity = k.toFixed(3);
+    d.style.transform = 'translateY(' + (34*(1-k)).toFixed(1) + 'px)';
+  });
+  document.getElementById('collection').style.opacity = fen(t,15.3,16.1, 16.7,17.3).toFixed(3);
+
+  // 4 — la chute
+  document.getElementById('scene4').style.opacity = seg(t,17.4,18.1).toFixed(3);
+  document.getElementById('fin').style.opacity    = seg(t,17.7,18.4).toFixed(3);
+  document.getElementById('url').style.opacity    = seg(t,18.6,19.3).toFixed(3);
 };
 window.__render(0);
 </script>

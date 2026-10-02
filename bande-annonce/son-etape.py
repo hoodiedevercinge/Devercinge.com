@@ -11,17 +11,22 @@ import numpy as np
 
 ICI = os.path.dirname(os.path.abspath(__file__))
 SR = 44100
-DUREE = 15.0
-N = int(SR * DUREE)
-t = np.arange(N) / SR
-piste = np.zeros(N)
 
 
 # ------------------------------------------------- ce que dit la page
 page = open(os.path.join(ICI, 'etape.html'), encoding='utf-8').read()
 ATTEINTE = int(re.search(r'const ATTEINTE = (\d+)', page).group(1))
+DUREE = float(re.search(r'const DUREE = ([\d.]+)', page).group(1))
 T_TRACE0, T_TRACE1 = (float(x) for x in
                       re.search(r'T_TRACE0 = ([\d.]+), T_TRACE1 = ([\d.]+)', page).groups())
+# la vitrine : debut de la premiere piece et ecart entre deux
+T_PIECE0, T_PIECE_PAS = (float(x) for x in
+    re.search(r"seg\(t, ([\d.]+) \+ i\*([\d.]+),", page).groups())
+T_COLLECTION = float(re.search(r"getElementById\('collection'\)\.style\.opacity\s*=\s*fen\(t,([\d.]+)", page).group(1))
+T_CHUTE = float(re.search(r"getElementById\('scene4'\)\.style\.opacity\s*=\s*seg\(t,([\d.]+)", page).group(1))
+T_URL = float(re.search(r"getElementById\('url'\)\.style\.opacity\s*=\s*seg\(t,([\d.]+)", page).group(1))
+
+N = int(SR * DUREE)
 
 VILLES = [(43.7102, 7.2620), (43.2965, 5.3698), (43.6108, 3.8767), (43.1836, 3.0036),
           (43.6047, 1.4442), (44.8378, -0.5792), (46.1591, -1.1578), (47.2199, -1.5582),
@@ -37,6 +42,9 @@ cum = [0.0]
 for i in range(1, ATTEINTE + 1):
     cum.append(cum[-1] + math.hypot(P[i][0] - P[i-1][0], P[i][1] - P[i-1][1]))
 quand = [T_TRACE0 + (c / cum[-1]) * (T_TRACE1 - T_TRACE0) for c in cum] if cum[-1] else [T_TRACE0]
+
+t = np.arange(N) / SR
+piste = np.zeros(N)
 
 
 # ----------------------------------------------------------- outils
@@ -95,8 +103,10 @@ for i in range(N):
 nappe += 9.0 * filtre
 
 courbe = np.interp(t,
-    [0.0, 1.4,  2.4,  T_TRACE1, T_TRACE1 + 1.0, 8.6,  11.6, 12.9, 13.6, 15.0],
-    [0.0, 0.30, 0.26, 0.46,     0.30,           0.26, 0.34, 0.50, 0.34, 0.0])
+    [0.0, 1.4,  2.4,  T_TRACE1, T_TRACE1 + 1.0, 8.6,  11.6, T_PIECE0, T_COLLECTION,
+     T_CHUTE + 0.4, T_CHUTE + 1.4, DUREE],
+    [0.0, 0.30, 0.26, 0.46,     0.30,           0.26, 0.36, 0.28,     0.38,
+     0.52,          0.34,          0.0])
 piste += nappe / (np.abs(nappe).max() + 1e-9) * courbe * 2.2
 
 # ------------------------------------------------- 1. l'en-tete
@@ -121,12 +131,18 @@ poser(souffle(1.6, 0.18), 8.5)
 for k, (q, f) in enumerate(zip((10.35, 10.95, 11.35), (523.25, 659.25, 783.99))):
     poser(cloche(f, 1.8, 0.6, 0.11 - k * 0.015), q)
 
-# ------------------------------------------------- 5. la chute
-poser(souffle(1.4, 0.24, montant=False), 12.3)
-poser(cloche(220.0, 3.4, 1.7, 0.40), 12.80)
-poser(cloche(329.63, 3.2, 1.5, 0.22), 12.90)
-poser(cloche(440.0, 3.0, 1.3, 0.11), 13.00)
-poser(cloche(659.25, 2.2, 0.9, 0.07), 13.85)   # sur l'adresse du site
+# ------------------------------- 5. la vitrine, une note par piece levee
+poser(souffle(1.2, 0.20, montant=False), T_PIECE0 - 0.7)
+for i, f in enumerate([440.00, 523.25, 587.33, 659.25, 783.99]):
+    poser(cloche(f, 2.4, 0.85, 0.22 - i * 0.012), T_PIECE0 + i * T_PIECE_PAS)
+poser(cloche(329.63, 2.6, 1.0, 0.16), T_COLLECTION + 0.3)
+
+# ------------------------------------------------- 6. la chute
+poser(souffle(1.4, 0.24, montant=False), T_CHUTE - 0.9)
+poser(cloche(220.0, 3.4, 1.7, 0.40), T_CHUTE + 0.35)
+poser(cloche(329.63, 3.2, 1.5, 0.22), T_CHUTE + 0.45)
+poser(cloche(440.0, 3.0, 1.3, 0.11), T_CHUTE + 0.55)
+poser(cloche(659.25, 2.2, 0.9, 0.07), T_URL + 0.15)   # sur l'adresse du site
 
 # ------------------------------------------------- finition
 fd = int(0.3 * SR)
@@ -144,3 +160,5 @@ print('habillage-etape.wav  %.1f s  crete %.1f dBFS  rms %.1f dBFS'
       % (DUREE, 20 * np.log10(np.abs(piste).max()),
          20 * np.log10(np.sqrt(np.mean(piste ** 2)))))
 print('villes validees a : ' + ', '.join('%.2f s' % q for q in quand))
+print('vitrine a %.2f s (pas %.2f) | collection %.2f | chute %.2f | adresse %.2f'
+      % (T_PIECE0, T_PIECE_PAS, T_COLLECTION, T_CHUTE, T_URL))

@@ -49,10 +49,12 @@ ffmpeg -y -i etape-muet.mp4 -i habillage-etape.wav \
        -c:v copy -c:a aac -b:a 192k -shortest devercinge-etape-<ville>.mp4
 ```
 
-`son-etape.py` lit `ATTEINTE` et les reperes de temps directement dans
-`etape.html` et recalcule les instants de validation avec la meme projection
-que la page : contrairement a la bande-annonce, l'image et le son d'une
-etape ne peuvent pas se desynchroniser.
+`son-etape.py` lit dans `etape.html` tout ce qui porte une date : `ATTEINTE`,
+`DUREE`, les bornes du trace, le depart de la vitrine et son pas, l'entree du
+mot et celle de la chute. Il recalcule ensuite les instants de validation avec
+la meme projection que la page. Contrairement a la bande-annonce, l'image et
+le son d'une etape ne peuvent donc pas se desynchroniser : deplacer une scene
+dans la page deplace la note avec elle.
 
 ## Les cinq temps de la bande-annonce
 
@@ -64,16 +66,22 @@ etape ne peuvent pas se desynchroniser.
 | 18,4 -> 28,3 s | les onze monuments defilent |
 | 28,2 -> 30,5 s | le logo, « Un seul reve », devercinge.com |
 
-## Les trois temps de la video d'etape
+## Les quatre temps de la video d'etape
 
 | | |
 |---|---|
 | 0 -> 7,6 s | la carte : le trait vert progresse, chaque ville franchie recoit sa coche |
 | 7,6 -> 12,9 s | le monument de l'etape se dessine, puis le nom, le decompte et les kilometres |
-| 12,7 -> 15 s | le logo, « La route continue », devercinge.com |
+| 12,7 -> 17,5 s | la vitrine : les cinq pieces se levent une a une, « Cinq pieces » |
+| 17,4 -> 20 s | le logo, « La route continue », devercinge.com |
 
 Le vert dit ce qui est fait, le gris ce qui reste, et Saint-Malo garde son
 cercle violet de but.
+
+La vitrine reprend les images de `assets/products/` dans l'ordre de la
+boutique. Une piece ajoutee ou retiree la-bas se reporte dans le tableau
+`PIECES` en haut du script -- et le mot « Cinq pieces » avec, puisqu'il est
+ecrit a la main lui.
 
 ## Deux choses a savoir avant d'y toucher
 
