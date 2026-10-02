@@ -1,0 +1,441 @@
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<title>Devercinge — étape validée</title>
+<style>
+  :root{ --bg:#0a0a0c; --ink:#f2f1ef; --dim:#9d9ba3; --sourd:#4a4a52;
+         --violet:#9b6bff; --green:#3ddc84; }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ width:1080px; height:1920px; overflow:hidden; background:var(--bg); }
+  body{ position:relative; font-family:'Liberation Sans','DejaVu Sans',sans-serif; color:var(--ink); }
+
+  #stars{ position:absolute; inset:0; }
+  #stars span{ position:absolute; background:var(--ink); border-radius:50%; }
+
+  .layer{ position:absolute; inset:0; }
+
+  .eyebrow{
+    position:absolute; left:0; right:0; text-align:center;
+    font-size:34px; font-weight:700; letter-spacing:.34em;
+    text-transform:uppercase; padding-left:.34em; line-height:1.7;
+    background:linear-gradient(90deg,var(--violet),var(--green));
+    -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+
+  #logo{ position:absolute; left:50%; top:230px; width:190px;
+         transform:translate(-50%,-50%);
+         filter:drop-shadow(0 0 50px rgba(155,107,255,.35)); }
+
+  #titre{ top:350px; }
+  #logo3{ position:absolute; left:50%; top:430px; width:160px;
+          transform:translate(-50%,-50%);
+          filter:drop-shadow(0 0 40px rgba(155,107,255,.3)); }
+  #logo2{ position:absolute; left:50%; top:840px; width:300px;
+          transform:translate(-50%,-50%); }
+  #fin{ top:1060px; }
+  #url{ top:1220px; }
+
+  /* ---- la carte : ce qui est fait en vert, ce qui reste en gris ---- */
+  #carte{ position:absolute; inset:0; }
+  #fantome{ fill:none; stroke:#2b2b33; stroke-width:5; stroke-linecap:round; stroke-linejoin:round; }
+  #fait{ fill:none; stroke:var(--green); stroke-width:7; stroke-linecap:round;
+         stroke-linejoin:round; filter:url(#lueur); }
+  .pt{ fill:#16161b; stroke:var(--sourd); stroke-width:4; }
+  .pt.validee{ fill:var(--green); stroke:none; }
+  .pt.but{ fill:none; stroke:var(--violet); stroke-width:5; }
+  .coche{ fill:none; stroke:#0a0a0c; stroke-width:5; stroke-linecap:round; stroke-linejoin:round; }
+  .nom{ fill:var(--ink); font-size:38px; font-weight:700; letter-spacing:.14em;
+        text-transform:uppercase; }
+  .nom.but{ fill:var(--dim); font-size:32px; }
+
+  /* ---- le monument de l'etape ---- */
+  #scene2 svg{ position:absolute; left:50%; top:880px; transform:translate(-50%,-50%); }
+  .trait{ fill:none; stroke:var(--ink); stroke-width:5; stroke-linecap:round; stroke-linejoin:round; }
+  #ville{
+    position:absolute; left:0; right:0; top:1230px; text-align:center;
+    font-size:72px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+    padding-left:.1em;
+  }
+  #compte{
+    position:absolute; left:0; right:0; top:1400px; text-align:center;
+    font-size:40px; font-weight:700; letter-spacing:.2em; text-transform:uppercase;
+    padding-left:.2em;
+    background:linear-gradient(90deg,var(--violet),var(--green));
+    -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+  #km{
+    position:absolute; left:0; right:0; top:1492px; text-align:center;
+    font-size:32px; letter-spacing:.18em; text-transform:uppercase;
+    color:#b5b3bb; padding-left:.18em;
+  }
+
+  /* La vitrine de fin : les cinq pieces, comme dans la boutique --
+     une fenetre en degrade derriere, le vetement pose par-dessus. */
+  #vitrine{ position:absolute; left:50%; top:820px; width:1000px;
+            transform:translateX(-50%); height:420px; }
+  .piece{ position:absolute; bottom:0; width:var(--pas,200px); text-align:center; }
+  .piece .fenetre{
+    position:absolute; left:50%; bottom:0; width:104px; height:330px;
+    transform:translateX(-50%); transform-origin:bottom center;
+    background:
+      radial-gradient(circle at 24% 16%, rgba(155,107,255,.34), transparent 60%),
+      radial-gradient(circle at 80% 84%, rgba(61,220,132,.26), transparent 60%);
+    background-size:1000px 330px; background-repeat:no-repeat;
+  }
+  .piece img{
+    position:relative; display:block; margin:0 auto;
+    width:186px; height:330px; object-fit:contain;
+    filter:drop-shadow(0 12px 28px rgba(155,107,255,.25));
+  }
+  #collection{
+    position:absolute; left:0; right:0; top:1340px; text-align:center;
+    font-size:40px; font-weight:700; letter-spacing:.3em;
+    text-transform:uppercase; padding-left:.3em;
+    background:linear-gradient(90deg,var(--violet),var(--green));
+    -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+
+  /* La page du reste a parcourir : meme ecriture et meme degrade
+     violet-vert que « trois villes sur onze ». */
+  .reste{
+    position:absolute; left:0; right:0; text-align:center;
+    font-weight:700; letter-spacing:.2em; text-transform:uppercase;
+    padding-left:.2em;
+    background:linear-gradient(90deg,var(--violet),var(--green));
+    -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+  #reste-titre{ top:800px; font-size:40px; }
+  #reste-nb{ top:900px; font-size:46px; letter-spacing:.14em; padding-left:.14em; line-height:1.55; }
+
+  #url{
+    position:absolute; left:0; right:0; text-align:center;
+    font-size:34px; letter-spacing:.3em; text-transform:uppercase;
+    color:var(--dim); padding-left:.3em;
+  }
+
+  /* ====================== PAYSAGE (page ouverte avec ?paysage) ======================
+     1920x1080 : la carte passe a droite et les textes a gauche, les scenes qui
+     empilaient un monument et trois lignes les posent cote a cote. Le portrait
+     n'est pas touche : tout ce qui suit est une surcharge. */
+  .paysage, .paysage body{ width:1920px; height:1080px; }
+
+  .paysage #logo{ left:480px; top:410px; width:230px; }
+  .paysage #titre{ right:auto; width:960px; top:590px; }
+
+  .paysage #scene2 svg{ left:480px; top:540px; }
+  .paysage #ville, .paysage #compte, .paysage #km{ left:960px; }
+  .paysage #ville{ top:380px; font-size:84px; }
+  .paysage #compte{ top:545px; font-size:42px; }
+  .paysage #km{ top:630px; font-size:32px; }
+
+  .paysage #reste-titre{ top:395px; font-size:52px; }
+  .paysage #reste-nb{ top:505px; font-size:70px; }
+
+  .paysage #logo3{ top:230px; width:130px; }
+  .paysage #vitrine{ --pas:270px; top:390px; width:1350px; height:440px; }
+  .paysage .piece .fenetre{ width:140px; height:380px; background-size:1350px 380px; }
+  .paysage .piece img{ width:250px; height:380px; }
+  .paysage #collection{ top:890px; font-size:44px; }
+
+  .paysage #logo2{ top:440px; width:240px; }
+  .paysage #fin{ top:680px; font-size:40px; }
+  .paysage #url{ top:820px; font-size:38px; }
+</style>
+
+<div id="stars"></div>
+
+<div class="layer" id="entete">
+  <img id="logo" src="../assets/logo-mark.png" alt="">
+  <div class="eyebrow" id="titre">Étape validée</div>
+</div>
+
+<div class="layer" id="scene1">
+  <svg id="carte" viewBox="0 0 1080 1920">
+    <defs>
+      <filter id="lueur" x="-40%" y="-40%" width="180%" height="180%">
+        <feGaussianBlur stdDeviation="8" result="f"/>
+        <feMerge><feMergeNode in="f"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+    <path id="fantome"/>
+    <path id="fait"/>
+    <g id="pts"></g>
+    <g id="noms"></g>
+  </svg>
+</div>
+
+<div class="layer" id="scene2">
+  <div id="ville"></div>
+  <div id="compte"></div>
+  <div id="km"></div>
+</div>
+
+<div class="layer" id="scene2b">
+  <div class="reste" id="reste-titre">Il reste</div>
+  <div class="reste" id="reste-nb"></div>
+</div>
+
+<div class="layer" id="scene3">
+  <img id="logo3" src="../assets/logo-mark.png" alt="">
+  <div id="vitrine"></div>
+  <div id="collection">Cinq pièces</div>
+</div>
+
+<div class="layer" id="scene4">
+  <img id="logo2" src="../assets/logo-mark.png" alt="">
+  <div class="eyebrow" id="fin">La route continue</div>
+  <div id="url">devercinge.com</div>
+</div>
+
+<script src="monuments.js"></script>
+<script>
+// ───────────────────────────── ce qu'il faut changer d'une etape a l'autre
+const ATTEINTE = 2;     // indice de la derniere ville franchie (0 = Nice)
+const KM_FAITS = 322;   // kilometres parcourus -- a remplacer par le releve GPS
+const KM_TOTAL = 1408;  // longueur du parcours ; le reste s'en deduit
+// ──────────────────────────────────────────────────────────────────────────
+
+// Portrait par defaut ; ?paysage pour la version 1920x1080.
+const PAYSAGE = /[?&]paysage/.test(location.search);
+document.documentElement.classList.toggle('paysage', PAYSAGE);
+const W = PAYSAGE ? 1920 : 1080, H = PAYSAGE ? 1080 : 1920;
+document.getElementById('carte').setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+
+const lisse = x => x<0?0 : x>1?1 : x*x*(3-2*x);
+const seg = (t,a,b) => lisse((t-a)/(b-a));
+const fen = (t,a,b,c,d) => Math.min(seg(t,a,b), 1-seg(t,c,d));
+
+function graine(s){ return function(){ s=(s*1664525+1013904223)%4294967296; return s/4294967296; }; }
+const alea = graine(20260906);
+
+const ciel = document.getElementById('stars');
+const etoiles = [];
+for (let i=0;i<150;i++){
+  const s=document.createElement('span'); const d=2+alea()*4;
+  s.style.left=(alea()*W)+'px'; s.style.top=(alea()*H)+'px';
+  s.style.width=d+'px'; s.style.height=d+'px';
+  ciel.appendChild(s);
+  etoiles.push({el:s, base:.25+alea()*.5, vitesse:.6+alea()*1.4, phase:alea()*6.28});
+}
+
+// Coordonnees reprises telles quelles d'aventure.html.
+const VILLES = [
+  { lat:43.7102, lng: 7.2620, nom:'Nice' },
+  { lat:43.2965, lng: 5.3698, nom:'Marseille' },
+  { lat:43.6108, lng: 3.8767, nom:'Montpellier' },
+  { lat:43.1836, lng: 3.0036, nom:'Narbonne' },
+  { lat:43.6047, lng: 1.4442, nom:'Toulouse' },
+  { lat:44.8378, lng:-0.5792, nom:'Bordeaux' },
+  { lat:46.1591, lng:-1.1578, nom:'La Rochelle' },
+  { lat:47.2199, lng:-1.5582, nom:'Nantes' },
+  { lat:47.4784, lng:-0.5632, nom:'Angers' },
+  { lat:48.1173, lng:-1.6778, nom:'Rennes' },
+  { lat:48.6493, lng:-2.0257, nom:'Saint-Malo' }
+];
+
+const CADRE = PAYSAGE ? { x:960, y:150, w:900, h:830 } : { x:120, y:600, w:840, h:1050 };
+const merc = lat => Math.log(Math.tan(Math.PI/4 + lat*Math.PI/360));
+const bx = VILLES.map(v => v.lng*Math.PI/180), by = VILLES.map(v => merc(v.lat));
+const x0=Math.min(...bx), x1=Math.max(...bx), y0=Math.min(...by), y1=Math.max(...by);
+const ech = Math.min(CADRE.w/(x1-x0), CADRE.h/(y1-y0));
+const dx = CADRE.x + (CADRE.w - (x1-x0)*ech)/2, dy = CADRE.y + (CADRE.h - (y1-y0)*ech)/2;
+const P = VILLES.map((v,i) => [dx + (bx[i]-x0)*ech, dy + (y1-by[i])*ech]);
+const d = (a,b) => (b?'L ':'M ') + a[0].toFixed(1) + ' ' + a[1].toFixed(1);
+
+document.getElementById('fantome').setAttribute('d', P.map((p,i)=>d(p,i)).join(' '));
+const fait = document.getElementById('fait');
+fait.setAttribute('d', P.slice(0, ATTEINTE+1).map((p,i)=>d(p,i)).join(' '));
+const LFAIT = fait.getTotalLength();
+fait.style.strokeDasharray = LFAIT;
+
+// Longueur cumulee le long de la portion faite, pour allumer chaque ville
+// au moment ou le trait l'atteint vraiment.
+const CUM = [0];
+for (let i=1;i<=ATTEINTE;i++)
+  CUM.push(CUM[i-1] + Math.hypot(P[i][0]-P[i-1][0], P[i][1]-P[i-1][1]));
+
+const gPts = document.getElementById('pts'), gNoms = document.getElementById('noms');
+const pastilles = [], coches = [];
+VILLES.forEach((v,i)=>{
+  const faite = i <= ATTEINTE, but = i === VILLES.length-1;
+  const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  c.setAttribute('cx', P[i][0]); c.setAttribute('cy', P[i][1]);
+  c.setAttribute('r', faite ? 24 : but ? 20 : 13);
+  c.setAttribute('class', 'pt' + (faite ? ' validee' : but ? ' but' : ''));
+  gPts.appendChild(c); pastilles.push(c);
+
+  if (faite){
+    const k = document.createElementNS('http://www.w3.org/2000/svg','path');
+    k.setAttribute('class','coche');
+    k.setAttribute('d', 'M ' + (P[i][0]-10) + ' ' + P[i][1] +
+                   ' L ' + (P[i][0]-3) + ' ' + (P[i][1]+7) +
+                   ' L ' + (P[i][0]+10) + ' ' + (P[i][1]-8));
+    gPts.appendChild(k); coches.push(k);
+  } else coches.push(null);
+});
+
+// Deux noms seulement : l'etape du jour et le but, pour ne pas charger.
+function etiquette(i, classe, dyy){
+  const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+  t.setAttribute('x', P[i][0]); t.setAttribute('y', P[i][1] + dyy);
+  t.setAttribute('class', classe); t.setAttribute('text-anchor','middle');
+  t.textContent = VILLES[i].nom;
+  gNoms.appendChild(t);
+  const b = t.getBBox(), M = 56;
+  const dd = Math.max(0, M - b.x) - Math.max(0, b.x + b.width - (W - M));
+  if (dd) t.setAttribute('x', +t.getAttribute('x') + dd);
+  return t;
+}
+const nomEtape = etiquette(ATTEINTE, 'nom', -46);
+const nomBut   = etiquette(VILLES.length-1, 'nom but', -40);
+
+// ───────────────────────────────────────────── le monument de l'etape
+const mon = MONUMENTS[ATTEINTE];
+const svgMon = document.createElementNS('http://www.w3.org/2000/svg','svg');
+svgMon.setAttribute('width', 520); svgMon.setAttribute('height', 570);
+svgMon.setAttribute('viewBox','-14 -30 228 250');
+svgMon.innerHTML = mon.traits.map(t=>'<path class="trait" d="'+t+'"/>').join('');
+document.getElementById('scene2').appendChild(svgMon);
+const traits = [...svgMon.querySelectorAll('.trait')].map(p=>{
+  const L = p.getTotalLength();
+  p.style.strokeDasharray = L;
+  return { el:p, L:L };
+});
+
+// ──────────────────────── la vitrine de fin : l'ordre est celui de la boutique
+const PIECES = ['tshirt-noir', 'tshirt-blanc', 'short-noir', 'sans-manches', 'hoodie'];
+const vitrine = document.getElementById('vitrine');
+const PAS_PIECE = PAYSAGE ? 270 : 200;
+const etals = PIECES.map((nom, i) => {
+  const d = document.createElement('div');
+  d.className = 'piece';
+  d.style.left = (i * PAS_PIECE) + 'px';
+  d.innerHTML = '<div class="fenetre"></div>' +
+                '<img src="../assets/products/' + nom + '.png" alt="">';
+  vitrine.appendChild(d);
+  // Chaque fenetre montre sa part du degrade, comme une seule lumiere
+  // derriere toute la rangee plutot que cinq lampes identiques.
+  d.querySelector('.fenetre').style.backgroundPositionX = (-i * PAS_PIECE) + 'px';
+  return d;
+});
+
+// ───────────────────────────────────────────── les mots
+const UNITES = ['zéro','un','deux','trois','quatre','cinq','six','sept','huit','neuf','dix',
+  'onze','douze','treize','quatorze','quinze','seize','dix-sept','dix-huit','dix-neuf'];
+const DIZAINES = ['','','vingt','trente','quarante','cinquante','soixante','soixante','quatre-vingt','quatre-vingt'];
+
+function enLettres(n){
+  if (n < 20) return UNITES[n];
+  if (n < 100){
+    const d = Math.floor(n/10), u = n%10;
+    if (d === 7 || d === 9) return DIZAINES[d] + (u===1 && d===7 ? ' et ' : '-') + UNITES[10+u];
+    let s = DIZAINES[d];
+    if (u === 0) return d === 8 ? s + 's' : s;
+    return s + (u === 1 ? ' et un' : '-' + UNITES[u]);
+  }
+  if (n < 1000){
+    const c = Math.floor(n/100), r = n%100;
+    let s = (c > 1 ? UNITES[c] + ' ' : '') + 'cent';
+    if (c > 1 && r === 0) s += 's';
+    return r ? s + ' ' + enLettres(r) : s;
+  }
+  const m = Math.floor(n/1000), r = n%1000;
+  let s = (m > 1 ? UNITES[m] + ' ' : '') + 'mille';
+  return r ? s + ' ' + enLettres(r) : s;
+}
+
+// Un texte trop long reduit sa taille plutot que de sortir de l'image : a
+// l'etape suivante « quatre cent quatre-vingt-dix-neuf kilometres » ne tient
+// pas sur la meme ligne que « trois cent vingt-deux kilometres ».
+function tenir(el, largeurMax){
+  const r = document.createRange();
+  r.selectNodeContents(el);
+  const l = r.getBoundingClientRect().width;
+  if (l > largeurMax)
+    el.style.fontSize = (parseFloat(getComputedStyle(el).fontSize) * largeurMax / l).toFixed(1) + 'px';
+}
+
+document.getElementById('ville').textContent = VILLES[ATTEINTE].nom;
+document.getElementById('compte').textContent =
+  enLettres(ATTEINTE + 1) + ' villes sur ' + enLettres(VILLES.length);
+document.getElementById('km').textContent = enLettres(KM_FAITS) + ' kilomètres';
+// Deux lignes : le nombre, puis l'unite. Sur une seule, « mille quatre-vingt-six
+// kilomètres » deborde de l'image des que le nombre s'allonge.
+document.getElementById('reste-nb').innerHTML =
+  enLettres(KM_TOTAL - KM_FAITS) + '<br>kilomètres';
+// Largeur disponible : l'image moins deux marges, ou la colonne de droite en paysage.
+const LARGEUR_TEXTE = PAYSAGE ? 840 : 960;
+['ville', 'compte', 'km'].forEach(id => tenir(document.getElementById(id), LARGEUR_TEXTE));
+tenir(document.getElementById('reste-nb'), PAYSAGE ? 1500 : 960);
+
+// ───────────────────────────────────────────── le montage
+const DUREE = 26.1;
+window.__duree = DUREE;
+
+// Chaque ville franchie s'allume quand le trait l'atteint.
+const T_TRACE0 = 2.4, T_TRACE1 = 6.4;
+const quandVille = i => T_TRACE0 + (CUM[i]/CUM[ATTEINTE]) * (T_TRACE1 - T_TRACE0);
+
+window.__render = function(t){
+  etoiles.forEach(e=>{
+    const s=e.base*(0.45+0.55*Math.abs(Math.sin(e.phase+t*e.vitesse)));
+    e.el.style.opacity=(s*Math.min(1,seg(t,0,1.0))).toFixed(3);
+  });
+
+  // l'en-tete accompagne la carte, puis s'efface
+  document.getElementById('entete').style.opacity = fen(t,0.5,1.6, 7.6,8.3).toFixed(3);
+  document.getElementById('titre').style.opacity  = seg(t,1.2,2.2).toFixed(3);
+
+  // 1 — la carte
+  document.getElementById('scene1').style.opacity = fen(t,1.0,1.8, 7.6,8.3).toFixed(3);
+  document.getElementById('fantome').style.opacity = (0.9*seg(t,1.4,2.3)).toFixed(3);
+  fait.style.strokeDashoffset = (LFAIT * (1 - seg(t, T_TRACE0, T_TRACE1))).toFixed(1);
+  pastilles.forEach((c,i)=>{
+    if (i <= ATTEINTE){
+      const k = seg(t, quandVille(i), quandVille(i) + 0.35);
+      c.style.opacity = k.toFixed(3);
+      if (coches[i]) coches[i].style.opacity = seg(t, quandVille(i)+0.15, quandVille(i)+0.5).toFixed(3);
+      const e = 0.5 + 0.5*k;
+      c.setAttribute('transform','translate('+P[i][0]+','+P[i][1]+') scale('+e.toFixed(3)+
+                     ') translate('+(-P[i][0])+','+(-P[i][1])+')');
+    } else {
+      c.style.opacity = (0.75*seg(t,1.8,2.6)).toFixed(3);
+    }
+  });
+  nomEtape.style.opacity = seg(t, T_TRACE1-0.1, T_TRACE1+0.5).toFixed(3);
+  nomBut.style.opacity   = (0.9*seg(t,2.0,2.8)).toFixed(3);
+
+  // 2 — le monument et les chiffres
+  document.getElementById('scene2').style.opacity = fen(t,8.1,8.8, 14.5,15.2).toFixed(3);
+  traits.forEach((p,i)=>{
+    const d0 = 8.6 + (i / Math.max(1, traits.length-1)) * 1.5;
+    p.el.style.strokeDashoffset = (p.L * (1 - seg(t, d0, d0+0.7))).toFixed(1);
+  });
+  document.getElementById('ville').style.opacity   = seg(t,10.3,11.0).toFixed(3);
+  document.getElementById('compte').style.opacity  = seg(t,11.0,11.7).toFixed(3);
+  document.getElementById('km').style.opacity      = seg(t,11.7,12.4).toFixed(3);
+
+  // 3 — la vitrine : ce qu'on trouve sur le site
+  document.getElementById('scene2b').style.opacity = fen(t,15.0,15.7, 18.6,19.3).toFixed(3);
+  document.getElementById('reste-titre').style.opacity = seg(t,15.4,16.1).toFixed(3);
+  document.getElementById('reste-nb').style.opacity    = seg(t,15.9,16.6).toFixed(3);
+
+  // 3 — la vitrine
+  document.getElementById('scene3').style.opacity = fen(t,18.6,19.3, 22.7,23.4).toFixed(3);
+  etals.forEach((d,i)=>{
+    const k = seg(t, 19.0 + i*0.30, 19.8 + i*0.30);
+    d.style.opacity = k.toFixed(3);
+    d.style.transform = 'translateY(' + (34*(1-k)).toFixed(1) + 'px)';
+  });
+  document.getElementById('collection').style.opacity = fen(t,21.2,22.0, 22.6,23.2).toFixed(3);
+
+  // 4 — la chute
+  document.getElementById('scene4').style.opacity = seg(t,23.3,24.0).toFixed(3);
+  document.getElementById('fin').style.opacity    = seg(t,23.6,24.3).toFixed(3);
+  document.getElementById('url').style.opacity    = seg(t,24.5,25.2).toFixed(3);
+};
+window.__render(0);
+</script>
