@@ -68,7 +68,7 @@ dans la page deplace la note avec elle.
 | 18,4 -> 28,3 s | les onze monuments defilent |
 | 28,2 -> 30,5 s | le logo, « Un seul reve », devercinge.com |
 
-## Les quatre temps de la video d'etape
+## Les cinq temps de la video d'etape
 
 | | |
 |---|---|
