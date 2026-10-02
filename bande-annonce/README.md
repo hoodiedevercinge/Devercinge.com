@@ -13,7 +13,8 @@ calcul. Aucune source exterieure, donc rien a crediter ni a licencier.
 | `son-etape.py` | son habillage sonore. |
 | `rendu.py` | pousse les images d'une page dans ffmpeg. |
 | `devercinge-bande-annonce.mp4` | la bande-annonce. |
-| `devercinge-etape-montpellier.mp4` | l'etape de Montpellier. |
+| `devercinge-etape-montpellier.mp4` | l'etape de Montpellier, en portrait (1080x1920). |
+| `devercinge-etape-montpellier-paysage.mp4` | la meme, en paysage (1920x1080). |
 
 ## Refaire le film
 
@@ -44,11 +45,32 @@ const KM_TOTAL = 1408;  // longueur du parcours ; le reste s'en deduit
 kilometres en toutes lettres suivent tout seuls.
 
 ```sh
-python3 son-etape.py            # -> habillage-etape.wav
-python3 rendu.py etape.html     # -> etape-muet.mp4
+python3 son-etape.py                  # -> habillage-etape.wav
+python3 rendu.py etape.html           # -> etape-muet.mp4          (portrait)
+python3 rendu.py etape.html paysage   # -> etape-paysage-muet.mp4  (paysage)
 ffmpeg -y -i etape-muet.mp4 -i habillage-etape.wav \
        -c:v copy -c:a aac -b:a 192k -shortest devercinge-etape-<ville>.mp4
+ffmpeg -y -i etape-paysage-muet.mp4 -i habillage-etape.wav \
+       -c:v copy -c:a aac -b:a 192k -shortest devercinge-etape-<ville>-paysage.mp4
 ```
+
+## Le paysage : meme page, meme son
+
+`etape.html` se met en paysage quand on l'ouvre avec `?paysage`
+(`etape.html?paysage` dans un navigateur, ou l'argument `paysage` de
+`rendu.py`). Ce n'est pas une copie : le portrait est la page telle quelle, le
+paysage une classe `paysage` posee sur `<html>` qui ne fait que surcharger des
+positions -- la carte passe a droite, le logo et le titre a gauche, le monument
+et ses trois lignes se placent cote a cote. Les minutages, les textes et les
+donnees sont les memes ; **le son aussi**, un seul `habillage-etape.wav` sert
+aux deux formats. Changer d'etape se fait donc une fois pour les deux.
+
+Pour les positions, le paysage ne vit que dans le bloc `PAYSAGE` de la feuille
+de style et dans trois constantes du script (`CADRE`, `PAS_PIECE`, `W`/`H`).
+Si le portrait bouge, le paysage n'est pas touche.
+
+Un texte trop long reduit sa taille plutot que de sortir de l'image : « neuf
+cent quatre-vingt-dix-neuf kilometres » passe de 32 a 29 px en portrait.
 
 `son-etape.py` lit dans `etape.html` tout ce qui porte une date : `ATTEINTE`,
 `DUREE`, les bornes du trace, les trois lignes du bloc de chiffres, la page du reste, le depart

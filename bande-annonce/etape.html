@@ -26,6 +26,15 @@
          transform:translate(-50%,-50%);
          filter:drop-shadow(0 0 50px rgba(155,107,255,.35)); }
 
+  #titre{ top:350px; }
+  #logo3{ position:absolute; left:50%; top:430px; width:160px;
+          transform:translate(-50%,-50%);
+          filter:drop-shadow(0 0 40px rgba(155,107,255,.3)); }
+  #logo2{ position:absolute; left:50%; top:840px; width:300px;
+          transform:translate(-50%,-50%); }
+  #fin{ top:1060px; }
+  #url{ top:1220px; }
+
   /* ---- la carte : ce qui est fait en vert, ce qui reste en gris ---- */
   #carte{ position:absolute; inset:0; }
   #fantome{ fill:none; stroke:#2b2b33; stroke-width:5; stroke-linecap:round; stroke-linejoin:round; }
@@ -65,7 +74,7 @@
      une fenetre en degrade derriere, le vetement pose par-dessus. */
   #vitrine{ position:absolute; left:50%; top:820px; width:1000px;
             transform:translateX(-50%); height:420px; }
-  .piece{ position:absolute; bottom:0; width:200px; text-align:center; }
+  .piece{ position:absolute; bottom:0; width:var(--pas,200px); text-align:center; }
   .piece .fenetre{
     position:absolute; left:50%; bottom:0; width:104px; height:330px;
     transform:translateX(-50%); transform-origin:bottom center;
@@ -106,13 +115,41 @@
     font-size:34px; letter-spacing:.3em; text-transform:uppercase;
     color:var(--dim); padding-left:.3em;
   }
+
+  /* ====================== PAYSAGE (page ouverte avec ?paysage) ======================
+     1920x1080 : la carte passe a droite et les textes a gauche, les scenes qui
+     empilaient un monument et trois lignes les posent cote a cote. Le portrait
+     n'est pas touche : tout ce qui suit est une surcharge. */
+  .paysage, .paysage body{ width:1920px; height:1080px; }
+
+  .paysage #logo{ left:480px; top:410px; width:230px; }
+  .paysage #titre{ right:auto; width:960px; top:590px; }
+
+  .paysage #scene2 svg{ left:480px; top:540px; }
+  .paysage #ville, .paysage #compte, .paysage #km{ left:960px; }
+  .paysage #ville{ top:380px; font-size:84px; }
+  .paysage #compte{ top:545px; font-size:42px; }
+  .paysage #km{ top:630px; font-size:32px; }
+
+  .paysage #reste-titre{ top:395px; font-size:52px; }
+  .paysage #reste-nb{ top:505px; font-size:70px; }
+
+  .paysage #logo3{ top:230px; width:130px; }
+  .paysage #vitrine{ --pas:270px; top:390px; width:1350px; height:440px; }
+  .paysage .piece .fenetre{ width:140px; height:380px; background-size:1350px 380px; }
+  .paysage .piece img{ width:250px; height:380px; }
+  .paysage #collection{ top:890px; font-size:44px; }
+
+  .paysage #logo2{ top:440px; width:240px; }
+  .paysage #fin{ top:680px; font-size:40px; }
+  .paysage #url{ top:820px; font-size:38px; }
 </style>
 
 <div id="stars"></div>
 
 <div class="layer" id="entete">
   <img id="logo" src="../assets/logo-mark.png" alt="">
-  <div class="eyebrow" id="titre" style="top:350px">Étape validée</div>
+  <div class="eyebrow" id="titre">Étape validée</div>
 </div>
 
 <div class="layer" id="scene1">
@@ -142,18 +179,15 @@
 </div>
 
 <div class="layer" id="scene3">
-  <img id="logo3" src="../assets/logo-mark.png" alt=""
-       style="position:absolute;left:50%;top:430px;width:160px;transform:translate(-50%,-50%);
-              filter:drop-shadow(0 0 40px rgba(155,107,255,.3))">
+  <img id="logo3" src="../assets/logo-mark.png" alt="">
   <div id="vitrine"></div>
   <div id="collection">Cinq pièces</div>
 </div>
 
 <div class="layer" id="scene4">
-  <img id="logo2" src="../assets/logo-mark.png" alt=""
-       style="position:absolute;left:50%;top:840px;width:300px;transform:translate(-50%,-50%)">
-  <div class="eyebrow" id="fin" style="top:1060px">La route continue</div>
-  <div id="url" style="top:1220px">devercinge.com</div>
+  <img id="logo2" src="../assets/logo-mark.png" alt="">
+  <div class="eyebrow" id="fin">La route continue</div>
+  <div id="url">devercinge.com</div>
 </div>
 
 <script src="monuments.js"></script>
@@ -163,6 +197,12 @@ const ATTEINTE = 2;     // indice de la derniere ville franchie (0 = Nice)
 const KM_FAITS = 322;   // kilometres parcourus -- a remplacer par le releve GPS
 const KM_TOTAL = 1408;  // longueur du parcours ; le reste s'en deduit
 // ──────────────────────────────────────────────────────────────────────────
+
+// Portrait par defaut ; ?paysage pour la version 1920x1080.
+const PAYSAGE = /[?&]paysage/.test(location.search);
+document.documentElement.classList.toggle('paysage', PAYSAGE);
+const W = PAYSAGE ? 1920 : 1080, H = PAYSAGE ? 1080 : 1920;
+document.getElementById('carte').setAttribute('viewBox', '0 0 ' + W + ' ' + H);
 
 const lisse = x => x<0?0 : x>1?1 : x*x*(3-2*x);
 const seg = (t,a,b) => lisse((t-a)/(b-a));
@@ -175,7 +215,7 @@ const ciel = document.getElementById('stars');
 const etoiles = [];
 for (let i=0;i<150;i++){
   const s=document.createElement('span'); const d=2+alea()*4;
-  s.style.left=(alea()*1080)+'px'; s.style.top=(alea()*1920)+'px';
+  s.style.left=(alea()*W)+'px'; s.style.top=(alea()*H)+'px';
   s.style.width=d+'px'; s.style.height=d+'px';
   ciel.appendChild(s);
   etoiles.push({el:s, base:.25+alea()*.5, vitesse:.6+alea()*1.4, phase:alea()*6.28});
@@ -196,7 +236,7 @@ const VILLES = [
   { lat:48.6493, lng:-2.0257, nom:'Saint-Malo' }
 ];
 
-const CADRE = { x:120, y:600, w:840, h:1050 };
+const CADRE = PAYSAGE ? { x:960, y:150, w:900, h:830 } : { x:120, y:600, w:840, h:1050 };
 const merc = lat => Math.log(Math.tan(Math.PI/4 + lat*Math.PI/360));
 const bx = VILLES.map(v => v.lng*Math.PI/180), by = VILLES.map(v => merc(v.lat));
 const x0=Math.min(...bx), x1=Math.max(...bx), y0=Math.min(...by), y1=Math.max(...by);
@@ -245,7 +285,7 @@ function etiquette(i, classe, dyy){
   t.textContent = VILLES[i].nom;
   gNoms.appendChild(t);
   const b = t.getBBox(), M = 56;
-  const dd = Math.max(0, M - b.x) - Math.max(0, b.x + b.width - (1080 - M));
+  const dd = Math.max(0, M - b.x) - Math.max(0, b.x + b.width - (W - M));
   if (dd) t.setAttribute('x', +t.getAttribute('x') + dd);
   return t;
 }
@@ -268,16 +308,17 @@ const traits = [...svgMon.querySelectorAll('.trait')].map(p=>{
 // ──────────────────────── la vitrine de fin : l'ordre est celui de la boutique
 const PIECES = ['tshirt-noir', 'tshirt-blanc', 'short-noir', 'sans-manches', 'hoodie'];
 const vitrine = document.getElementById('vitrine');
+const PAS_PIECE = PAYSAGE ? 270 : 200;
 const etals = PIECES.map((nom, i) => {
   const d = document.createElement('div');
   d.className = 'piece';
-  d.style.left = (i * 200) + 'px';
+  d.style.left = (i * PAS_PIECE) + 'px';
   d.innerHTML = '<div class="fenetre"></div>' +
                 '<img src="../assets/products/' + nom + '.png" alt="">';
   vitrine.appendChild(d);
   // Chaque fenetre montre sa part du degrade, comme une seule lumiere
   // derriere toute la rangee plutot que cinq lampes identiques.
-  d.querySelector('.fenetre').style.backgroundPositionX = (-i * 200) + 'px';
+  d.querySelector('.fenetre').style.backgroundPositionX = (-i * PAS_PIECE) + 'px';
   return d;
 });
 
@@ -306,6 +347,17 @@ function enLettres(n){
   return r ? s + ' ' + enLettres(r) : s;
 }
 
+// Un texte trop long reduit sa taille plutot que de sortir de l'image : a
+// l'etape suivante « quatre cent quatre-vingt-dix-neuf kilometres » ne tient
+// pas sur la meme ligne que « trois cent vingt-deux kilometres ».
+function tenir(el, largeurMax){
+  const r = document.createRange();
+  r.selectNodeContents(el);
+  const l = r.getBoundingClientRect().width;
+  if (l > largeurMax)
+    el.style.fontSize = (parseFloat(getComputedStyle(el).fontSize) * largeurMax / l).toFixed(1) + 'px';
+}
+
 document.getElementById('ville').textContent = VILLES[ATTEINTE].nom;
 document.getElementById('compte').textContent =
   enLettres(ATTEINTE + 1) + ' villes sur ' + enLettres(VILLES.length);
@@ -314,6 +366,10 @@ document.getElementById('km').textContent = enLettres(KM_FAITS) + ' kilomètres'
 // kilomètres » deborde de l'image des que le nombre s'allonge.
 document.getElementById('reste-nb').innerHTML =
   enLettres(KM_TOTAL - KM_FAITS) + '<br>kilomètres';
+// Largeur disponible : l'image moins deux marges, ou la colonne de droite en paysage.
+const LARGEUR_TEXTE = PAYSAGE ? 840 : 960;
+['ville', 'compte', 'km'].forEach(id => tenir(document.getElementById(id), LARGEUR_TEXTE));
+tenir(document.getElementById('reste-nb'), PAYSAGE ? 1500 : 960);
 
 // ───────────────────────────────────────────── le montage
 const DUREE = 26.1;
