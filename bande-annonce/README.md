@@ -35,6 +35,7 @@ Une seule ligne a changer, en haut du script de `etape.html` :
 ```js
 const ATTEINTE = 2;     // indice de la derniere ville franchie (0 = Nice)
 const KM_FAITS = 322;   // kilometres parcourus -- a remplacer par le releve GPS
+const KM_TOTAL = 1408;  // longueur du parcours ; le reste s'en deduit
 ```
 
 `ATTEINTE` suit l'ordre du trace : 0 Nice, 1 Marseille, 2 Montpellier,
@@ -50,7 +51,7 @@ ffmpeg -y -i etape-muet.mp4 -i habillage-etape.wav \
 ```
 
 `son-etape.py` lit dans `etape.html` tout ce qui porte une date : `ATTEINTE`,
-`DUREE`, les bornes du trace, les trois lignes du bloc de chiffres, le depart
+`DUREE`, les bornes du trace, les trois lignes du bloc de chiffres, la page du reste, le depart
 de la vitrine et son pas, l'entree du mot et celle de la chute. Plus une seule
 date n'y est ecrite en dur. Il recalcule ensuite les instants de validation avec
 la meme projection que la page. Contrairement a la bande-annonce, l'image et
@@ -73,8 +74,13 @@ dans la page deplace la note avec elle.
 |---|---|
 | 0 -> 8,1 s | la carte : le trait vert progresse, chaque ville franchie recoit sa coche |
 | 8,1 -> 15,2 s | le monument de l'etape se dessine, puis le nom, le decompte et les kilometres |
-| 15,0 -> 19,8 s | la vitrine : les cinq pieces se levent une a une, « Cinq pieces » |
-| 19,7 -> 22,5 s | le logo, « La route continue », devercinge.com |
+| 15,0 -> 19,3 s | « Il reste », puis le nombre de kilometres restants en toutes lettres |
+| 18,6 -> 23,4 s | la vitrine : les cinq pieces se levent une a une, « Cinq pieces » |
+| 23,3 -> 26,1 s | le logo, « La route continue », devercinge.com |
+
+Le reste se deduit : `KM_TOTAL - KM_FAITS`, ecrit en lettres par la meme
+fonction que les kilometres parcourus. `KM_TOTAL` (1408) vit a cote de
+`KM_FAITS` en haut du script, a changer s'il bouge.
 
 Le bloc de chiffres garde volontairement la pose : une fois les trois lignes
 installees, rien ne bouge pendant plus de deux secondes. Mesure sur la page,

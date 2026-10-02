@@ -88,6 +88,19 @@
     -webkit-text-fill-color:transparent;
   }
 
+  /* La page du reste a parcourir : meme ecriture et meme degrade
+     violet-vert que « trois villes sur onze ». */
+  .reste{
+    position:absolute; left:0; right:0; text-align:center;
+    font-weight:700; letter-spacing:.2em; text-transform:uppercase;
+    padding-left:.2em;
+    background:linear-gradient(90deg,var(--violet),var(--green));
+    -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+  #reste-titre{ top:800px; font-size:40px; }
+  #reste-nb{ top:900px; font-size:46px; letter-spacing:.14em; padding-left:.14em; line-height:1.55; }
+
   #url{
     position:absolute; left:0; right:0; text-align:center;
     font-size:34px; letter-spacing:.3em; text-transform:uppercase;
@@ -123,6 +136,11 @@
   <div id="km"></div>
 </div>
 
+<div class="layer" id="scene2b">
+  <div class="reste" id="reste-titre">Il reste</div>
+  <div class="reste" id="reste-nb"></div>
+</div>
+
 <div class="layer" id="scene3">
   <img id="logo3" src="../assets/logo-mark.png" alt=""
        style="position:absolute;left:50%;top:430px;width:160px;transform:translate(-50%,-50%);
@@ -143,6 +161,7 @@
 // ───────────────────────────── ce qu'il faut changer d'une etape a l'autre
 const ATTEINTE = 2;     // indice de la derniere ville franchie (0 = Nice)
 const KM_FAITS = 322;   // kilometres parcourus -- a remplacer par le releve GPS
+const KM_TOTAL = 1408;  // longueur du parcours ; le reste s'en deduit
 // ──────────────────────────────────────────────────────────────────────────
 
 const lisse = x => x<0?0 : x>1?1 : x*x*(3-2*x);
@@ -291,9 +310,13 @@ document.getElementById('ville').textContent = VILLES[ATTEINTE].nom;
 document.getElementById('compte').textContent =
   enLettres(ATTEINTE + 1) + ' villes sur ' + enLettres(VILLES.length);
 document.getElementById('km').textContent = enLettres(KM_FAITS) + ' kilomètres';
+// Deux lignes : le nombre, puis l'unite. Sur une seule, « mille quatre-vingt-six
+// kilomètres » deborde de l'image des que le nombre s'allonge.
+document.getElementById('reste-nb').innerHTML =
+  enLettres(KM_TOTAL - KM_FAITS) + '<br>kilomètres';
 
 // ───────────────────────────────────────────── le montage
-const DUREE = 22.5;
+const DUREE = 26.1;
 window.__duree = DUREE;
 
 // Chaque ville franchie s'allume quand le trait l'atteint.
@@ -340,18 +363,23 @@ window.__render = function(t){
   document.getElementById('km').style.opacity      = seg(t,11.7,12.4).toFixed(3);
 
   // 3 — la vitrine : ce qu'on trouve sur le site
-  document.getElementById('scene3').style.opacity = fen(t,15.0,15.7, 19.1,19.8).toFixed(3);
+  document.getElementById('scene2b').style.opacity = fen(t,15.0,15.7, 18.6,19.3).toFixed(3);
+  document.getElementById('reste-titre').style.opacity = seg(t,15.4,16.1).toFixed(3);
+  document.getElementById('reste-nb').style.opacity    = seg(t,15.9,16.6).toFixed(3);
+
+  // 3 — la vitrine
+  document.getElementById('scene3').style.opacity = fen(t,18.6,19.3, 22.7,23.4).toFixed(3);
   etals.forEach((d,i)=>{
-    const k = seg(t, 15.4 + i*0.30, 16.2 + i*0.30);
+    const k = seg(t, 19.0 + i*0.30, 19.8 + i*0.30);
     d.style.opacity = k.toFixed(3);
     d.style.transform = 'translateY(' + (34*(1-k)).toFixed(1) + 'px)';
   });
-  document.getElementById('collection').style.opacity = fen(t,17.6,18.4, 19.0,19.6).toFixed(3);
+  document.getElementById('collection').style.opacity = fen(t,21.2,22.0, 22.6,23.2).toFixed(3);
 
   // 4 — la chute
-  document.getElementById('scene4').style.opacity = seg(t,19.7,20.4).toFixed(3);
-  document.getElementById('fin').style.opacity    = seg(t,20.0,20.7).toFixed(3);
-  document.getElementById('url').style.opacity    = seg(t,20.9,21.6).toFixed(3);
+  document.getElementById('scene4').style.opacity = seg(t,23.3,24.0).toFixed(3);
+  document.getElementById('fin').style.opacity    = seg(t,23.6,24.3).toFixed(3);
+  document.getElementById('url').style.opacity    = seg(t,24.5,25.2).toFixed(3);
 };
 window.__render(0);
 </script>

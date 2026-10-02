@@ -28,6 +28,9 @@ T_URL = float(re.search(r"getElementById\('url'\)\.style\.opacity\s*=\s*seg\(t,(
 # les trois lignes du bloc de chiffres
 T_LIGNES = [float(re.search(r"getElementById\('%s'\)\.style\.opacity\s*=\s*seg\(t,([\d.]+)" % n,
                             page).group(1)) for n in ('ville', 'compte', 'km')]
+# la page du reste a parcourir : son titre, puis le nombre
+T_RESTE = [float(re.search(r"getElementById\('%s'\)\.style\.opacity\s*=\s*seg\(t,([\d.]+)" % n,
+                           page).group(1)) for n in ('reste-titre', 'reste-nb')]
 
 N = int(SR * DUREE)
 
@@ -106,9 +109,9 @@ for i in range(N):
 nappe += 9.0 * filtre
 
 courbe = np.interp(t,
-    [0.0, 1.4,  2.4,  T_TRACE1, T_TRACE1 + 1.0, 8.6,  T_LIGNES[2] + 0.7, T_PIECE0, T_COLLECTION,
+    [0.0, 1.4,  2.4,  T_TRACE1, T_TRACE1 + 1.0, 8.6,  T_LIGNES[2] + 0.7, T_RESTE[1], T_PIECE0, T_COLLECTION,
      T_CHUTE + 0.4, T_CHUTE + 1.4, DUREE],
-    [0.0, 0.30, 0.26, 0.46,     0.30,           0.26, 0.38, 0.28,     0.38,
+    [0.0, 0.30, 0.26, 0.46,     0.30,           0.26, 0.38, 0.34, 0.28,     0.38,
      0.52,          0.34,          0.0])
 piste += nappe / (np.abs(nappe).max() + 1e-9) * courbe * 2.2
 
@@ -134,13 +137,18 @@ poser(souffle(1.6, 0.18), 8.5)
 for k, (q, f) in enumerate(zip(T_LIGNES, (523.25, 659.25, 783.99))):
     poser(cloche(f, 2.0, 0.7, 0.12 - k * 0.015), q + 0.05)
 
-# ------------------------------- 5. la vitrine, une note par piece levee
+# ------------------------- 5. le reste a parcourir : deux cloches, la seconde plus haute
+poser(cloche(440.00, 2.0, 0.7, 0.13), T_RESTE[0] + 0.05)
+poser(cloche(587.33, 2.6, 0.9, 0.16), T_RESTE[1] + 0.05)
+poser(cloche(880.00, 2.2, 0.8, 0.07), T_RESTE[1] + 0.12)
+
+# ------------------------------- 6. la vitrine, une note par piece levee
 poser(souffle(1.2, 0.20, montant=False), T_PIECE0 - 0.7)
 for i, f in enumerate([440.00, 523.25, 587.33, 659.25, 783.99]):
     poser(cloche(f, 2.4, 0.85, 0.22 - i * 0.012), T_PIECE0 + i * T_PIECE_PAS)
 poser(cloche(329.63, 2.6, 1.0, 0.16), T_COLLECTION + 0.3)
 
-# ------------------------------------------------- 6. la chute
+# ------------------------------------------------- 7. la chute
 poser(souffle(1.4, 0.24, montant=False), T_CHUTE - 0.9)
 poser(cloche(220.0, 3.4, 1.7, 0.40), T_CHUTE + 0.35)
 poser(cloche(329.63, 3.2, 1.5, 0.22), T_CHUTE + 0.45)
@@ -164,5 +172,6 @@ print('habillage-etape.wav  %.1f s  crete %.1f dBFS  rms %.1f dBFS'
          20 * np.log10(np.sqrt(np.mean(piste ** 2)))))
 print('villes validees a : ' + ', '.join('%.2f s' % q for q in quand))
 print('lignes de chiffres a : ' + ', '.join('%.2f s' % q for q in T_LIGNES))
+print('reste a parcourir a : ' + ', '.join('%.2f s' % q for q in T_RESTE))
 print('vitrine a %.2f s (pas %.2f) | collection %.2f | chute %.2f | adresse %.2f'
       % (T_PIECE0, T_PIECE_PAS, T_COLLECTION, T_CHUTE, T_URL))
