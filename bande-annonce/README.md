@@ -11,12 +11,14 @@ calcul. Aucune source exterieure, donc rien a crediter ni a licencier.
 | `son.py` | l'habillage sonore. Nappe, cloches inharmoniques, souffles et pas, tout en numpy. |
 | `etape.html` | la video d'etape : une ville validee en cours de route. |
 | `son-etape.py` | son habillage sonore. |
-| `banniere.html` | la banniere 16:9, une boucle de 12 s sans son. |
+| `banniere.html` | la banniere : une boucle de 12 s, en 16:9 par defaut et en Reel avec `?reel`. |
+| `son-banniere.py` | le son du Reel, qui boucle lui aussi sans couture. |
 | `rendu.py` | pousse les images d'une page dans ffmpeg. |
 | `devercinge-bande-annonce.mp4` | la bande-annonce. |
 | `devercinge-etape-montpellier.mp4` | l'etape de Montpellier, en portrait (1080x1920). |
 | `devercinge-etape-montpellier-paysage.mp4` | la meme, en paysage (1920x1080). |
 | `devercinge-banniere.mp4` | la banniere, 1920x1080, 12 s, sans son, faite pour boucler. |
+| `devercinge-banniere-reel.mp4` | la banniere pour Instagram, 1080x1920, 12 s, avec son, en boucle. |
 
 ## Refaire le film
 
@@ -145,6 +147,38 @@ depart a 12 s, sinon la couture se voit a chaque tour.
 
 Sur la plupart des plateformes il suffit de la placer en lecture automatique,
 en boucle et en sourdine.
+
+## La banniere en Reel, pour le fil Instagram
+
+Instagram n'a pas de banniere : la bonne cible est un Reel. Il se publie en
+9:16 (1080x1920), mais Instagram le **rogne** quand il le montre ailleurs que
+dans l'onglet Reels -- en 4:5 dans le fil (de y 285 a 1635), en 3:4 sur la
+grille du profil (de y 240 a 1680) -- et son interface recouvre le bas de
+l'image. `banniere.html?reel` compose donc tout entre **y 335 et y 1500**, avec
+des marges laterales de 60 px. Les formats d'Instagram bougent : a reverifier
+si un cadrage change.
+
+```sh
+python3 son-banniere.py                     # -> habillage-banniere.wav
+python3 rendu.py banniere.html reel         # -> banniere-reel-muet.mp4
+ffmpeg -y -i banniere-reel-muet.mp4 -i habillage-banniere.wav \
+       -c:v copy -c:a aac -b:a 192k -shortest devercinge-banniere-reel.mp4
+```
+
+Ce que la mise en page verticale change : le logo, le nom et la devise passent
+au-dessus de la route plutot qu'a cote, et **Saint-Malo se lit a droite de son
+point** au lieu d'au-dessus : au-dessus il serait venu s'ecrire par-dessus la
+devise. Verifie par calcul : aucun texte n'en recouvre un autre ni ne touche la
+route. Le paysage n'a pas bouge (8 images comparees, ecart nul).
+
+**Le son boucle comme l'image.** Un Reel se rejoue sans fin ; un son qui n'est
+pas periodique claque a chaque tour. `son-banniere.py` n'emploie que des
+frequences a nombre entier de periodes dans les 12 s, fait respirer le volume
+par un cosinus de periode 12 s, et pose les cloches « en cercle » : la queue
+d'une cloche qui depasse la fin revient par le debut. Mesure : le saut entre
+le dernier et le premier echantillon (0,0004) est plus petit qu'un saut
+ordinaire entre deux voisins (0,0018). Le fichier AAC ajoute un silence de
+quelques millisecondes au raccord, imperceptible.
 
 ## Deux choses a savoir avant d'y toucher
 

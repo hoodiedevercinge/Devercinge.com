@@ -53,6 +53,20 @@
     -webkit-background-clip:text; background-clip:text;
     -webkit-text-fill-color:transparent;
   }
+
+  /* ====================== REEL (page ouverte avec ?reel) ======================
+     1080x1920. Instagram montre un Reel en 9:16 dans l'onglet Reels, mais le
+     rogne dans le fil (4:5, soit y 285 a 1635) et sur la grille du profil
+     (3:4, y 240 a 1680) ; sa propre interface couvre en plus le bas de l'image.
+     Tout ce qui compte tient donc entre y 335 et y 1500. */
+  .reel, .reel body{ width:1080px; height:1920px; }
+
+  .reel #logo{ left:540px; top:440px; width:150px; }
+  .reel #nom{ width:1080px; top:590px; font-size:52px; }
+  .reel #devise{ width:1080px; top:662px; font-size:25px; }
+  .reel #url{ width:1080px; top:1445px; font-size:26px; }
+  .reel .borne{ font-size:32px; }
+  .reel #distance{ left:0; top:1385px; font-size:27px; }
 </style>
 
 <div id="stars"></div>
@@ -82,6 +96,12 @@
 <div id="distance"></div>
 
 <script>
+// Paysage par defaut ; ?reel pour la version verticale 1080x1920.
+const REEL = /[?&]reel/.test(location.search);
+document.documentElement.classList.toggle('reel', REEL);
+const W = REEL ? 1080 : 1920, H = REEL ? 1920 : 1080;
+document.getElementById('carte').setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+
 const lisse = x => x<0?0 : x>1?1 : x*x*(3-2*x);
 const seg = (t,a,b) => lisse((t-a)/(b-a));
 const fen = (t,a,b,c,d) => Math.min(seg(t,a,b), 1-seg(t,c,d));
@@ -99,7 +119,7 @@ const ciel = document.getElementById('stars');
 const etoiles = [];
 for (let i=0;i<190;i++){
   const s=document.createElement('span'); const d=2+alea()*4;
-  s.style.left=(alea()*1920)+'px'; s.style.top=(alea()*1080)+'px';
+  s.style.left=(alea()*W)+'px'; s.style.top=(alea()*H)+'px';
   s.style.width=d+'px'; s.style.height=d+'px';
   ciel.appendChild(s);
   // |sin| a pour periode PI : un multiple entier de PI/DUREE boucle exactement.
@@ -114,7 +134,7 @@ const VILLES = [
   [47.4784,-0.5632], [48.1173,-1.6778], [48.6493,-2.0257]
 ];
 const NOMS = { 0:'Nice', 10:'Saint-Malo' };
-const CADRE = { x:1000, y:130, w:820, h:760 };
+const CADRE = REEL ? { x:140, y:740, w:800, h:590 } : { x:1000, y:130, w:820, h:760 };
 const merc = lat => Math.log(Math.tan(Math.PI/4 + lat*Math.PI/360));
 const bx = VILLES.map(v => v[1]*Math.PI/180), by = VILLES.map(v => merc(v[0]));
 const x0=Math.min(...bx), x1=Math.max(...bx), y0=Math.min(...by), y1=Math.max(...by);
@@ -132,6 +152,9 @@ const TOTAL = LONG[LONG.length-1];
 trace.style.strokeDasharray = TOTAL;
 const tete = document.getElementById('tete');
 
+const dg = document.getElementById('degrade');
+dg.setAttribute('x1', CADRE.x + CADRE.w); dg.setAttribute('x2', CADRE.x);
+
 const gPts = document.getElementById('pts'), gNoms = document.getElementById('noms');
 const NS = 'http://www.w3.org/2000/svg';
 const pastilles = P.map((p,i)=>{
@@ -145,7 +168,19 @@ const bornes = Object.entries(NOMS).map(([i,nom])=>{
   const t = document.createElementNS(NS,'text');
   t.setAttribute('x', P[i][0]); t.setAttribute('y', P[i][1] - 40);
   t.setAttribute('class','borne'); t.setAttribute('text-anchor','middle');
+  // En Reel la route commence juste sous la devise : au-dessus de son point,
+  // Saint-Malo viendrait s'ecrire par-dessus. On le pose a droite, la ou la
+  // route ne passe pas.
+  if (REEL && +i === P.length-1){
+    t.setAttribute('x', P[i][0] + 38); t.setAttribute('y', P[i][1] + 11);
+    t.setAttribute('text-anchor','start');
+  }
   t.textContent = nom; gNoms.appendChild(t);
+  if (REEL){   // le paysage garde ses positions telles qu'elles ont ete validees
+    const bb = t.getBBox(), M = 60;
+    const dd = Math.max(0, M - bb.x) - Math.max(0, bb.x + bb.width - (W - M));
+    if (dd) t.setAttribute('x', +t.getAttribute('x') + dd);
+  }
   return { i:+i, el:t };
 });
 document.getElementById('distance').textContent = 'Mille quatre cent huit kilomètres';
