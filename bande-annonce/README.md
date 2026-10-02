@@ -11,10 +11,12 @@ calcul. Aucune source exterieure, donc rien a crediter ni a licencier.
 | `son.py` | l'habillage sonore. Nappe, cloches inharmoniques, souffles et pas, tout en numpy. |
 | `etape.html` | la video d'etape : une ville validee en cours de route. |
 | `son-etape.py` | son habillage sonore. |
+| `banniere.html` | la banniere 16:9, une boucle de 12 s sans son. |
 | `rendu.py` | pousse les images d'une page dans ffmpeg. |
 | `devercinge-bande-annonce.mp4` | la bande-annonce. |
 | `devercinge-etape-montpellier.mp4` | l'etape de Montpellier, en portrait (1080x1920). |
 | `devercinge-etape-montpellier-paysage.mp4` | la meme, en paysage (1920x1080). |
+| `devercinge-banniere.mp4` | la banniere, 1920x1080, 12 s, sans son, faite pour boucler. |
 
 ## Refaire le film
 
@@ -119,6 +121,30 @@ La vitrine reprend les images de `assets/products/` dans l'ordre ou
 la meme chose. Une piece ajoutee ou retiree la-bas se reporte dans le tableau
 `PIECES` en haut du script -- et le mot « Cinq pieces » avec, puisqu'il est
 ecrit a la main lui.
+
+## La banniere
+
+`banniere.html` est une boucle de 12 s en 1920x1080 : le logo, « Devercinge »,
+la devise a gauche, et a droite la route qui se dessine de Nice a Saint-Malo
+dans un degrade vert-violet, avec sa distance en toutes lettres. Elle ne
+depend d'aucune etape : elle sert tout au long du parcours. Pas de son, comme
+il est d'usage pour une banniere qui se lance toute seule.
+
+```sh
+python3 rendu.py banniere.html paysage     # -> banniere-paysage-muet.mp4
+mv banniere-paysage-muet.mp4 devercinge-banniere.mp4
+```
+
+**Elle boucle sans couture parce que tout y est periodique.** L'image a
+`t = 12 s` est strictement celle de `t = 0` (ecart nul, mesure sur la page).
+Le scintillement des etoiles utilise `|sin|`, de periode PI, avec une
+frequence multiple de PI/12 ; le halo du logo respire une fois par boucle ; le
+trace et les noms apparaissent puis s'effacent avant la fin. Si vous ajoutez
+quelque chose qui evolue avec le temps, il faut qu'il revienne a son point de
+depart a 12 s, sinon la couture se voit a chaque tour.
+
+Sur la plupart des plateformes il suffit de la placer en lecture automatique,
+en boucle et en sourdine.
 
 ## Deux choses a savoir avant d'y toucher
 

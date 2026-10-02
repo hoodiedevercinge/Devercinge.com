@@ -1,0 +1,194 @@
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<title>Devercinge — bannière</title>
+<style>
+  :root{ --bg:#0a0a0c; --ink:#f2f1ef; --dim:#9d9ba3; --sourd:#4a4a52;
+         --violet:#9b6bff; --green:#3ddc84; }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ width:1920px; height:1080px; overflow:hidden; background:var(--bg); }
+  body{ position:relative; font-family:'Liberation Sans','DejaVu Sans',sans-serif; color:var(--ink); }
+
+  #stars{ position:absolute; inset:0; }
+  #stars span{ position:absolute; background:var(--ink); border-radius:50%; }
+
+  /* ---- a gauche : la marque ---- */
+  #logo{ position:absolute; left:500px; top:300px; width:210px;
+         transform:translate(-50%,-50%);
+         filter:drop-shadow(0 0 60px rgba(155,107,255,.38)); }
+  #nom{
+    position:absolute; left:0; width:1000px; top:520px; text-align:center;
+    font-size:68px; font-weight:700; letter-spacing:.3em; padding-left:.3em;
+    text-transform:uppercase;
+  }
+  #devise{
+    position:absolute; left:0; width:1000px; top:628px; text-align:center;
+    font-size:30px; font-weight:700; letter-spacing:.3em; padding-left:.3em;
+    text-transform:uppercase;
+    background:linear-gradient(90deg,var(--violet),var(--green));
+    -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+  #url{
+    position:absolute; left:0; width:1000px; top:900px; text-align:center;
+    font-size:28px; letter-spacing:.3em; padding-left:.3em;
+    text-transform:uppercase; color:var(--dim);
+  }
+
+  /* ---- a droite : la route ---- */
+  #carte{ position:absolute; inset:0; }
+  #fantome{ fill:none; stroke:#26262d; stroke-width:5; stroke-linecap:round; stroke-linejoin:round; }
+  #trace{ fill:none; stroke:url(#degrade); stroke-width:7; stroke-linecap:round;
+          stroke-linejoin:round; filter:url(#lueur); }
+  .pt{ fill:#16161b; stroke:var(--sourd); stroke-width:4; }
+  .pt.depart{ fill:var(--green); stroke:none; }
+  .pt.arrivee{ fill:none; stroke:var(--violet); stroke-width:5; }
+  #tete{ fill:var(--green); }
+  .borne{ fill:var(--ink); font-size:34px; font-weight:700; letter-spacing:.16em;
+          text-transform:uppercase; }
+  #distance{
+    position:absolute; left:1000px; right:0; top:930px; text-align:center;
+    font-size:30px; font-weight:700; letter-spacing:.2em; padding-left:.2em;
+    text-transform:uppercase;
+    background:linear-gradient(90deg,var(--violet),var(--green));
+    -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+</style>
+
+<div id="stars"></div>
+
+<img id="logo" src="../assets/logo-mark.png" alt="">
+<div id="nom">Devercinge</div>
+<div id="devise">Deux créateurs · Un seul rêve</div>
+<div id="url">devercinge.com</div>
+
+<svg id="carte" viewBox="0 0 1920 1080">
+  <defs>
+    <!-- vert a Nice, violet a Saint-Malo : les couleurs de leurs pastilles sur le site -->
+    <linearGradient id="degrade" gradientUnits="userSpaceOnUse" x1="1820" y1="0" x2="1000" y2="0">
+      <stop offset="0" stop-color="#3ddc84"/><stop offset="1" stop-color="#9b6bff"/>
+    </linearGradient>
+    <filter id="lueur" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="8" result="f"/>
+      <feMerge><feMergeNode in="f"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <path id="fantome"/>
+  <path id="trace"/>
+  <g id="pts"></g>
+  <circle id="tete" r="12" filter="url(#lueur)"/>
+  <g id="noms"></g>
+</svg>
+<div id="distance"></div>
+
+<script>
+const lisse = x => x<0?0 : x>1?1 : x*x*(3-2*x);
+const seg = (t,a,b) => lisse((t-a)/(b-a));
+const fen = (t,a,b,c,d) => Math.min(seg(t,a,b), 1-seg(t,c,d));
+
+// Une boucle de DUREE secondes : l'image a t = DUREE est celle de t = 0, donc
+// le film se rejoue sans couture. Tout ce qui varie dans le temps l'est de
+// facon periodique -- scintillement, halo, trace.
+const DUREE = 12.0;
+window.__duree = DUREE;
+
+function graine(s){ return function(){ s=(s*1664525+1013904223)%4294967296; return s/4294967296; }; }
+const alea = graine(20260906);
+
+const ciel = document.getElementById('stars');
+const etoiles = [];
+for (let i=0;i<190;i++){
+  const s=document.createElement('span'); const d=2+alea()*4;
+  s.style.left=(alea()*1920)+'px'; s.style.top=(alea()*1080)+'px';
+  s.style.width=d+'px'; s.style.height=d+'px';
+  ciel.appendChild(s);
+  // |sin| a pour periode PI : un multiple entier de PI/DUREE boucle exactement.
+  etoiles.push({el:s, base:.25+alea()*.5,
+                k:2+Math.floor(alea()*5), phase:alea()*6.28});
+}
+
+// Coordonnees reprises telles quelles d'aventure.html.
+const VILLES = [
+  [43.7102, 7.2620], [43.2965, 5.3698], [43.6108, 3.8767], [43.1836, 3.0036],
+  [43.6047, 1.4442], [44.8378,-0.5792], [46.1591,-1.1578], [47.2199,-1.5582],
+  [47.4784,-0.5632], [48.1173,-1.6778], [48.6493,-2.0257]
+];
+const NOMS = { 0:'Nice', 10:'Saint-Malo' };
+const CADRE = { x:1000, y:130, w:820, h:760 };
+const merc = lat => Math.log(Math.tan(Math.PI/4 + lat*Math.PI/360));
+const bx = VILLES.map(v => v[1]*Math.PI/180), by = VILLES.map(v => merc(v[0]));
+const x0=Math.min(...bx), x1=Math.max(...bx), y0=Math.min(...by), y1=Math.max(...by);
+const ech = Math.min(CADRE.w/(x1-x0), CADRE.h/(y1-y0));
+const dx = CADRE.x + (CADRE.w-(x1-x0)*ech)/2, dy = CADRE.y + (CADRE.h-(y1-y0)*ech)/2;
+const P = VILLES.map((v,i) => [dx + (bx[i]-x0)*ech, dy + (y1-by[i])*ech]);
+
+const chemin = P.map((p,i)=>(i?'L ':'M ')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+document.getElementById('fantome').setAttribute('d', chemin);
+const trace = document.getElementById('trace');
+trace.setAttribute('d', chemin);
+const LONG = [0];
+for (let i=1;i<P.length;i++) LONG.push(LONG[i-1] + Math.hypot(P[i][0]-P[i-1][0], P[i][1]-P[i-1][1]));
+const TOTAL = LONG[LONG.length-1];
+trace.style.strokeDasharray = TOTAL;
+const tete = document.getElementById('tete');
+
+const gPts = document.getElementById('pts'), gNoms = document.getElementById('noms');
+const NS = 'http://www.w3.org/2000/svg';
+const pastilles = P.map((p,i)=>{
+  const c = document.createElementNS(NS,'circle');
+  c.setAttribute('cx', p[0]); c.setAttribute('cy', p[1]);
+  c.setAttribute('r', i===0||i===P.length-1 ? 20 : 13);
+  c.setAttribute('class', 'pt' + (i===0 ? ' depart' : i===P.length-1 ? ' arrivee' : ''));
+  gPts.appendChild(c); return c;
+});
+const bornes = Object.entries(NOMS).map(([i,nom])=>{
+  const t = document.createElementNS(NS,'text');
+  t.setAttribute('x', P[i][0]); t.setAttribute('y', P[i][1] - 40);
+  t.setAttribute('class','borne'); t.setAttribute('text-anchor','middle');
+  t.textContent = nom; gNoms.appendChild(t);
+  return { i:+i, el:t };
+});
+document.getElementById('distance').textContent = 'Mille quatre cent huit kilomètres';
+
+// ------------------------------------------------------------- le montage
+const T_DEBUT = 0.8, T_FIN = 6.6;      // le trait part de Nice, arrive a Saint-Malo
+const quand = i => T_DEBUT + (LONG[i]/TOTAL)*(T_FIN - T_DEBUT);
+const T_SORTIE0 = 10.2, T_SORTIE1 = 11.7;   // tout s'efface avant de rejouer
+
+window.__render = function(t){
+  etoiles.forEach(e=>{
+    const s = e.base*(0.45+0.55*Math.abs(Math.sin(e.phase + t*e.k*Math.PI/DUREE)));
+    e.el.style.opacity = s.toFixed(3);
+  });
+  // le halo du logo respire une fois par boucle
+  document.getElementById('logo').style.transform =
+    'translate(-50%,-50%) scale(' + (1 + 0.025*Math.sin(2*Math.PI*t/DUREE)).toFixed(4) + ')';
+
+  const sortie = 1 - seg(t, T_SORTIE0, T_SORTIE1);      // 1 -> 0 en fin de boucle
+  const entree = seg(t, 0.2, 0.9);                      // 0 -> 1 en debut de boucle
+  const vie = Math.min(entree, sortie);
+
+  document.getElementById('fantome').style.opacity = (0.9*vie).toFixed(3);
+  const k = seg(t, T_DEBUT, T_FIN);
+  trace.style.strokeDashoffset = (TOTAL*(1-k)).toFixed(1);
+  trace.style.opacity = sortie.toFixed(3);
+
+  const q = trace.getPointAtLength(TOTAL*k);
+  tete.setAttribute('cx', q.x.toFixed(1)); tete.setAttribute('cy', q.y.toFixed(1));
+  tete.style.opacity = (Math.min(seg(t,T_DEBUT-0.1,T_DEBUT+0.3), 1-seg(t,T_FIN-0.1,T_FIN+0.4))*sortie).toFixed(3);
+
+  pastilles.forEach((c,i)=>{
+    const p = seg(t, quand(i), quand(i)+0.3);
+    const e = 0.5 + 0.5*p;
+    c.style.opacity = (Math.max(p, 0.55*vie) * (i===0||i===P.length-1 ? 1 : 1) * sortie).toFixed(3);
+    c.setAttribute('transform','translate('+P[i][0]+','+P[i][1]+') scale('+e.toFixed(3)+
+                   ') translate('+(-P[i][0])+','+(-P[i][1])+')');
+  });
+  bornes.forEach(b=>{
+    b.el.style.opacity = (Math.min(seg(t, quand(b.i)+0.05, quand(b.i)+0.6), sortie)).toFixed(3);
+  });
+  document.getElementById('distance').style.opacity =
+    (Math.min(seg(t, T_FIN+0.2, T_FIN+1.0), sortie)).toFixed(3);
+};
+window.__render(0);
+</script>
