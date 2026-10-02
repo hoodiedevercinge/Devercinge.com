@@ -25,6 +25,9 @@ T_PIECE0, T_PIECE_PAS = (float(x) for x in
 T_COLLECTION = float(re.search(r"getElementById\('collection'\)\.style\.opacity\s*=\s*fen\(t,([\d.]+)", page).group(1))
 T_CHUTE = float(re.search(r"getElementById\('scene4'\)\.style\.opacity\s*=\s*seg\(t,([\d.]+)", page).group(1))
 T_URL = float(re.search(r"getElementById\('url'\)\.style\.opacity\s*=\s*seg\(t,([\d.]+)", page).group(1))
+# les trois lignes du bloc de chiffres
+T_LIGNES = [float(re.search(r"getElementById\('%s'\)\.style\.opacity\s*=\s*seg\(t,([\d.]+)" % n,
+                            page).group(1)) for n in ('ville', 'compte', 'km')]
 
 N = int(SR * DUREE)
 
@@ -103,9 +106,9 @@ for i in range(N):
 nappe += 9.0 * filtre
 
 courbe = np.interp(t,
-    [0.0, 1.4,  2.4,  T_TRACE1, T_TRACE1 + 1.0, 8.6,  11.6, T_PIECE0, T_COLLECTION,
+    [0.0, 1.4,  2.4,  T_TRACE1, T_TRACE1 + 1.0, 8.6,  T_LIGNES[2] + 0.7, T_PIECE0, T_COLLECTION,
      T_CHUTE + 0.4, T_CHUTE + 1.4, DUREE],
-    [0.0, 0.30, 0.26, 0.46,     0.30,           0.26, 0.36, 0.28,     0.38,
+    [0.0, 0.30, 0.26, 0.46,     0.30,           0.26, 0.38, 0.28,     0.38,
      0.52,          0.34,          0.0])
 piste += nappe / (np.abs(nappe).max() + 1e-9) * courbe * 2.2
 
@@ -128,8 +131,8 @@ poser(cloche(gamme[len(quand) - 1] / 2, 3.0, 1.3, 0.17), quand[-1])
 poser(souffle(1.6, 0.18), 8.5)
 
 # ------------------------------------------- 4. les trois lignes de texte
-for k, (q, f) in enumerate(zip((10.35, 10.95, 11.35), (523.25, 659.25, 783.99))):
-    poser(cloche(f, 1.8, 0.6, 0.11 - k * 0.015), q)
+for k, (q, f) in enumerate(zip(T_LIGNES, (523.25, 659.25, 783.99))):
+    poser(cloche(f, 2.0, 0.7, 0.12 - k * 0.015), q + 0.05)
 
 # ------------------------------- 5. la vitrine, une note par piece levee
 poser(souffle(1.2, 0.20, montant=False), T_PIECE0 - 0.7)
@@ -160,5 +163,6 @@ print('habillage-etape.wav  %.1f s  crete %.1f dBFS  rms %.1f dBFS'
       % (DUREE, 20 * np.log10(np.abs(piste).max()),
          20 * np.log10(np.sqrt(np.mean(piste ** 2)))))
 print('villes validees a : ' + ', '.join('%.2f s' % q for q in quand))
+print('lignes de chiffres a : ' + ', '.join('%.2f s' % q for q in T_LIGNES))
 print('vitrine a %.2f s (pas %.2f) | collection %.2f | chute %.2f | adresse %.2f'
       % (T_PIECE0, T_PIECE_PAS, T_COLLECTION, T_CHUTE, T_URL))

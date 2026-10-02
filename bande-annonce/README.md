@@ -50,8 +50,9 @@ ffmpeg -y -i etape-muet.mp4 -i habillage-etape.wav \
 ```
 
 `son-etape.py` lit dans `etape.html` tout ce qui porte une date : `ATTEINTE`,
-`DUREE`, les bornes du trace, le depart de la vitrine et son pas, l'entree du
-mot et celle de la chute. Il recalcule ensuite les instants de validation avec
+`DUREE`, les bornes du trace, les trois lignes du bloc de chiffres, le depart
+de la vitrine et son pas, l'entree du mot et celle de la chute. Plus une seule
+date n'y est ecrite en dur. Il recalcule ensuite les instants de validation avec
 la meme projection que la page. Contrairement a la bande-annonce, l'image et
 le son d'une etape ne peuvent donc pas se desynchroniser : deplacer une scene
 dans la page deplace la note avec elle.
@@ -70,16 +71,24 @@ dans la page deplace la note avec elle.
 
 | | |
 |---|---|
-| 0 -> 7,6 s | la carte : le trait vert progresse, chaque ville franchie recoit sa coche |
-| 7,6 -> 12,9 s | le monument de l'etape se dessine, puis le nom, le decompte et les kilometres |
-| 12,7 -> 17,5 s | la vitrine : les cinq pieces se levent une a une, « Cinq pieces » |
-| 17,4 -> 20 s | le logo, « La route continue », devercinge.com |
+| 0 -> 8,1 s | la carte : le trait vert progresse, chaque ville franchie recoit sa coche |
+| 8,1 -> 15,2 s | le monument de l'etape se dessine, puis le nom, le decompte et les kilometres |
+| 15,0 -> 19,8 s | la vitrine : les cinq pieces se levent une a une, « Cinq pieces » |
+| 19,7 -> 22,5 s | le logo, « La route continue », devercinge.com |
+
+Le bloc de chiffres garde volontairement la pose : une fois les trois lignes
+installees, rien ne bouge pendant plus de deux secondes. Mesure sur la page,
+image par image, le temps ou chaque ligne est pleinement opaque : le nom de
+la ville 3,6 s, le decompte 2,9 s, les kilometres 2,2 s. La derniere ligne
+est celle qui arrive, c'est donc elle qui commande la duree de la scene --
+la raccourcir la rend illisible avant les autres.
 
 Le vert dit ce qui est fait, le gris ce qui reste, et Saint-Malo garde son
 cercle violet de but.
 
-La vitrine reprend les images de `assets/products/` dans l'ordre de la
-boutique. Une piece ajoutee ou retiree la-bas se reporte dans le tableau
+La vitrine reprend les images de `assets/products/` dans l'ordre ou
+`boutique.html` les presente : la vitrine du film et celle du site montrent
+la meme chose. Une piece ajoutee ou retiree la-bas se reporte dans le tableau
 `PIECES` en haut du script -- et le mot « Cinq pieces » avec, puisqu'il est
 ecrit a la main lui.
 

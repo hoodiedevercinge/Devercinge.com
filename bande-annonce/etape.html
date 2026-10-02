@@ -293,7 +293,7 @@ document.getElementById('compte').textContent =
 document.getElementById('km').textContent = enLettres(KM_FAITS) + ' kilomètres';
 
 // ───────────────────────────────────────────── le montage
-const DUREE = 20.0;
+const DUREE = 22.5;
 window.__duree = DUREE;
 
 // Chaque ville franchie s'allume quand le trait l'atteint.
@@ -330,28 +330,28 @@ window.__render = function(t){
   nomBut.style.opacity   = (0.9*seg(t,2.0,2.8)).toFixed(3);
 
   // 2 — le monument et les chiffres
-  document.getElementById('scene2').style.opacity = fen(t,8.1,8.8, 12.2,12.9).toFixed(3);
+  document.getElementById('scene2').style.opacity = fen(t,8.1,8.8, 14.5,15.2).toFixed(3);
   traits.forEach((p,i)=>{
     const d0 = 8.6 + (i / Math.max(1, traits.length-1)) * 1.5;
     p.el.style.strokeDashoffset = (p.L * (1 - seg(t, d0, d0+0.7))).toFixed(1);
   });
   document.getElementById('ville').style.opacity   = seg(t,10.3,11.0).toFixed(3);
-  document.getElementById('compte').style.opacity  = seg(t,10.9,11.6).toFixed(3);
-  document.getElementById('km').style.opacity      = seg(t,11.3,12.0).toFixed(3);
+  document.getElementById('compte').style.opacity  = seg(t,11.0,11.7).toFixed(3);
+  document.getElementById('km').style.opacity      = seg(t,11.7,12.4).toFixed(3);
 
   // 3 — la vitrine : ce qu'on trouve sur le site
-  document.getElementById('scene3').style.opacity = fen(t,12.7,13.4, 16.8,17.5).toFixed(3);
+  document.getElementById('scene3').style.opacity = fen(t,15.0,15.7, 19.1,19.8).toFixed(3);
   etals.forEach((d,i)=>{
-    const k = seg(t, 13.1 + i*0.30, 13.9 + i*0.30);
+    const k = seg(t, 15.4 + i*0.30, 16.2 + i*0.30);
     d.style.opacity = k.toFixed(3);
     d.style.transform = 'translateY(' + (34*(1-k)).toFixed(1) + 'px)';
   });
-  document.getElementById('collection').style.opacity = fen(t,15.3,16.1, 16.7,17.3).toFixed(3);
+  document.getElementById('collection').style.opacity = fen(t,17.6,18.4, 19.0,19.6).toFixed(3);
 
   // 4 — la chute
-  document.getElementById('scene4').style.opacity = seg(t,17.4,18.1).toFixed(3);
-  document.getElementById('fin').style.opacity    = seg(t,17.7,18.4).toFixed(3);
-  document.getElementById('url').style.opacity    = seg(t,18.6,19.3).toFixed(3);
+  document.getElementById('scene4').style.opacity = seg(t,19.7,20.4).toFixed(3);
+  document.getElementById('fin').style.opacity    = seg(t,20.0,20.7).toFixed(3);
+  document.getElementById('url').style.opacity    = seg(t,20.9,21.6).toFixed(3);
 };
 window.__render(0);
 </script>
