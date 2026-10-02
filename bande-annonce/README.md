@@ -22,7 +22,7 @@ calcul. Aucune source exterieure, donc rien a crediter ni a licencier.
 | `devercinge-episode-1-reel.mp4` | la meme avec « Episode 1 » en grand au centre. |
 | `couverture-episode-1.png` | l'image de couverture du Reel, celle que montre la grille du profil. |
 | `couverture.py` | enregistre une image d'une page de montage. |
-| `episodes.py` | produit d'un coup les Reels numerotes et leurs couvertures (dossier `episodes/`, non versionne). |
+| `episodes.py` | produit d'un coup les 25 videos numerotees et leurs images : Reels verticaux (`episodes/`) ou paysage (`episodes-paysage/`). Sorties non versionnees. |
 
 ## Refaire le film
 
@@ -226,6 +226,38 @@ cela ; de 1 a 9 il fait 274 px). Verifie aussi sur les fichiers produits : les 2
 font 12 s en 1080x1920 avec une piste son, la couverture correspond a
 l'image de la video a 7,6 s (ecart moyen 0,6 sur 255), et les 25 chiffres sont
 bien differents.
+
+### La serie en paysage : images et animations
+
+```sh
+CHROMIUM=/opt/pw-browsers/chromium python3 episodes.py paysage     # 1 a 25
+```
+
+Environ 8 minutes. Dans `episodes-paysage/`, pour chaque numero N :
+`devercinge-episode-NN-paysage.mp4` (1920x1080, 12 s, avec son) et
+`image-episode-NN.png` (la meme composition, fixe, a 7,6 s).
+
+**L'animation se joue en deux temps** : le mot « Episode » s'ecrit de gauche a
+droite (de 0,3 a 1,5 s) ; PUIS le chiffre apparait en grossissant et en
+devenant net (de 1,5 a 2,5 s). A 1,1 s on lit donc « Episode » sans numero.
+Elle boucle sans couture, comme le reste.
+
+**Le chiffre est au centre exact de l'image, et ce n'est pas un hasard.** Sur la
+grille d'un profil, Instagram rogne une image paysage au centre (3:4, soit de
+x 555 a 1365 sur 1920). La marque est donc a gauche et la route a droite,
+hors de ce que la grille peut couper ; le chiffre, lui, reste entier.
+
+Mesure sur les 25 numeros : chiffre a 72 px au moins de la route, marge de
+45 px minimum autour de tous les textes, centre a 14 px pres (le « 1 », plus
+etroit, est un peu decale), aucun chiffre coupe par la grille, aucun
+chevauchement. Sur les fichiers produits : les 25 font 12 s en 1920x1080 avec
+une piste son, l'image correspond a la video a 7,6 s, la boucle est sans
+couture (0,09/255) et les 25 chiffres sont differents.
+
+Un fichier paysage se publie tel quel comme **post** (Instagram accepte du 1,91:1
+au 4:5, le 16:9 passe en entier). Dans l'onglet **Reels**, qui est vertical, il
+s'afficherait avec des bandes noires : pour cet onglet, utiliser la serie
+verticale.
 
 **La couverture compte plus que la video.** Sur la grille du profil, un Reel
 est represente par sa couverture, pas par ses images : c'est `couverture.py`
