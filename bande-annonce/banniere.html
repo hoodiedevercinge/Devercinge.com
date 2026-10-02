@@ -87,6 +87,20 @@
     color:#fff; font-variant-numeric:tabular-nums;
     text-shadow:0 0 50px rgba(155,107,255,.55), 0 0 12px rgba(155,107,255,.35);
   }
+
+  /* ============ PAYSAGE AVEC NUMERO (?paysage&episode=N) ============
+     16:9, mais pense pour Instagram : sur la grille d'un profil, une image
+     paysage est rognee au centre (3:4, soit x 555 a 1365 sur 1920). Le chiffre
+     est donc pile au milieu de l'image, la marque a gauche et la route a
+     droite, hors de la zone que la grille peut couper. */
+  .ep-paysage #logo{ left:340px; top:390px; width:150px; }
+  .ep-paysage #nom{ width:680px; top:530px; font-size:46px; }
+  .ep-paysage #devise{ width:680px; top:610px; font-size:18px; }
+  .ep-paysage #url{ left:0; width:1920px; top:965px; font-size:26px; }
+  .ep-paysage .borne{ font-size:30px; }
+  .ep-paysage #distance{ left:1280px; right:0; top:850px; font-size:28px; line-height:1.55; }
+  .ep-paysage #ep-label{ top:275px; font-size:46px; letter-spacing:.5em; padding-left:.5em; }
+  .ep-paysage #ep-num{ top:321px; font-size:520px; }
 </style>
 
 <div id="stars"></div>
@@ -125,7 +139,11 @@ document.getElementById('carte').setAttribute('viewBox', '0 0 ' + W + ' ' + H);
 
 // ?reel&episode=3 : affiche « Episode 3 » au centre. Sans ce parametre, ou en
 // paysage, la banniere reste la banniere generique, sans numero.
-const EPISODE = REEL ? ((location.search.match(/episode=(\d+)/) || [])[1] || null) : null;
+const EPISODE = (location.search.match(/episode=(\d+)/) || [])[1] || null;
+// Le paysage avec numero a sa propre mise en page ; sans numero il reste la
+// banniere generique, inchangee.
+const EP_PAYSAGE = !REEL && !!EPISODE;
+document.documentElement.classList.toggle('ep-paysage', EP_PAYSAGE);
 
 document.documentElement.classList.toggle('avec-episode', !!EPISODE);
 
@@ -161,7 +179,9 @@ const VILLES = [
   [47.4784,-0.5632], [48.1173,-1.6778], [48.6493,-2.0257]
 ];
 const NOMS = { 0:'Nice', 10:'Saint-Malo' };
-const CADRE = REEL ? { x:140, y:740, w:800, h:590 } : { x:1000, y:130, w:820, h:760 };
+const CADRE = REEL ? { x:140, y:740, w:800, h:590 }
+            : EP_PAYSAGE ? { x:1290, y:290, w:540, h:500 }
+            : { x:1000, y:130, w:820, h:760 };
 const merc = lat => Math.log(Math.tan(Math.PI/4 + lat*Math.PI/360));
 const bx = VILLES.map(v => v[1]*Math.PI/180), by = VILLES.map(v => merc(v[0]));
 const x0=Math.min(...bx), x1=Math.max(...bx), y0=Math.min(...by), y1=Math.max(...by);
@@ -198,19 +218,20 @@ const bornes = Object.entries(NOMS).map(([i,nom])=>{
   // En Reel la route commence juste sous la devise : au-dessus de son point,
   // Saint-Malo viendrait s'ecrire par-dessus. On le pose a droite, la ou la
   // route ne passe pas.
-  if (REEL && +i === P.length-1){
+  if ((REEL || EP_PAYSAGE) && +i === P.length-1){
     t.setAttribute('x', P[i][0] + 38); t.setAttribute('y', P[i][1] + 11);
     t.setAttribute('text-anchor','start');
   }
   t.textContent = nom; gNoms.appendChild(t);
-  if (REEL){   // le paysage garde ses positions telles qu'elles ont ete validees
-    const bb = t.getBBox(), M = 60;
+  if (REEL || EP_PAYSAGE){   // le paysage generique garde ses positions validees
+    const bb = t.getBBox(), M = EP_PAYSAGE ? 40 : 60;
     const dd = Math.max(0, M - bb.x) - Math.max(0, bb.x + bb.width - (W - M));
     if (dd) t.setAttribute('x', +t.getAttribute('x') + dd);
   }
   return { i:+i, el:t };
 });
-document.getElementById('distance').textContent = 'Mille quatre cent huit kilomètres';
+if (EP_PAYSAGE) document.getElementById('distance').innerHTML = 'Mille quatre cent huit<br>kilomètres';
+else document.getElementById('distance').textContent = 'Mille quatre cent huit kilomètres';
 
 const epNum = document.getElementById('ep-num');
 if (EPISODE){
@@ -221,7 +242,9 @@ if (EPISODE){
   // pour tous les numeros de 10 a 25 (mesure, voir README).
   const g = document.createRange(); g.selectNodeContents(epNum);
   const l = g.getBoundingClientRect().width;
-  if (l > 385) epNum.style.fontSize = (400*385/l).toFixed(1) + 'px';
+  const base = parseFloat(getComputedStyle(epNum).fontSize);
+  const plafond = EP_PAYSAGE ? 640 : 385;   // paysage : hors de la route et dans le centre de la grille
+  if (l > plafond) epNum.style.fontSize = (base*plafond/l).toFixed(1) + 'px';
 }
 
 // ------------------------------------------------------------- le montage
@@ -261,7 +284,19 @@ window.__render = function(t){
   bornes.forEach(b=>{
     b.el.style.opacity = (Math.min(seg(t, quand(b.i)+0.05, quand(b.i)+0.6), sortie)).toFixed(3);
   });
-  if (EPISODE){
+  if (EP_PAYSAGE){
+    // Le mot s'ecrit de gauche a droite, PUIS le chiffre se pose : il apparait
+    // en grossissant et en devenant net. Deux temps, pour qu'on lise « Episode »
+    // avant de voir le numero.
+    const lab = document.getElementById('ep-label');
+    const w = seg(t, 0.3, 1.5);
+    lab.style.clipPath = 'inset(0 ' + ((1-w)*100).toFixed(2) + '% 0 0)';
+    lab.style.opacity = Math.min(seg(t, 0.3, 0.7), sortie).toFixed(3);
+    const a = seg(t, 1.5, 2.5);
+    epNum.style.opacity = Math.min(a, sortie).toFixed(3);
+    epNum.style.transform = 'scale(' + (0.8 + 0.2*a).toFixed(4) + ')';
+    epNum.style.filter = 'blur(' + (16*(1-a)).toFixed(1) + 'px)';
+  } else if (EPISODE){
     const a = seg(t, 0.35, 1.25), ec = Math.min(a, sortie);
     document.getElementById('ep-label').style.opacity = ec.toFixed(3);
     epNum.style.opacity = ec.toFixed(3);
