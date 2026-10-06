@@ -176,5 +176,45 @@ window.MONUMENTS_ETAPES = {
     // et l'eau
     'M -6 196 Q 12 190 30 196 Q 48 202 66 196 Q 84 190 102 196 Q 120 202 138 196 Q 156 190 174 196 Q 192 202 206 196',
     'M -6 208 Q 12 202 30 208 Q 48 214 66 208 Q 84 202 102 208 Q 120 214 138 208 Q 156 202 174 208 Q 192 214 206 208'
+  ]},
+  'Béziers': { ville:'Béziers', legende:'La cathedrale Saint-Nazaire', traits:[
+    // la facade avec ses creneaux et sa rosace
+    'M 30 200 L 30 96 L 124 96 L 124 200',
+    'M 30 96 L 30 84 L 44 84 L 44 94 L 58 94 L 58 84 L 72 84 L 72 94 L 86 94 L 86 84 L 100 84 L 100 94 L 114 94 L 114 84 L 124 84',
+    'M 61 134 a 16 16 0 1 0 32 0 a 16 16 0 1 0 -32 0',
+    'M 77 118 L 77 150 M 61 134 L 93 134 M 66 123 L 88 145 M 88 123 L 66 145',
+    'M 62 200 L 62 180 Q 77 160 92 180 L 92 200',
+    // le clocher fortifie
+    'M 136 200 L 136 56 L 178 56 L 178 200',
+    'M 134 56 L 134 42 L 148 42 L 148 52 L 162 52 L 162 42 L 180 42 L 180 56',
+    'M 157 80 L 157 108 M 157 134 L 157 156'
+  ]},
+
+  'Argeliers': { ville:'Argeliers', legende:'Le canal du Midi', traits:[
+    // un pont de pierre sur le canal
+    'M 56 168 Q 100 128 144 168',
+    'M 56 168 L 56 200 M 144 168 L 144 200',
+    'M 72 200 L 72 184 Q 100 154 128 184 L 128 200',
+    'M 40 200 L 160 200',
+    // des platanes sur la berge
+    'M 22 200 L 22 132 M 22 150 L 8 134 M 22 142 L 36 128',
+    'M -6 102 a 28 28 0 1 0 56 0 a 28 28 0 1 0 -56 0',
+    'M 178 200 L 178 120 M 178 146 L 164 130 M 178 138 L 192 124',
+    'M 150 92 a 28 28 0 1 0 56 0 a 28 28 0 1 0 -56 0'
+  ]},
+
+  'La Redorte': { ville:'La Redorte', legende:'Le clocher et les vignes', traits:[
+    // le clocher et la nef
+    'M 84 200 L 84 84 L 116 84 L 116 200',
+    'M 78 84 L 100 40 L 122 84 Z',
+    'M 100 40 L 100 24 M 93 31 L 107 31',
+    'M 93 138 L 93 108 Q 100 98 107 108 L 107 138',
+    'M 116 200 L 116 154 L 170 154 L 170 200',
+    'M 112 154 L 143 126 L 174 154',
+    'M 132 200 L 132 180 L 152 180 L 152 200',
+    // les rangs de vigne qui filent vers le village
+    'M 6 200 L 6 180 M -4 164 L 6 180 L 16 164',
+    'M 30 200 L 30 180 M 20 164 L 30 180 L 40 164',
+    'M 54 200 L 54 180 M 44 164 L 54 180 L 64 164'
   ]}
 };

@@ -42,6 +42,7 @@
          stroke-linejoin:round; filter:url(#lueur); }
   .pt{ fill:#16161b; stroke:var(--sourd); stroke-width:4; }
   .pt.validee{ fill:var(--green); stroke:none; }
+  .anneau{ fill:none; stroke:var(--green); stroke-width:3; opacity:0; }
   .pt.but{ fill:none; stroke:var(--violet); stroke-width:5; }
   .coche{ fill:none; stroke:#0a0a0c; stroke-width:5; stroke-linecap:round; stroke-linejoin:round; }
   .nom{ fill:var(--ink); font-size:38px; font-weight:700; letter-spacing:.14em;
@@ -215,14 +216,31 @@
        km_avant  (facultatif) km de l'etape precedente : affiche l'augmentation
        depuis    (avec km_avant) nom de l'etape precedente
        plus_loin (facultatif) quand l'etape n'est pas l'une des onze villes :
-                 son nom, sa latitude, sa longitude ; elle se place apres
-                 la ville `atteinte`, et son monument est dans monuments.js
-                 (MONUMENTS_ETAPES) -->
+                 une LISTE de points {nom, lat, lng}, dans l'ordre du parcours,
+                 apres la ville `atteinte`. Le dernier est l'etape du jour (il a
+                 son monument dans monuments.js, MONUMENTS_ETAPES) ; les autres
+                 sont les etapes deja faites, que le trait vert doit traverser
+                 -->
 <script type="application/json" id="etapes">
 {
   "montpellier": { "atteinte": 2, "km": 322 },
   "meze": { "atteinte": 2, "km": 356, "km_avant": 322, "depuis": "Montpellier",
-            "plus_loin": { "nom": "Mèze", "lat": 43.4255, "lng": 3.6045 } }
+            "plus_loin": [ { "nom": "Mèze", "lat": 43.4255, "lng": 3.6045 } ] },
+
+  "beziers": { "atteinte": 2, "km": 393, "km_avant": 356, "depuis": "Mèze",
+               "plus_loin": [ { "nom": "Mèze", "lat": 43.4255, "lng": 3.6045 },
+                              { "nom": "Béziers", "lat": 43.3412, "lng": 3.2140 } ] },
+
+  "argeliers": { "atteinte": 2, "km": 421, "km_avant": 393, "depuis": "Béziers",
+                 "plus_loin": [ { "nom": "Mèze", "lat": 43.4255, "lng": 3.6045 },
+                                { "nom": "Béziers", "lat": 43.3412, "lng": 3.2140 },
+                                { "nom": "Argeliers", "lat": 43.3122, "lng": 2.9105 } ] },
+
+  "la-redorte": { "atteinte": 2, "km": 447, "km_avant": 421, "depuis": "Argeliers",
+                  "plus_loin": [ { "nom": "Mèze", "lat": 43.4255, "lng": 3.6045 },
+                                 { "nom": "Béziers", "lat": 43.3412, "lng": 3.2140 },
+                                 { "nom": "Argeliers", "lat": 43.3122, "lng": 2.9105 },
+                                 { "nom": "La Redorte", "lat": 43.2539, "lng": 2.6350 } ] }
 }
 </script>
 
@@ -235,7 +253,8 @@ if (!E) throw new Error('etape inconnue : ' + NOM_ETAPE);
 const ATTEINTE = E.atteinte;
 const KM_FAITS = E.km;
 const KM_TOTAL = 1408;            // longueur du parcours ; le reste s'en deduit
-const PLUS_LOIN = E.plus_loin || null;
+const PLUS_LOIN = E.plus_loin ? [].concat(E.plus_loin) : [];    // une liste ; un objet seul est accepte
+const DU_JOUR = PLUS_LOIN.length ? PLUS_LOIN[PLUS_LOIN.length-1] : null;   // l'etape du jour
 
 // Portrait par defaut ; ?paysage pour la version 1920x1080.
 const PAYSAGE = /[?&]paysage/.test(location.search);
@@ -285,8 +304,9 @@ const P = VILLES.map((v,i) => [dx + (bx[i]-x0)*ech, dy + (y1-by[i])*ech]);
 const d = (a,b) => (b?'L ':'M ') + a[0].toFixed(1) + ' ' + a[1].toFixed(1);
 
 // L'etape hors trace est projetee comme les villes : meme echelle, meme origine.
-const PM = PLUS_LOIN ? [dx + (PLUS_LOIN.lng*Math.PI/180 - x0)*ech, dy + (y1 - merc(PLUS_LOIN.lat))*ech] : null;
-const PTS_FAITS = P.slice(0, ATTEINTE+1).concat(PM ? [PM] : []);   // ce que le trait vert parcourt
+const PMS = PLUS_LOIN.map(q => [dx + (q.lng*Math.PI/180 - x0)*ech, dy + (y1 - merc(q.lat))*ech]);
+const PM = PMS.length ? PMS[PMS.length-1] : null;                   // l'etape du jour
+const PTS_FAITS = P.slice(0, ATTEINTE+1).concat(PMS);               // ce que le trait vert parcourt
 const DERNIER = PTS_FAITS.length - 1;
 
 document.getElementById('fantome').setAttribute('d', P.map((p,i)=>d(p,i)).join(' '));
@@ -304,7 +324,7 @@ for (let i=1;i<=DERNIER;i++)
 const gPts = document.getElementById('pts'), gNoms = document.getElementById('noms');
 const pastilles = [], coches = [];
 // `rang` : la place du point sur le trait vert, ou -1 s'il n'est pas encore franchi.
-function pastille(xy, rang, but, rayon, sansCoche){
+function pastille(xy, rang, but, rayon, sansCoche, anneauAutour){
   const faite = rang >= 0;
   const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
   c.setAttribute('cx', xy[0]); c.setAttribute('cy', xy[1]);
@@ -320,21 +340,90 @@ function pastille(xy, rang, but, rayon, sansCoche){
                    ' L ' + (xy[0]+10) + ' ' + (xy[1]-8));
     gPts.appendChild(coche);
   }
-  pastilles.push({ c, coche, xy, rang });
+  // Quand les points s'entassent, un anneau designe l'etape du jour.
+  let anneau = null;
+  if (anneauAutour){
+    anneau = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    anneau.setAttribute('cx', xy[0]); anneau.setAttribute('cy', xy[1]);
+    anneau.setAttribute('r', (rayon || 24) + 9);
+    anneau.setAttribute('class', 'anneau');
+    gPts.insertBefore(anneau, c);
+  }
+  pastilles.push({ c, coche, xy, rang, anneau });
 }
 // Une etape hors trace est tres pres de la ville qui la precede (Meze est a 34 km
 // de Montpellier sur une carte de 1 400 km : une trentaine de pixels). Les deux
 // disques de 24 px se recouvriraient. L'etape du jour est la vedette ; la ville
 // d'avant devient un petit point, dont le rayon se deduit de la distance reelle
 // pour qu'ils ne se touchent jamais.
-const ECART_PM = PM ? Math.hypot(PM[0] - P[ATTEINTE][0], PM[1] - P[ATTEINTE][1]) : 0;
+// Avec plusieurs etapes hors trace (Beziers, Argeliers... a 25 km les unes des
+// autres, une vingtaine de pixels), les petits points ne doivent pas non plus se
+// toucher entre eux : leur rayon est borne par l'ecart qui les separe.
+const petits = PM ? [P[ATTEINTE]].concat(PMS.slice(0, -1)) : [];     // ce qui precede l'etape du jour
+const ecartA = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+const ECART_PM = PM ? Math.min(...PTS_FAITS.slice(0, -1).map(q => ecartA(PM, q))) : 0;
+let ECART_PETITS = Infinity;
+for (let a = 0; a < petits.length; a++) for (let b = a + 1; b < petits.length; b++)
+  ECART_PETITS = Math.min(ECART_PETITS, ecartA(petits[a], petits[b]));
 const R_VEDETTE = PM ? Math.min(24, ECART_PM * 0.6) : 24;
-const R_AVANT   = PM ? Math.max(6, Math.min(14, ECART_PM - R_VEDETTE - 4)) : 24;
+const R_AVANT   = PM ? Math.max(5, Math.min(14, ECART_PM - R_VEDETTE - 4, ECART_PETITS / 2 - 1.5)) : 24;
 VILLES.forEach((v,i)=>{
   const precede = PM && i === ATTEINTE;
   pastille(P[i], i <= ATTEINTE ? i : -1, i === VILLES.length-1, precede ? R_AVANT : 0, precede);
 });
-if (PM) pastille(PM, DERNIER, false, R_VEDETTE);      // l'etape hors trace, par-dessus
+PMS.forEach((q, k) => {                                // les etapes hors trace, par-dessus
+  if (k < PMS.length - 1) pastille(q, ATTEINTE + 1 + k, false, R_AVANT, true);
+});
+if (PM) pastille(PM, DERNIER, false, R_VEDETTE, false, PMS.length > 1);   // et l'etape du jour au sommet
+
+// Placement libre du nom de l'etape du jour. Quand plusieurs etapes s'entassent
+// a 25 km les unes des autres (une vingtaine de pixels), aucune position fixe ne
+// convient : le nom tombait sur le point gris de Narbonne et sur la ligne grise.
+// On essaie des positions autour de l'etape, de plus en plus loin, et on garde
+// celle qui ne touche ni un point ni une ligne, la plus proche et de preference
+// au-dessus.
+function etiquetteLibre(centre, nom, rayon){
+  const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+  t.setAttribute('class', 'nom'); t.setAttribute('text-anchor', 'middle');
+  t.setAttribute('x', 0); t.setAttribute('y', 0); t.textContent = nom;
+  gNoms.appendChild(t);
+  const b0 = t.getBBox();                              // boite du texte pose en (0, 0)
+  // les obstacles : tous les disques, et des points echantillonnes sur les deux traces
+  const disques = pastilles.map(o => ({ x:o.xy[0], y:o.xy[1], r:+o.c.getAttribute('r') }));
+  const points = [];
+  [document.getElementById('fantome'), fait].forEach(chemin => {
+    const L = chemin.getTotalLength();
+    for (let l = 0; l <= L; l += 5){ const q = chemin.getPointAtLength(l); points.push([q.x, q.y]); }
+  });
+  const rect = (x, y) => [x + b0.x, y + b0.y, x + b0.x + b0.width, y + b0.y + b0.height];
+  const MARGE = 12, M = 56;
+  const gene = (x, y) => {
+    const r = rect(x, y);
+    if (r[0] < M || r[2] > W - M || r[1] < M || r[3] > H - M) return 1000;
+    let n = 0;
+    disques.forEach(d => {
+      const px = Math.max(r[0], Math.min(d.x, r[2])), py = Math.max(r[1], Math.min(d.y, r[3]));
+      if (Math.hypot(px - d.x, py - d.y) < d.r + MARGE) n++;
+    });
+    points.forEach(q => { if (q[0] > r[0]-MARGE && q[0] < r[2]+MARGE && q[1] > r[1]-MARGE && q[1] < r[3]+MARGE) n++; });
+    return n;
+  };
+  let meilleur = null;
+  for (const dist of [rayon + 40, rayon + 66, rayon + 96, rayon + 130, rayon + 170]){
+    for (let a = 0; a < 360; a += 15){
+      const rad = a * Math.PI / 180;
+      const x = centre[0] + dist * Math.cos(rad), y = centre[1] + dist * Math.sin(rad) - (b0.y + b0.height / 2);
+      const n = gene(x, y);
+      const score = n * 1000 + dist + (Math.sin(rad) > 0 ? 25 : 0);    // le dessous est moins naturel
+      if (!meilleur || score < meilleur.score) meilleur = { x, y, n, score };
+    }
+    if (meilleur && meilleur.n === 0) break;                          // la plus proche des positions libres
+  }
+  if (meilleur.n > 0) console.warn('nom de l\'etape : aucune position libre, ' + meilleur.n + ' contacts');
+  t.setAttribute('x', meilleur.x.toFixed(1)); t.setAttribute('y', meilleur.y.toFixed(1));
+  window.__placementNom = meilleur;
+  return t;
+}
 
 // Deux noms seulement : l'etape du jour et le but, pour ne pas charger.
 function etiquette(xy, nom, classe, dyy, ancre){
@@ -348,15 +437,16 @@ function etiquette(xy, nom, classe, dyy, ancre){
   if (dd) t.setAttribute('x', +t.getAttribute('x') + dd);
   return t;
 }
-const NOM_DU_JOUR = PLUS_LOIN ? PLUS_LOIN.nom : VILLES[ATTEINTE].nom;
+const NOM_DU_JOUR = DU_JOUR ? DU_JOUR.nom : VILLES[ATTEINTE].nom;
 // Hors trace, le nom se pose en haut a gauche de l'etape, du cote que la ville
 // d'avant (en haut a droite) ne gene pas.
-const nomEtape = PM ? etiquette([PM[0] + 12, PM[1]], NOM_DU_JOUR, 'nom', -(R_VEDETTE + 22), 'end')
-                    : etiquette(P[ATTEINTE], NOM_DU_JOUR, 'nom', -46);
+const nomEtape = PMS.length > 1 ? etiquetteLibre(PM, NOM_DU_JOUR, R_VEDETTE)
+              : PM ? etiquette([PM[0] + 12, PM[1]], NOM_DU_JOUR, 'nom', -(R_VEDETTE + 22), 'end')
+                   : etiquette(P[ATTEINTE], NOM_DU_JOUR, 'nom', -46);
 const nomBut   = etiquette(P[VILLES.length-1], VILLES[VILLES.length-1].nom, 'nom but', -40);
 
 // ───────────────────────────────────────────── le monument de l'etape
-const mon = PLUS_LOIN ? MONUMENTS_ETAPES[PLUS_LOIN.nom] : MONUMENTS[ATTEINTE];
+const mon = DU_JOUR ? MONUMENTS_ETAPES[DU_JOUR.nom] : MONUMENTS[ATTEINTE];
 const svgMon = document.createElementNS('http://www.w3.org/2000/svg','svg');
 svgMon.setAttribute('width', 520); svgMon.setAttribute('height', 570);
 svgMon.setAttribute('viewBox','-14 -30 228 250');
@@ -501,8 +591,10 @@ window.__render = function(t){
       c.style.opacity = k.toFixed(3);
       if (o.coche) o.coche.style.opacity = seg(t, q+0.15, q+0.5).toFixed(3);
       const e = 0.5 + 0.5*k;
-      c.setAttribute('transform','translate('+o.xy[0]+','+o.xy[1]+') scale('+e.toFixed(3)+
-                     ') translate('+(-o.xy[0])+','+(-o.xy[1])+')');
+      const tr = 'translate('+o.xy[0]+','+o.xy[1]+') scale('+e.toFixed(3)+
+                     ') translate('+(-o.xy[0])+','+(-o.xy[1])+')';
+      c.setAttribute('transform', tr);
+      if (o.anneau){ o.anneau.style.opacity = (0.6*k).toFixed(3); o.anneau.setAttribute('transform', tr); }
     } else {
       c.style.opacity = (0.75*seg(t,1.8,2.6)).toFixed(3);
     }
