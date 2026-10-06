@@ -1,0 +1,497 @@
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<title>Devercinge — le voyage jusqu'ici</title>
+<style>
+  :root{ --bg:#0a0a0c; --ink:#f2f1ef; --dim:#9d9ba3; --sourd:#4a4a52;
+         --violet:#9b6bff; --green:#3ddc84; }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ width:1080px; height:1920px; overflow:hidden; background:var(--bg); }
+  body{ position:relative; font-family:'Liberation Sans','DejaVu Sans',sans-serif; color:var(--ink); }
+
+  #stars{ position:absolute; inset:0; }
+  #stars span{ position:absolute; background:var(--ink); border-radius:50%; }
+  .layer{ position:absolute; inset:0; }
+
+  .eyebrow{
+    position:absolute; left:0; right:0; text-align:center;
+    font-size:34px; font-weight:700; letter-spacing:.34em;
+    text-transform:uppercase; padding-left:.34em; line-height:1.7;
+    background:linear-gradient(90deg,var(--violet),var(--green));
+    -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+  #logo{ position:absolute; left:50%; top:230px; width:190px;
+         transform:translate(-50%,-50%);
+         filter:drop-shadow(0 0 50px rgba(155,107,255,.35)); }
+  #titre{ top:350px; }
+
+  /* ---- les photos des villes, si on en fournit : un fond tres sombre ---- */
+  #fonds{ position:absolute; inset:0; overflow:hidden; }
+  .fond{ position:absolute; inset:-6%; background-size:cover; background-position:center; opacity:0; }
+
+  /* ---- la carte, qui suit le cycliste puis recule pour tout montrer ---- */
+  #carte{ position:absolute; inset:0; }
+  #fantome{ fill:none; stroke:#2b2b33; stroke-width:5; stroke-linecap:round; stroke-linejoin:round; }
+  #fait{ fill:none; stroke:var(--green); stroke-width:7; stroke-linecap:round;
+         stroke-linejoin:round; filter:url(#lueur); }
+  .pt{ fill:#16161b; stroke:var(--sourd); stroke-width:4; }
+  .pt.validee{ fill:var(--green); stroke:none; }
+  .pt.but{ fill:none; stroke:var(--violet); stroke-width:5; }
+  #tete{ fill:none; stroke:var(--violet); stroke-width:5; }
+  .nom{ fill:var(--dim); font-size:32px; font-weight:700; letter-spacing:.14em;
+        text-transform:uppercase; }
+
+  /* ---- un bloc par lieu : le nom, puis combien de villes ---- */
+  .lieu{ position:absolute; left:0; right:0; top:1330px; opacity:0; text-align:center; }
+  .lieu .n{
+    font-size:76px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+    padding-left:.1em; white-space:nowrap; text-shadow:0 2px 28px rgba(0,0,0,.7);
+  }
+  .lieu .c{
+    margin-top:36px; font-size:40px; font-weight:700; letter-spacing:.2em;
+    text-transform:uppercase; padding-left:.2em; white-space:nowrap;
+    background:linear-gradient(90deg,var(--violet),var(--green));
+    -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+
+  /* ---- le bilan : les kilometres de Erwan, en lettres ---- */
+  .bilan{ position:absolute; left:0; right:0; text-align:center; opacity:0;
+          font-weight:700; text-transform:uppercase; white-space:nowrap; }
+  #bilan-km{
+    top:1575px; font-size:54px; letter-spacing:.14em; padding-left:.14em;
+    background:linear-gradient(90deg,var(--violet),var(--green));
+    -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+  #bilan-villes{ top:1672px; font-size:32px; letter-spacing:.2em; padding-left:.2em; color:var(--dim); }
+
+  /* ---- la vitrine et la chute : comme la video d'etape ---- */
+  #logo3{ position:absolute; left:50%; top:430px; width:160px;
+          transform:translate(-50%,-50%);
+          filter:drop-shadow(0 0 40px rgba(155,107,255,.3)); }
+  #logo2{ position:absolute; left:50%; top:840px; width:300px; transform:translate(-50%,-50%); }
+  #fin{ top:1060px; }
+  #vitrine{ position:absolute; left:50%; top:820px; width:1000px;
+            transform:translateX(-50%); height:420px; }
+  .piece{ position:absolute; bottom:0; width:var(--pas,200px); text-align:center; }
+  .piece .fenetre{
+    position:absolute; left:50%; bottom:0; width:104px; height:330px;
+    transform:translateX(-50%); transform-origin:bottom center;
+    background:
+      radial-gradient(circle at 24% 16%, rgba(155,107,255,.34), transparent 60%),
+      radial-gradient(circle at 80% 84%, rgba(61,220,132,.26), transparent 60%);
+    background-size:1000px 330px; background-repeat:no-repeat;
+  }
+  .piece img{
+    position:relative; display:block; margin:0 auto;
+    width:186px; height:330px; object-fit:contain;
+    filter:drop-shadow(0 12px 28px rgba(155,107,255,.25));
+  }
+  #collection{
+    position:absolute; left:0; right:0; top:1340px; text-align:center;
+    font-size:40px; font-weight:700; letter-spacing:.3em;
+    text-transform:uppercase; padding-left:.3em;
+    background:linear-gradient(90deg,var(--violet),var(--green));
+    -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+  #url{
+    position:absolute; left:0; right:0; top:1220px; text-align:center;
+    font-size:34px; letter-spacing:.3em; text-transform:uppercase;
+    color:var(--dim); padding-left:.3em;
+  }
+
+  /* ====================== PAYSAGE (?paysage) ======================
+     La carte vit a droite, derriere un fondu, les textes a gauche. */
+  .paysage, .paysage body{ width:1920px; height:1080px; }
+  .paysage #carte{
+    -webkit-mask-image:linear-gradient(90deg, transparent 840px, #000 1010px);
+            mask-image:linear-gradient(90deg, transparent 840px, #000 1010px);
+  }
+  .paysage #logo{ left:480px; top:300px; width:230px; }
+  .paysage #titre{ right:auto; width:960px; top:480px; }
+  .paysage .lieu{ right:auto; width:960px; top:590px; }
+  .paysage .lieu .n{ font-size:84px; }
+  .paysage .lieu .c{ font-size:42px; margin-top:34px; }
+  .paysage .bilan{ right:auto; width:960px; }
+  .paysage #bilan-km{ top:590px; font-size:62px; }
+  .paysage #bilan-villes{ top:700px; font-size:34px; }
+
+  .paysage #logo3{ top:230px; width:130px; }
+  .paysage #vitrine{ --pas:270px; top:390px; width:1350px; height:440px; }
+  .paysage .piece .fenetre{ width:140px; height:380px; background-size:1350px 380px; }
+  .paysage .piece img{ width:250px; height:380px; }
+  .paysage #collection{ top:890px; font-size:44px; }
+  .paysage #logo2{ top:440px; width:240px; }
+  .paysage #fin{ top:680px; font-size:40px; }
+  .paysage #url{ top:820px; font-size:38px; }
+</style>
+
+<div id="stars"></div>
+<div id="fonds"></div>
+
+<div class="layer" id="entete">
+  <img id="logo" src="../assets/logo-mark.png" alt="">
+  <div class="eyebrow" id="titre">Le voyage jusqu'ici</div>
+</div>
+
+<div class="layer" id="scene1">
+  <svg id="carte" viewBox="0 0 1080 1920">
+    <defs>
+      <filter id="lueur" x="-40%" y="-40%" width="180%" height="180%">
+        <feGaussianBlur stdDeviation="8" result="f"/>
+        <feMerge><feMergeNode in="f"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+    <path id="fantome"/>
+    <path id="fait"/>
+    <g id="pts"></g>
+    <circle id="tete" r="20"/>
+    <g id="noms"></g>
+  </svg>
+  <div id="lieux"></div>
+  <div class="bilan" id="bilan-km"></div>
+  <div class="bilan" id="bilan-villes"></div>
+</div>
+
+<div class="layer" id="scene3">
+  <img id="logo3" src="../assets/logo-mark.png" alt="">
+  <div id="vitrine"></div>
+  <div id="collection">Cinq pièces</div>
+</div>
+
+<div class="layer" id="scene4">
+  <img id="logo2" src="../assets/logo-mark.png" alt="">
+  <div class="eyebrow" id="fin">La route continue</div>
+  <div id="url">devercinge.com</div>
+</div>
+
+<script>
+// Les lieux dans l'ordre ou Erwan les a traverses (sa propre liste, en messages).
+// Coordonnees : GeoNames, hors ligne. `photo` : si recap-photos/<slug>.jpg existe,
+// la page l'affiche en fond sombre pendant que le cycliste est dans la ville.
+const LIEUX = [
+  { nom:'Nice',                  slug:'nice',                  lat:43.7102, lng:7.2620 },
+  { nom:'Cannes',                slug:'cannes',                lat:43.5513, lng:7.0127 },
+  { nom:'Fréjus',                slug:'frejus',                lat:43.4329, lng:6.7352 },
+  { nom:'Roquebrune-sur-Argens', slug:'roquebrune',            lat:43.4333, lng:6.6333 },
+  { nom:'Vidauban',              slug:'vidauban',              lat:43.4278, lng:6.4329 },
+  { nom:'Le Luc',                slug:'le-luc',                lat:43.3932, lng:6.3147 },
+  { nom:'Brignoles',             slug:'brignoles',             lat:43.4000, lng:6.0667 },
+  { nom:'Saint-Zacharie',        slug:'saint-zacharie',        lat:43.3852, lng:5.7081 },
+  { nom:'Aubagne',               slug:'aubagne',               lat:43.2928, lng:5.5707 },
+  { nom:'Marseille',             slug:'marseille',             lat:43.2965, lng:5.3698 },
+  { nom:'Martigues',             slug:'martigues',             lat:43.4074, lng:5.0553 },
+  { nom:'Istres',                slug:'istres',                lat:43.5167, lng:4.9833 },
+  { nom:'Saint-Martin-de-Crau',  slug:'saint-martin-de-crau',  lat:43.6395, lng:4.8127 },
+  { nom:'Arles',                 slug:'arles',                 lat:43.6768, lng:4.6303 },
+  { nom:'Saint-Gilles',          slug:'saint-gilles',          lat:43.6766, lng:4.4302 },
+  { nom:'Vauvert',               slug:'vauvert',               lat:43.6953, lng:4.2771 },
+  { nom:'Montpellier',           slug:'montpellier',           lat:43.6108, lng:3.8767 },
+  { nom:'Mèze',                  slug:'meze',                  lat:43.4255, lng:3.6045 },
+  { nom:'Béziers',               slug:'beziers',               lat:43.3412, lng:3.2140 },
+  { nom:'Argeliers',             slug:'argeliers',             lat:43.3122, lng:2.9105 },
+  { nom:'La Redorte',            slug:'la-redorte',            lat:43.2539, lng:2.6350 },
+  { nom:'Carcassonne',           slug:'carcassonne',           lat:43.2167, lng:2.3500 }
+];
+// Le reste du parcours prevu apres Carcassonne, jusqu'au but.
+const SUITE = [
+  { nom:'Toulouse',    lat:43.6047, lng: 1.4442 },
+  { nom:'Bordeaux',    lat:44.8378, lng:-0.5792 },
+  { nom:'La Rochelle', lat:46.1591, lng:-1.1578 },
+  { nom:'Nantes',      lat:47.2199, lng:-1.5582 },
+  { nom:'Angers',      lat:47.4784, lng:-0.5632 },
+  { nom:'Rennes',      lat:48.1173, lng:-1.6778 },
+  { nom:'Saint-Malo',  lat:48.6493, lng:-2.0257 }
+];
+// Le chiffre annonce par Erwan lui-meme (« A Carcassonne j'aurai fait 500 km »).
+// A remplacer par le releve GPS.
+const KM_ANNONCE = 500;
+
+const PAYSAGE = /[?&]paysage/.test(location.search);
+document.documentElement.classList.toggle('paysage', PAYSAGE);
+const W = PAYSAGE ? 1920 : 1080, H = PAYSAGE ? 1080 : 1920;
+document.getElementById('carte').setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+
+const lisse = x => x<0?0 : x>1?1 : x*x*(3-2*x);
+const seg = (t,a,b) => lisse((t-a)/(b-a));
+const fen = (t,a,b,c,d) => Math.min(seg(t,a,b), 1-seg(t,c,d));
+const mix = (a,b,k) => a + (b-a)*k;
+
+function graine(s){ return function(){ s=(s*1664525+1013904223)%4294967296; return s/4294967296; }; }
+const alea = graine(20260906);
+const ciel = document.getElementById('stars');
+const etoiles = [];
+for (let i=0;i<150;i++){
+  const s=document.createElement('span'); const d=2+alea()*4;
+  s.style.left=(alea()*W)+'px'; s.style.top=(alea()*H)+'px';
+  s.style.width=d+'px'; s.style.height=d+'px';
+  ciel.appendChild(s);
+  etoiles.push({el:s, base:.25+alea()*.5, vitesse:.6+alea()*1.4, phase:alea()*6.28});
+}
+
+// ───────────────────────────────────────── les mots
+const UNITES = ['zéro','un','deux','trois','quatre','cinq','six','sept','huit','neuf','dix',
+  'onze','douze','treize','quatorze','quinze','seize','dix-sept','dix-huit','dix-neuf'];
+const DIZAINES = ['','','vingt','trente','quarante','cinquante','soixante','soixante','quatre-vingt','quatre-vingt'];
+function enLettres(n){
+  if (n < 20) return UNITES[n];
+  if (n < 100){
+    const d = Math.floor(n/10), u = n%10;
+    if (d === 7 || d === 9) return DIZAINES[d] + (u===1 && d===7 ? ' et ' : '-') + UNITES[10+u];
+    let s = DIZAINES[d];
+    if (u === 0) return d === 8 ? s + 's' : s;
+    return s + (u === 1 ? ' et un' : '-' + UNITES[u]);
+  }
+  if (n < 1000){
+    const c = Math.floor(n/100), r = n%100;
+    let s = (c > 1 ? UNITES[c] + ' ' : '') + 'cent';
+    if (c > 1 && r === 0) s += 's';
+    return r ? s + ' ' + enLettres(r) : s;
+  }
+  const m = Math.floor(n/1000), r = n%1000;
+  let s = (m > 1 ? UNITES[m] + ' ' : '') + 'mille';
+  return r ? s + ' ' + enLettres(r) : s;
+}
+function tenir(el, largeurMax){
+  const r = document.createRange();
+  r.selectNodeContents(el);
+  const l = r.getBoundingClientRect().width;
+  if (l > largeurMax)
+    el.style.fontSize = (parseFloat(getComputedStyle(el).fontSize) * largeurMax / l).toFixed(1) + 'px';
+}
+
+// ───────────────────────────────────────── la projection (Mercator, comme etape.html)
+const merc = lat => Math.log(Math.tan(Math.PI/4 + lat*Math.PI/360));
+const monde = o => [o.lng*Math.PI/180, merc(o.lat)];
+const MONDE = LIEUX.map(monde);
+const MONDE_SUITE = SUITE.map(monde);
+
+// La vue lointaine : tout le parcours Nice -> Saint-Malo, comme les autres videos.
+const TOUT = [LIEUX[0]].concat(SUITE);
+const tx = TOUT.map(o => o.lng*Math.PI/180), ty = TOUT.map(o => merc(o.lat));
+const X0=Math.min(...tx), X1=Math.max(...tx), Y0=Math.min(...ty), Y1=Math.max(...ty);
+const LOIN = PAYSAGE ? { x:1060, y:110, w:800, h:860 } : { x:120, y:470, w:840, h:1000 };
+const ECH_LOIN = Math.min(LOIN.w/(X1-X0), LOIN.h/(Y1-Y0));
+const CENTRE_LOIN = [(X0+X1)/2, (Y0+Y1)/2];
+const ANCRE_LOIN = [LOIN.x + LOIN.w/2, LOIN.y + LOIN.h/2];
+// La vue proche : le cycliste reste a peu pres au meme endroit, la carte defile.
+const ECH_PRES = 450 * 180 / Math.PI;                    // 450 px par degre de longitude
+const ANCRE_PRES = PAYSAGE ? [1400, 540] : [540, 900];
+
+// ───────────────────────────────────────── le montage
+// Tous les reperes de temps ici : l'image les lit pour se peindre, le son les lit
+// (window.__reperes) pour poser ses notes.
+const N = LIEUX.length;
+const PAS = 0.85;                                       // une ville toutes les 0,85 s
+const T0 = 2.4;                                         // Nice
+const quand = i => T0 + i*PAS;
+const ARRIVEE = quand(N-1);
+const T = {
+  zoom: [ARRIVEE + 1.05, ARRIVEE + 3.75],               // la carte recule : tout le parcours
+  km: [ARRIVEE + 3.0, ARRIVEE + 3.8],
+  villes: [ARRIVEE + 3.8, ARRIVEE + 4.6],
+  carte: [0.5, 1.5, ARRIVEE + 7.4, ARRIVEE + 8.1],      // la scene de la carte
+  vitrine: { scene: [ARRIVEE + 7.8, ARRIVEE + 8.5, ARRIVEE + 11.6, ARRIVEE + 12.3], piece0: ARRIVEE + 8.1, pas: 0.30,
+             collection: [ARRIVEE + 10.3, ARRIVEE + 11.1, ARRIVEE + 11.5, ARRIVEE + 12.1] },
+  chute: { scene: [ARRIVEE + 12.2, ARRIVEE + 12.9], fin: [ARRIVEE + 12.5, ARRIVEE + 13.2], url: [ARRIVEE + 13.4, ARRIVEE + 14.1] },
+  duree: ARRIVEE + 15.0
+};
+window.__duree = T.duree;
+window.__reperes = {
+  duree: T.duree,
+  lieux: LIEUX.map((_, i) => quand(i)),
+  zoom: T.zoom, km: T.km[0], villes: T.villes[0],
+  piece0: T.vitrine.piece0, pas: T.vitrine.pas,
+  collection: T.vitrine.collection[0],
+  chute: T.chute.scene[0], url: T.chute.url[0]
+};
+
+// Ou en est le cycliste : un indice fractionnaire. Il s'arrete dans chaque ville
+// puis repart, pour qu'on ait le temps de lire le nom.
+function avancee(t){
+  if (t <= quand(0)) return 0;
+  for (let i = 1; i < N; i++)
+    if (t <= quand(i)) return i - 1 + seg(t, quand(i) - 0.55, quand(i));
+  return N - 1;
+}
+const position = s => {
+  const i = Math.min(N - 2, Math.floor(s)), k = s - i;
+  return [mix(MONDE[i][0], MONDE[i+1][0], k), mix(MONDE[i][1], MONDE[i+1][1], k)];
+};
+// La camera suit le cycliste en moyenne sur une seconde : elle glisse, sans saccade.
+function camera(t){
+  let x = 0, y = 0;
+  for (let k = -4; k <= 4; k++){ const p = position(avancee(t + k*0.125)); x += p[0]; y += p[1]; }
+  return [x/9, y/9];
+}
+
+// ───────────────────────────────────────── la carte
+const gPts = document.getElementById('pts'), gNoms = document.getElementById('noms');
+const svgNS = 'http://www.w3.org/2000/svg';
+const fantome = document.getElementById('fantome'), fait = document.getElementById('fait'), tete = document.getElementById('tete');
+const dots = LIEUX.map(() => {
+  const c = document.createElementNS(svgNS, 'circle'); c.setAttribute('class', 'pt validee'); gPts.appendChild(c); return c;
+});
+const dotsSuite = SUITE.map((o, i) => {
+  const c = document.createElementNS(svgNS, 'circle');
+  c.setAttribute('class', 'pt' + (i === SUITE.length-1 ? ' but' : ''));
+  gPts.appendChild(c); return c;
+});
+const nomBut = document.createElementNS(svgNS, 'text');
+nomBut.setAttribute('class', 'nom'); nomBut.setAttribute('text-anchor', 'middle');
+nomBut.textContent = SUITE[SUITE.length-1].nom;
+gNoms.appendChild(nomBut);
+
+// ───────────────────────────────────────── un bloc de texte par lieu
+const zoneLieux = document.getElementById('lieux');
+const LARGEUR_TEXTE = PAYSAGE ? 840 : 960;
+const blocs = LIEUX.map((l, i) => {
+  const d = document.createElement('div');
+  d.className = 'lieu';
+  d.innerHTML = '<div class="n"></div><div class="c"></div>';
+  d.querySelector('.n').textContent = l.nom;
+  d.querySelector('.c').textContent = i === 0 ? 'le départ' : enLettres(i + 1).replace(/\bun$/, 'une') + ' villes';
+  zoneLieux.appendChild(d);
+  tenir(d.querySelector('.n'), LARGEUR_TEXTE);
+  return d;
+});
+document.getElementById('bilan-km').textContent = enLettres(KM_ANNONCE) + ' kilomètres';
+document.getElementById('bilan-villes').textContent = enLettres(N) + ' villes traversées';
+tenir(document.getElementById('bilan-km'), LARGEUR_TEXTE);
+tenir(document.getElementById('bilan-villes'), LARGEUR_TEXTE);
+
+// ───────────────────────────────────────── les photos, si elles existent
+// recap-photos/<slug>.jpg (ou .jpeg, .png, .webp). Sans photo, rien ne change.
+const fonds = LIEUX.map(() => null);
+const sonde = (l, i) => new Promise(fini => {
+  const exts = ['jpg', 'jpeg', 'png', 'webp'];
+  const essai = k => {
+    if (k >= exts.length) return fini();
+    const im = new Image();
+    im.onload = () => { l.photo = im.src; fini(); };
+    im.onerror = () => essai(k + 1);
+    im.src = 'recap-photos/' + l.slug + '.' + exts[k];
+  };
+  essai(0);
+});
+window.__pret = Promise.all(LIEUX.map(sonde)).then(() => {
+  LIEUX.forEach((l, i) => {
+    if (!l.photo) return;
+    const d = document.createElement('div');
+    d.className = 'fond';
+    d.style.backgroundImage = 'url("' + l.photo + '")';
+    document.getElementById('fonds').appendChild(d);
+    fonds[i] = d;
+  });
+  window.__photos = LIEUX.filter(l => l.photo).map(l => l.slug);
+  window.__render(0);
+});
+
+// ───────────────────────────────────────── la vitrine : l'ordre est celui de la boutique
+const PIECES = ['tshirt-noir', 'tshirt-blanc', 'short-noir', 'sans-manches', 'hoodie'];
+const vitrine = document.getElementById('vitrine');
+const PAS_PIECE = PAYSAGE ? 270 : 200;
+const etals = PIECES.map((nom, i) => {
+  const d = document.createElement('div');
+  d.className = 'piece';
+  d.style.left = (i * PAS_PIECE) + 'px';
+  d.innerHTML = '<div class="fenetre"></div>' +
+                '<img src="../assets/products/' + nom + '.png" alt="">';
+  vitrine.appendChild(d);
+  d.querySelector('.fenetre').style.backgroundPositionX = (-i * PAS_PIECE) + 'px';
+  return d;
+});
+
+const el = id => document.getElementById(id);
+const pt = d => d[0].toFixed(1) + ' ' + d[1].toFixed(1);
+
+window.__render = function(t){
+  etoiles.forEach(e=>{
+    const s=e.base*(0.45+0.55*Math.abs(Math.sin(e.phase+t*e.vitesse)));
+    e.el.style.opacity=(s*Math.min(1,seg(t,0,1.0))).toFixed(3);
+  });
+
+  el('entete').style.opacity = fen(t, 0.4, 1.4, T.carte[2], T.carte[3]).toFixed(3);
+  el('titre').style.opacity  = seg(t, 1.0, 2.0).toFixed(3);
+  el('scene1').style.opacity = fen(t, ...T.carte).toFixed(3);
+
+  // la camera : proche du cycliste, puis elle recule
+  const z = seg(t, ...T.zoom);
+  const echelle = Math.exp(mix(Math.log(ECH_PRES), Math.log(ECH_LOIN), z));
+  const cam = camera(t), centre = [mix(cam[0], CENTRE_LOIN[0], z), mix(cam[1], CENTRE_LOIN[1], z)];
+  const ancre = [mix(ANCRE_PRES[0], ANCRE_LOIN[0], z), mix(ANCRE_PRES[1], ANCRE_LOIN[1], z)];
+  const ecran = m => [ancre[0] + (m[0] - centre[0]) * echelle, ancre[1] - (m[1] - centre[1]) * echelle];
+
+  const s = avancee(t);
+  const E = MONDE.map(ecran);
+  const tp = ecran(position(s));
+  const jusque = Math.floor(s + 1e-6);
+
+  fantome.setAttribute('d', [E[N-1]].concat(MONDE_SUITE.map(ecran)).map((p, i) => (i ? 'L ' : 'M ') + pt(p)).join(' '));
+  fantome.style.opacity = (0.9 * seg(t, 1.0, 2.0)).toFixed(3);
+  fait.setAttribute('d', E.slice(0, jusque + 1).concat(s > jusque + 1e-6 ? [tp] : [])
+                          .map((p, i) => (i ? 'L ' : 'M ') + pt(p)).join(' '));
+
+  const r = mix(13, 6, z);
+  dots.forEach((c, i) => {
+    const k = seg(s, i - 0.1, i + 0.15) * seg(t, quand(0) - 0.3, quand(0));
+    c.setAttribute('cx', E[i][0].toFixed(1)); c.setAttribute('cy', E[i][1].toFixed(1));
+    c.setAttribute('r', (r * (0.5 + 0.5*k)).toFixed(2));
+    c.style.opacity = k.toFixed(3);
+  });
+  const rs = mix(13, 7, z);
+  dotsSuite.forEach((c, i) => {
+    const p = ecran(MONDE_SUITE[i]);
+    c.setAttribute('cx', p[0].toFixed(1)); c.setAttribute('cy', p[1].toFixed(1));
+    c.setAttribute('r', (i === SUITE.length-1 ? rs + 6 : rs).toFixed(2));
+    c.style.opacity = (0.75 * seg(t, 1.5, 2.3)).toFixed(3);
+  });
+  const pb = ecran(MONDE_SUITE[SUITE.length-1]);
+  nomBut.setAttribute('x', Math.min(W - 56 - 100, Math.max(56 + 100, pb[0])).toFixed(1));
+  nomBut.setAttribute('y', (pb[1] - 40).toFixed(1));
+  nomBut.style.opacity = (0.9 * seg(t, T.zoom[0] + 0.6, T.zoom[1])).toFixed(3);
+
+  // la tete : un anneau violet qui bat doucement, plus petit quand la carte recule
+  const pouls = 1 + 0.12 * Math.sin(t * 6);
+  tete.setAttribute('cx', tp[0].toFixed(1)); tete.setAttribute('cy', tp[1].toFixed(1));
+  tete.setAttribute('r', (mix(26, 14, z) * pouls).toFixed(2));
+  tete.style.opacity = seg(t, quand(0) - 0.2, quand(0) + 0.2).toFixed(3);
+
+  // le nom du lieu, un a la fois ; le dernier reste jusqu'au recul de la carte
+  blocs.forEach((b, i) => {
+    // le nom precedent a fini de s'effacer avant que le suivant ne paraisse :
+    // deux noms superposes se liraient mal
+    const a = quand(i) - 0.04, b2 = quand(i) + 0.16;
+    const fin = i === N - 1 ? [T.zoom[0], T.zoom[0] + 0.6] : [quand(i+1) - 0.3, quand(i+1) - 0.08];
+    b.style.opacity = fen(t, a, b2, ...fin).toFixed(3);
+  });
+  // les photos, si on en a : un fondu lent, avec un leger travelling
+  fonds.forEach((d, i) => {
+    if (!d) return;
+    const fin = i === N - 1 ? [T.zoom[0], T.zoom[0] + 1.0] : [quand(i+1) - 0.1, quand(i+1) + 0.35];
+    const k = fen(t, quand(i) - 0.35, quand(i) + 0.1, ...fin);
+    d.style.opacity = (0.42 * k).toFixed(3);
+    d.style.transform = 'scale(' + (1 + 0.06 * Math.min(1, Math.max(0, (t - quand(i) + 0.35) / 2))).toFixed(4) + ')';
+  });
+
+  el('bilan-km').style.opacity     = seg(t, ...T.km).toFixed(3);
+  el('bilan-villes').style.opacity = seg(t, ...T.villes).toFixed(3);
+
+  // la vitrine
+  el('scene3').style.opacity = fen(t, ...T.vitrine.scene).toFixed(3);
+  etals.forEach((d,i)=>{
+    const k = seg(t, T.vitrine.piece0 + i*T.vitrine.pas, T.vitrine.piece0 + 0.8 + i*T.vitrine.pas);
+    d.style.opacity = k.toFixed(3);
+    d.style.transform = 'translateY(' + (34*(1-k)).toFixed(1) + 'px)';
+  });
+  el('collection').style.opacity = fen(t, ...T.vitrine.collection).toFixed(3);
+
+  // la chute
+  el('scene4').style.opacity = seg(t, ...T.chute.scene).toFixed(3);
+  el('fin').style.opacity    = seg(t, ...T.chute.fin).toFixed(3);
+  el('url').style.opacity    = seg(t, ...T.chute.url).toFixed(3);
+};
+window.__render(0);
+</script>

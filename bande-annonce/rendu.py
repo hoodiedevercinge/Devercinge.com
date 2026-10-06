@@ -41,6 +41,7 @@ with sync_playwright() as p:
     pg.on('pageerror', lambda e: fautes.append(str(e)))
     pg.goto('file://' + os.path.join(ICI, PAGE) + ('?' + FORMAT if FORMAT else ''))
     pg.wait_for_timeout(900)
+    pg.evaluate('window.__pret || null')      # les pages a photos attendent leurs images
 
     duree = pg.evaluate('window.__duree')
     n = int(round(duree * FPS))

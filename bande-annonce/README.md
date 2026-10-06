@@ -21,6 +21,8 @@ calcul. Aucune source exterieure, donc rien a crediter ni a licencier.
 | `devercinge-etape-meze-paysage.mp4` | la meme, en paysage. |
 | `devercinge-etape-beziers.mp4`, `-argeliers.mp4`, `-la-redorte.mp4`, `-carcassonne.mp4` | les quatre etapes suivantes, en portrait (et leurs versions `-paysage.mp4`). |
 | `etapes.py` | produit d'un coup le son, le portrait et le paysage d'une ou de plusieurs etapes. |
+| `recap.html`, `son-recap.py`, `recap.py` | la bande-annonce recap : tous les lieux deja traverses, d'une traite (voir « La bande-annonce recap »). |
+| `devercinge-recap.mp4`, `devercinge-recap-paysage.mp4` | la bande-annonce recap, en portrait et en paysage. |
 | `devercinge-banniere.mp4` | la banniere, 1920x1080, 12 s, sans son, faite pour boucler. |
 | `devercinge-banniere-reel.mp4` | la banniere pour Instagram, 1080x1920, 12 s, avec son, en boucle. |
 | `devercinge-episode-1-reel.mp4` | la meme avec « Episode 1 » en grand au centre. |
@@ -365,3 +367,41 @@ fichier desynchronise l'image et le son. Les constantes qui comptent sont
 Saint-Malo, comme sur `aventure.html` au repos. Un relais de tous les noms
 avait ete essaye : chaque nom ne tenait que trois dixiemes de seconde, donc
 illisible, et le defile des monuments les nomme deja un par un.
+
+## La bande-annonce recap
+
+`recap.html` raconte, en 35 s, **tous les lieux que Erwan a traverses**, dans
+l'ordre ou il les a lui-meme listes (Nice, Cannes, Frejus, ... Carcassonne :
+vingt-deux lieux). Une cloche par lieu, de plus en plus haut ; le nom et le
+nombre de villes (« dix villes ») apparaissent un a la fois, sans se superposer.
+La carte suit le cycliste de tres pres, puis recule pour montrer le parcours
+entier jusqu'a Saint-Malo ; viennent ensuite les kilometres en lettres, la
+vitrine et la chute devercinge.com, comme les videos d'etape.
+
+```sh
+CHROMIUM=/opt/pw-browsers/chromium python3 recap.py     # son + portrait + paysage
+```
+
+Ou pas a pas : `python3 son-recap.py`, `python3 rendu.py recap.html` et
+`python3 rendu.py recap.html paysage`, puis ffmpeg comme pour une etape.
+
+- **Les lieux** sont la liste `LIEUX` en haut du script de la page (nom, slug,
+  latitude, longitude) ; `SUITE` est ce qui reste jusqu'a Saint-Malo. Pour
+  ajouter un lieu, l'ajouter a la fin de `LIEUX` : la duree, le son et le
+  decompte suivent.
+- **Les kilometres** affiches a la fin sont `KM_ANNONCE` : le chiffre de Erwan
+  lui-meme (« a Carcassonne j'aurai fait 500 km »), pas une estimation. Les
+  videos d'etape, elles, affichent des estimations a vol d'oiseau (474 km a
+  Carcassonne) : les deux ne coincident pas encore. A remplacer par le releve
+  GPS.
+- **Les photos des villes sont facultatives.** Un fichier
+  `recap-photos/<slug>.jpg` (`.jpeg`, `.png` ou `.webp`) devient un fond
+  tres sombre, avec un leger travelling, pendant que le cycliste est dans la
+  ville. Sans fichier, la page est identique : rien a changer. `rendu.py`
+  attend la fin du chargement (`window.__pret`) avant de filmer.
+- **Camera.** `camera(t)` moyenne la position du cycliste sur une seconde pour
+  glisser sans saccade ; le zoom interpole l'echelle en geometrique, de 450 px
+  par degre de longitude a l'echelle du parcours entier.
+- **Le son** lit `window.__reperes` dans la page, comme `son-etape.py` : une
+  cloche par lieu sur une gamme pentatonique de trois octaves.
+- **Paysage** : la carte vit a droite, derriere un fondu, les textes a gauche.
