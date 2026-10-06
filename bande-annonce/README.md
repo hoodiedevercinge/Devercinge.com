@@ -19,7 +19,7 @@ calcul. Aucune source exterieure, donc rien a crediter ni a licencier.
 | `devercinge-etape-montpellier-paysage.mp4` | la meme, en paysage (1920x1080). |
 | `devercinge-etape-meze.mp4` | l'etape de Meze, en portrait, avec l'augmentation des kilometres. |
 | `devercinge-etape-meze-paysage.mp4` | la meme, en paysage. |
-| `devercinge-etape-beziers.mp4`, `-argeliers.mp4`, `-la-redorte.mp4` | les trois etapes suivantes, en portrait (et leurs versions `-paysage.mp4`). |
+| `devercinge-etape-beziers.mp4`, `-argeliers.mp4`, `-la-redorte.mp4`, `-carcassonne.mp4` | les quatre etapes suivantes, en portrait (et leurs versions `-paysage.mp4`). |
 | `etapes.py` | produit d'un coup le son, le portrait et le paysage d'une ou de plusieurs etapes. |
 | `devercinge-banniere.mp4` | la banniere, 1920x1080, 12 s, sans son, faite pour boucler. |
 | `devercinge-banniere-reel.mp4` | la banniere pour Instagram, 1080x1920, 12 s, avec son, en boucle. |
@@ -107,7 +107,7 @@ Elle n'est pas dans le trace, donc `plus_loin`. Deux consequences a connaitre :
 Le monument de Meze est un pointu et des tables a huitres (l'etang de Thau). Une
 nouvelle etape hors trace demande son propre dessin dans `MONUMENTS_ETAPES`.
 
-### Des etapes tres rapprochees : Beziers, Argeliers, La Redorte
+### Des etapes tres rapprochees : Beziers, Argeliers, La Redorte, Carcassonne
 
 A 25 km les unes des autres (une vingtaine de pixels sur la carte), les etapes
 s'entassent. Ce que la page fait pour que ca reste lisible :
@@ -122,15 +122,22 @@ s'entassent. Ce que la page fait pour que ca reste lisible :
   Narbonne. Le solveur ne s'applique qu'aux etapes a plusieurs points hors trace ;
   Montpellier et Meze gardent leur placement.
 
-`atteinte` reste a 2 (Montpellier) pour ces quatre etapes : le cycliste suit le
-canal du Midi, qui contourne Narbonne a 16 km. Narbonne n'est donc pas comptee ;
+`atteinte` reste a 2 (Montpellier) pour ces cinq etapes (Meze comprise) : le cycliste
+suit le canal du Midi, qui contourne Narbonne a 16 km. Narbonne n'est donc pas comptee ;
 « trois villes sur onze » reste vrai jusqu'a ce qu'il y passe, ou la franchisse.
 
 **Les coordonnees ne viennent pas de la memoire** : de la base GeoNames hors ligne
 (paquet PyPI `reverse_geocoder`, fichier `rg_cities1000.csv`, communes de plus de
 1 000 habitants). Verification utile : Meze y est a 0,6 km des coordonnees que
 j'avais saisies. La Redorte, trop petite pour y figurer, est placee entre Azille
-et Puicheric, a 2 km pres.
+et Puicheric, a 2 km pres. Carcassonne y figure (43,2167 N, 2,3500 E) : elle est a
+15 km de la ligne droite Narbonne-Toulouse, ce qui est normal, le vrai chemin
+passant par Carcassonne alors que la ligne grise relie simplement deux villes.
+
+Les kilometres suivent la meme methode pour toutes les etapes (distance a vol
+d'oiseau x 1,1303). Elle sous-estime sans doute un trace qui serpente : le canal du
+Midi entre La Redorte et Carcassonne fait plus de 27 km. Le releve GPS remplace
+ces estimations, une etape a la fois, dans le champ `km` du JSON.
 
 **Verifie** : en passant la page en donnees, la video de Montpellier est restee
 **identique au pixel pres** (14 images dans chaque format, ecart nul) et son son
