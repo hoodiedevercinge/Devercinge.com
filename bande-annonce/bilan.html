@@ -9,18 +9,18 @@
   #stars{ position:absolute; inset:0; }
   #stars span{ position:absolute; background:var(--ink); border-radius:50%; }
   #logo{ position:absolute; left:50%; top:560px; width:230px; transform:translate(-50%,-50%);
-         filter:drop-shadow(0 0 50px rgba(176,92,255,.6)); }
+         filter:drop-shadow(0 0 40px rgba(176,92,255,.35)); }
   .bloc{ position:absolute; left:0; right:0; text-align:center; font-weight:700;
          text-transform:uppercase; white-space:nowrap; }
   /* Une lueur colorée derrière les mots : le violet à gauche, le vert à droite. */
   #halo{ position:absolute; inset:0;
-         background:radial-gradient(ellipse 55% 30% at 12% 52%, rgba(176,92,255,.30), transparent 70%),
-                    radial-gradient(ellipse 55% 30% at 88% 52%, rgba(31,255,142,.22), transparent 70%); }
+         background:radial-gradient(ellipse 55% 30% at 12% 52%, rgba(176,92,255,.11), transparent 65%),
+                    radial-gradient(ellipse 55% 30% at 88% 52%, rgba(31,255,142,.08), transparent 65%); }
   /* Deux arrêts intermédiaires : un simple dégradé violet-vert passe par un bleu-gris terne. */
   /* La boîte épouse le texte : le dégradé va du violet au vert sur les mots eux-mêmes. */
   .degrade{ left:50%; right:auto; width:max-content; transform:translateX(-50%);
             background:linear-gradient(90deg,var(--violet) 0%,#6f86ff 36%,#17e6c4 68%,var(--green) 100%);
-            filter:drop-shadow(0 0 14px rgba(176,92,255,.55)) drop-shadow(0 0 38px rgba(31,255,142,.30));
+            filter:drop-shadow(0 0 10px rgba(176,92,255,.40)) drop-shadow(0 0 24px rgba(31,255,142,.18));
             -webkit-background-clip:text; background-clip:text;
             -webkit-text-fill-color:transparent; }
   #nb{ top:810px; font-size:128px; letter-spacing:.06em; padding-left:.06em; line-height:1.1; }

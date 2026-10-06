@@ -22,7 +22,7 @@ calcul. Aucune source exterieure, donc rien a crediter ni a licencier.
 | `devercinge-etape-beziers.mp4`, `-argeliers.mp4`, `-la-redorte.mp4`, `-carcassonne.mp4` | les quatre etapes suivantes, en portrait (et leurs versions `-paysage.mp4`). |
 | `etapes.py` | produit d'un coup le son, le portrait et le paysage d'une ou de plusieurs etapes. |
 | `recap.html`, `son-recap.py`, `recap.py` | la bande-annonce recap : tous les lieux deja traverses, d'une traite (voir « La bande-annonce recap »). |
-| `bilan.html`, `image-bilan-500km.png`, `image-bilan-500km-paysage.png` | la page « cinq cents kilometres / vingt-deux villes traversees » seule, en image (portrait et paysage). Les chiffres `KM` et `VILLES` en haut de `bilan.html` sont ceux de `recap.html` : a mettre a jour ensemble. Images : `python3 couverture.py bilan.html "" 4 image.png` (ou `paysage`). |
+| `bilan.html`, `image-bilan-500km.png`, `image-bilan-500km-paysage.png` | la page « cinq cents kilometres / vingt-deux villes traversees » seule, en image (portrait et paysage). Les chiffres `KM` et `VILLES` en haut de `bilan.html` sont ceux de `recap.html` : a mettre a jour ensemble. Images : `python3 couverture.py bilan.html "" 4 image.png` (ou `paysage`). Ajouter `2` en dernier argument donne la 4K (2160x3840 ou 3840x2160) : `image-bilan-500km-4k.png` et `image-bilan-500km-paysage-4k.png`. |
 | `devercinge-recap.mp4`, `devercinge-recap-paysage.mp4` | la bande-annonce recap, en portrait et en paysage. |
 | `devercinge-banniere.mp4` | la banniere, 1920x1080, 12 s, sans son, faite pour boucler. |
 | `devercinge-banniere-reel.mp4` | la banniere pour Instagram, 1080x1920, 12 s, avec son, en boucle. |
