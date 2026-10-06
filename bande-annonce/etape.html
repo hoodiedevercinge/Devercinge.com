@@ -110,6 +110,20 @@
   #reste-titre{ top:800px; font-size:40px; }
   #reste-nb{ top:900px; font-size:46px; letter-spacing:.14em; padding-left:.14em; line-height:1.55; }
 
+  /* L'augmentation depuis la derniere etape : meme degrade que « trois villes
+     sur onze », plus grande que les kilometres parcourus pour qu'on la lise
+     comme une progression. Absente (et sans effet) quand l'etape n'en a pas. */
+  #plus, #depuis{ display:none; position:absolute; left:0; right:0; text-align:center;
+                  text-transform:uppercase; }
+  .avec-plus #plus, .avec-plus #depuis{ display:block; }
+  #plus{
+    top:1585px; font-size:44px; font-weight:700; letter-spacing:.14em; padding-left:.14em;
+    background:linear-gradient(90deg,var(--violet),var(--green));
+    -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+  #depuis{ top:1655px; font-size:28px; letter-spacing:.2em; padding-left:.2em; color:var(--dim); }
+
   #url{
     position:absolute; left:0; right:0; text-align:center;
     font-size:34px; letter-spacing:.3em; text-transform:uppercase;
@@ -126,7 +140,9 @@
   .paysage #titre{ right:auto; width:960px; top:590px; }
 
   .paysage #scene2 svg{ left:480px; top:540px; }
-  .paysage #ville, .paysage #compte, .paysage #km{ left:960px; }
+  .paysage #ville, .paysage #compte, .paysage #km, .paysage #plus, .paysage #depuis{ left:960px; }
+  .paysage #plus{ top:725px; font-size:42px; }
+  .paysage #depuis{ top:792px; font-size:26px; }
   .paysage #ville{ top:380px; font-size:84px; }
   .paysage #compte{ top:545px; font-size:42px; }
   .paysage #km{ top:630px; font-size:32px; }
@@ -171,6 +187,8 @@
   <div id="ville"></div>
   <div id="compte"></div>
   <div id="km"></div>
+  <div id="plus"></div>
+  <div id="depuis"></div>
 </div>
 
 <div class="layer" id="scene2b">
@@ -190,13 +208,34 @@
   <div id="url">devercinge.com</div>
 </div>
 
+<!-- Une etape par entree. La page affiche celle que demande ?etape=nom
+     (montpellier par defaut). Pour une nouvelle etape, ajouter une entree :
+       atteinte  indice de la derniere VILLE DU TRACE franchie (0 = Nice)
+       km        kilometres parcourus -- a remplacer par le releve GPS
+       km_avant  (facultatif) km de l'etape precedente : affiche l'augmentation
+       depuis    (avec km_avant) nom de l'etape precedente
+       plus_loin (facultatif) quand l'etape n'est pas l'une des onze villes :
+                 son nom, sa latitude, sa longitude ; elle se place apres
+                 la ville `atteinte`, et son monument est dans monuments.js
+                 (MONUMENTS_ETAPES) -->
+<script type="application/json" id="etapes">
+{
+  "montpellier": { "atteinte": 2, "km": 322 },
+  "meze": { "atteinte": 2, "km": 356, "km_avant": 322, "depuis": "Montpellier",
+            "plus_loin": { "nom": "Mèze", "lat": 43.4255, "lng": 3.6045 } }
+}
+</script>
+
 <script src="monuments.js"></script>
 <script>
-// ───────────────────────────── ce qu'il faut changer d'une etape a l'autre
-const ATTEINTE = 2;     // indice de la derniere ville franchie (0 = Nice)
-const KM_FAITS = 322;   // kilometres parcourus -- a remplacer par le releve GPS
-const KM_TOTAL = 1408;  // longueur du parcours ; le reste s'en deduit
-// ──────────────────────────────────────────────────────────────────────────
+const ETAPES = JSON.parse(document.getElementById('etapes').textContent);
+const NOM_ETAPE = (location.search.match(/[?&]etape=([a-z0-9-]+)/) || [])[1] || 'montpellier';
+const E = ETAPES[NOM_ETAPE];
+if (!E) throw new Error('etape inconnue : ' + NOM_ETAPE);
+const ATTEINTE = E.atteinte;
+const KM_FAITS = E.km;
+const KM_TOTAL = 1408;            // longueur du parcours ; le reste s'en deduit
+const PLUS_LOIN = E.plus_loin || null;
 
 // Portrait par defaut ; ?paysage pour la version 1920x1080.
 const PAYSAGE = /[?&]paysage/.test(location.search);
@@ -245,55 +284,79 @@ const dx = CADRE.x + (CADRE.w - (x1-x0)*ech)/2, dy = CADRE.y + (CADRE.h - (y1-y0
 const P = VILLES.map((v,i) => [dx + (bx[i]-x0)*ech, dy + (y1-by[i])*ech]);
 const d = (a,b) => (b?'L ':'M ') + a[0].toFixed(1) + ' ' + a[1].toFixed(1);
 
+// L'etape hors trace est projetee comme les villes : meme echelle, meme origine.
+const PM = PLUS_LOIN ? [dx + (PLUS_LOIN.lng*Math.PI/180 - x0)*ech, dy + (y1 - merc(PLUS_LOIN.lat))*ech] : null;
+const PTS_FAITS = P.slice(0, ATTEINTE+1).concat(PM ? [PM] : []);   // ce que le trait vert parcourt
+const DERNIER = PTS_FAITS.length - 1;
+
 document.getElementById('fantome').setAttribute('d', P.map((p,i)=>d(p,i)).join(' '));
 const fait = document.getElementById('fait');
-fait.setAttribute('d', P.slice(0, ATTEINTE+1).map((p,i)=>d(p,i)).join(' '));
+fait.setAttribute('d', PTS_FAITS.map((p,i)=>d(p,i)).join(' '));
 const LFAIT = fait.getTotalLength();
 fait.style.strokeDasharray = LFAIT;
 
 // Longueur cumulee le long de la portion faite, pour allumer chaque ville
 // au moment ou le trait l'atteint vraiment.
 const CUM = [0];
-for (let i=1;i<=ATTEINTE;i++)
-  CUM.push(CUM[i-1] + Math.hypot(P[i][0]-P[i-1][0], P[i][1]-P[i-1][1]));
+for (let i=1;i<=DERNIER;i++)
+  CUM.push(CUM[i-1] + Math.hypot(PTS_FAITS[i][0]-PTS_FAITS[i-1][0], PTS_FAITS[i][1]-PTS_FAITS[i-1][1]));
 
 const gPts = document.getElementById('pts'), gNoms = document.getElementById('noms');
 const pastilles = [], coches = [];
-VILLES.forEach((v,i)=>{
-  const faite = i <= ATTEINTE, but = i === VILLES.length-1;
+// `rang` : la place du point sur le trait vert, ou -1 s'il n'est pas encore franchi.
+function pastille(xy, rang, but, rayon, sansCoche){
+  const faite = rang >= 0;
   const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
-  c.setAttribute('cx', P[i][0]); c.setAttribute('cy', P[i][1]);
-  c.setAttribute('r', faite ? 24 : but ? 20 : 13);
+  c.setAttribute('cx', xy[0]); c.setAttribute('cy', xy[1]);
+  c.setAttribute('r', rayon || (faite ? 24 : but ? 20 : 13));
   c.setAttribute('class', 'pt' + (faite ? ' validee' : but ? ' but' : ''));
-  gPts.appendChild(c); pastilles.push(c);
-
-  if (faite){
-    const k = document.createElementNS('http://www.w3.org/2000/svg','path');
-    k.setAttribute('class','coche');
-    k.setAttribute('d', 'M ' + (P[i][0]-10) + ' ' + P[i][1] +
-                   ' L ' + (P[i][0]-3) + ' ' + (P[i][1]+7) +
-                   ' L ' + (P[i][0]+10) + ' ' + (P[i][1]-8));
-    gPts.appendChild(k); coches.push(k);
-  } else coches.push(null);
+  gPts.appendChild(c);
+  let coche = null;
+  if (faite && !sansCoche){
+    coche = document.createElementNS('http://www.w3.org/2000/svg','path');
+    coche.setAttribute('class','coche');
+    coche.setAttribute('d', 'M ' + (xy[0]-10) + ' ' + xy[1] +
+                   ' L ' + (xy[0]-3) + ' ' + (xy[1]+7) +
+                   ' L ' + (xy[0]+10) + ' ' + (xy[1]-8));
+    gPts.appendChild(coche);
+  }
+  pastilles.push({ c, coche, xy, rang });
+}
+// Une etape hors trace est tres pres de la ville qui la precede (Meze est a 34 km
+// de Montpellier sur une carte de 1 400 km : une trentaine de pixels). Les deux
+// disques de 24 px se recouvriraient. L'etape du jour est la vedette ; la ville
+// d'avant devient un petit point, dont le rayon se deduit de la distance reelle
+// pour qu'ils ne se touchent jamais.
+const ECART_PM = PM ? Math.hypot(PM[0] - P[ATTEINTE][0], PM[1] - P[ATTEINTE][1]) : 0;
+const R_VEDETTE = PM ? Math.min(24, ECART_PM * 0.6) : 24;
+const R_AVANT   = PM ? Math.max(6, Math.min(14, ECART_PM - R_VEDETTE - 4)) : 24;
+VILLES.forEach((v,i)=>{
+  const precede = PM && i === ATTEINTE;
+  pastille(P[i], i <= ATTEINTE ? i : -1, i === VILLES.length-1, precede ? R_AVANT : 0, precede);
 });
+if (PM) pastille(PM, DERNIER, false, R_VEDETTE);      // l'etape hors trace, par-dessus
 
 // Deux noms seulement : l'etape du jour et le but, pour ne pas charger.
-function etiquette(i, classe, dyy){
+function etiquette(xy, nom, classe, dyy, ancre){
   const t = document.createElementNS('http://www.w3.org/2000/svg','text');
-  t.setAttribute('x', P[i][0]); t.setAttribute('y', P[i][1] + dyy);
-  t.setAttribute('class', classe); t.setAttribute('text-anchor','middle');
-  t.textContent = VILLES[i].nom;
+  t.setAttribute('x', xy[0]); t.setAttribute('y', xy[1] + dyy);
+  t.setAttribute('class', classe); t.setAttribute('text-anchor', ancre || 'middle');
+  t.textContent = nom;
   gNoms.appendChild(t);
   const b = t.getBBox(), M = 56;
   const dd = Math.max(0, M - b.x) - Math.max(0, b.x + b.width - (W - M));
   if (dd) t.setAttribute('x', +t.getAttribute('x') + dd);
   return t;
 }
-const nomEtape = etiquette(ATTEINTE, 'nom', -46);
-const nomBut   = etiquette(VILLES.length-1, 'nom but', -40);
+const NOM_DU_JOUR = PLUS_LOIN ? PLUS_LOIN.nom : VILLES[ATTEINTE].nom;
+// Hors trace, le nom se pose en haut a gauche de l'etape, du cote que la ville
+// d'avant (en haut a droite) ne gene pas.
+const nomEtape = PM ? etiquette([PM[0] + 12, PM[1]], NOM_DU_JOUR, 'nom', -(R_VEDETTE + 22), 'end')
+                    : etiquette(P[ATTEINTE], NOM_DU_JOUR, 'nom', -46);
+const nomBut   = etiquette(P[VILLES.length-1], VILLES[VILLES.length-1].nom, 'nom but', -40);
 
 // ───────────────────────────────────────────── le monument de l'etape
-const mon = MONUMENTS[ATTEINTE];
+const mon = PLUS_LOIN ? MONUMENTS_ETAPES[PLUS_LOIN.nom] : MONUMENTS[ATTEINTE];
 const svgMon = document.createElementNS('http://www.w3.org/2000/svg','svg');
 svgMon.setAttribute('width', 520); svgMon.setAttribute('height', 570);
 svgMon.setAttribute('viewBox','-14 -30 228 250');
@@ -358,26 +421,63 @@ function tenir(el, largeurMax){
     el.style.fontSize = (parseFloat(getComputedStyle(el).fontSize) * largeurMax / l).toFixed(1) + 'px';
 }
 
-document.getElementById('ville').textContent = VILLES[ATTEINTE].nom;
+document.getElementById('ville').textContent = NOM_DU_JOUR;
 document.getElementById('compte').textContent =
   enLettres(ATTEINTE + 1) + ' villes sur ' + enLettres(VILLES.length);
 document.getElementById('km').textContent = enLettres(KM_FAITS) + ' kilomètres';
+// L'augmentation depuis la derniere etape, quand l'etape en a une.
+document.documentElement.classList.toggle('avec-plus', !!E.km_avant);
+if (E.km_avant){
+  document.getElementById('plus').textContent = '+ ' + enLettres(KM_FAITS - E.km_avant) + ' kilomètres';
+  document.getElementById('depuis').textContent = 'depuis ' + E.depuis;
+}
 // Deux lignes : le nombre, puis l'unite. Sur une seule, « mille quatre-vingt-six
 // kilomètres » deborde de l'image des que le nombre s'allonge.
 document.getElementById('reste-nb').innerHTML =
   enLettres(KM_TOTAL - KM_FAITS) + '<br>kilomètres';
 // Largeur disponible : l'image moins deux marges, ou la colonne de droite en paysage.
 const LARGEUR_TEXTE = PAYSAGE ? 840 : 960;
-['ville', 'compte', 'km'].forEach(id => tenir(document.getElementById(id), LARGEUR_TEXTE));
+['ville', 'compte', 'km', 'plus'].forEach(id => tenir(document.getElementById(id), LARGEUR_TEXTE));
 tenir(document.getElementById('reste-nb'), PAYSAGE ? 1500 : 960);
 
 // ───────────────────────────────────────────── le montage
-const DUREE = 26.1;
+// Tous les reperes de temps vivent ici, a un seul endroit : l'image les lit pour
+// se peindre, et le son les lit (window.__reperes) pour poser ses notes. Une
+// etape qui a une ligne d'augmentation allonge la scene des chiffres de D
+// secondes, et tout ce qui suit recule d'autant.
+const D = E.km_avant ? 2.1 : 0;
+const T = {
+  trace: [2.4, 6.4],                                    // le trait vert part de Nice, arrive a l'etape
+  carte: [0.5, 1.6, 7.6, 8.3],
+  monument: [8.1, 8.8, 14.5 + D, 15.2 + D],             // la scene du monument et des chiffres
+  lignes: { ville: [10.3, 11.0], compte: [11.0, 11.7], km: [11.7, 12.4] },
+  plus: [13.0, 13.7], depuis: [13.5, 14.2],             // seulement si l'etape a une augmentation
+  reste: { scene: [15.0 + D, 15.7 + D, 18.6 + D, 19.3 + D], titre: [15.4 + D, 16.1 + D], nb: [15.9 + D, 16.6 + D] },
+  vitrine: { scene: [18.6 + D, 19.3 + D, 22.7 + D, 23.4 + D], piece0: 19.0 + D, pas: 0.30,
+             collection: [21.2 + D, 22.0 + D, 22.6 + D, 23.2 + D] },
+  chute: { scene: [23.3 + D, 24.0 + D], fin: [23.6 + D, 24.3 + D], url: [24.5 + D, 25.2 + D] },
+  duree: 26.1 + D
+};
+const DUREE = T.duree;
 window.__duree = DUREE;
 
-// Chaque ville franchie s'allume quand le trait l'atteint.
-const T_TRACE0 = 2.4, T_TRACE1 = 6.4;
-const quandVille = i => T_TRACE0 + (CUM[i]/CUM[ATTEINTE]) * (T_TRACE1 - T_TRACE0);
+// Chaque point franchi s'allume quand le trait l'atteint.
+const quandVille = i => T.trace[0] + (CUM[i]/CUM[DERNIER]) * (T.trace[1] - T.trace[0]);
+
+// Ce que lit le son.
+window.__reperes = {
+  duree: DUREE,
+  trace: T.trace,
+  validations: PTS_FAITS.map((_, i) => quandVille(i)),
+  lignes: [T.lignes.ville[0], T.lignes.compte[0], T.lignes.km[0]],
+  plus: E.km_avant ? [T.plus[0], T.depuis[0]] : null,
+  reste: [T.reste.titre[0], T.reste.nb[0]],
+  piece0: T.vitrine.piece0, pas: T.vitrine.pas,
+  collection: T.vitrine.collection[0],
+  chute: T.chute.scene[0], url: T.chute.url[0]
+};
+
+const el = id => document.getElementById(id);
 
 window.__render = function(t){
   etoiles.forEach(e=>{
@@ -386,56 +486,62 @@ window.__render = function(t){
   });
 
   // l'en-tete accompagne la carte, puis s'efface
-  document.getElementById('entete').style.opacity = fen(t,0.5,1.6, 7.6,8.3).toFixed(3);
-  document.getElementById('titre').style.opacity  = seg(t,1.2,2.2).toFixed(3);
+  el('entete').style.opacity = fen(t, ...T.carte).toFixed(3);
+  el('titre').style.opacity  = seg(t,1.2,2.2).toFixed(3);
 
   // 1 — la carte
-  document.getElementById('scene1').style.opacity = fen(t,1.0,1.8, 7.6,8.3).toFixed(3);
-  document.getElementById('fantome').style.opacity = (0.9*seg(t,1.4,2.3)).toFixed(3);
-  fait.style.strokeDashoffset = (LFAIT * (1 - seg(t, T_TRACE0, T_TRACE1))).toFixed(1);
-  pastilles.forEach((c,i)=>{
-    if (i <= ATTEINTE){
-      const k = seg(t, quandVille(i), quandVille(i) + 0.35);
+  el('scene1').style.opacity = fen(t,1.0,1.8, T.carte[2],T.carte[3]).toFixed(3);
+  el('fantome').style.opacity = (0.9*seg(t,1.4,2.3)).toFixed(3);
+  fait.style.strokeDashoffset = (LFAIT * (1 - seg(t, T.trace[0], T.trace[1]))).toFixed(1);
+  pastilles.forEach(o=>{
+    const c = o.c;
+    if (o.rang >= 0){
+      const q = quandVille(o.rang);
+      const k = seg(t, q, q + 0.35);
       c.style.opacity = k.toFixed(3);
-      if (coches[i]) coches[i].style.opacity = seg(t, quandVille(i)+0.15, quandVille(i)+0.5).toFixed(3);
+      if (o.coche) o.coche.style.opacity = seg(t, q+0.15, q+0.5).toFixed(3);
       const e = 0.5 + 0.5*k;
-      c.setAttribute('transform','translate('+P[i][0]+','+P[i][1]+') scale('+e.toFixed(3)+
-                     ') translate('+(-P[i][0])+','+(-P[i][1])+')');
+      c.setAttribute('transform','translate('+o.xy[0]+','+o.xy[1]+') scale('+e.toFixed(3)+
+                     ') translate('+(-o.xy[0])+','+(-o.xy[1])+')');
     } else {
       c.style.opacity = (0.75*seg(t,1.8,2.6)).toFixed(3);
     }
   });
-  nomEtape.style.opacity = seg(t, T_TRACE1-0.1, T_TRACE1+0.5).toFixed(3);
+  nomEtape.style.opacity = seg(t, T.trace[1]-0.1, T.trace[1]+0.5).toFixed(3);
   nomBut.style.opacity   = (0.9*seg(t,2.0,2.8)).toFixed(3);
 
   // 2 — le monument et les chiffres
-  document.getElementById('scene2').style.opacity = fen(t,8.1,8.8, 14.5,15.2).toFixed(3);
+  el('scene2').style.opacity = fen(t, ...T.monument).toFixed(3);
   traits.forEach((p,i)=>{
     const d0 = 8.6 + (i / Math.max(1, traits.length-1)) * 1.5;
     p.el.style.strokeDashoffset = (p.L * (1 - seg(t, d0, d0+0.7))).toFixed(1);
   });
-  document.getElementById('ville').style.opacity   = seg(t,10.3,11.0).toFixed(3);
-  document.getElementById('compte').style.opacity  = seg(t,11.0,11.7).toFixed(3);
-  document.getElementById('km').style.opacity      = seg(t,11.7,12.4).toFixed(3);
+  el('ville').style.opacity   = seg(t, ...T.lignes.ville).toFixed(3);
+  el('compte').style.opacity  = seg(t, ...T.lignes.compte).toFixed(3);
+  el('km').style.opacity      = seg(t, ...T.lignes.km).toFixed(3);
+  if (E.km_avant){
+    el('plus').style.opacity   = seg(t, ...T.plus).toFixed(3);
+    el('depuis').style.opacity = seg(t, ...T.depuis).toFixed(3);
+  }
 
-  // 3 — la vitrine : ce qu'on trouve sur le site
-  document.getElementById('scene2b').style.opacity = fen(t,15.0,15.7, 18.6,19.3).toFixed(3);
-  document.getElementById('reste-titre').style.opacity = seg(t,15.4,16.1).toFixed(3);
-  document.getElementById('reste-nb').style.opacity    = seg(t,15.9,16.6).toFixed(3);
+  // 3 — le reste a parcourir
+  el('scene2b').style.opacity = fen(t, ...T.reste.scene).toFixed(3);
+  el('reste-titre').style.opacity = seg(t, ...T.reste.titre).toFixed(3);
+  el('reste-nb').style.opacity    = seg(t, ...T.reste.nb).toFixed(3);
 
-  // 3 — la vitrine
-  document.getElementById('scene3').style.opacity = fen(t,18.6,19.3, 22.7,23.4).toFixed(3);
+  // 4 — la vitrine : ce qu'on trouve sur le site
+  el('scene3').style.opacity = fen(t, ...T.vitrine.scene).toFixed(3);
   etals.forEach((d,i)=>{
-    const k = seg(t, 19.0 + i*0.30, 19.8 + i*0.30);
+    const k = seg(t, T.vitrine.piece0 + i*T.vitrine.pas, T.vitrine.piece0 + 0.8 + i*T.vitrine.pas);
     d.style.opacity = k.toFixed(3);
     d.style.transform = 'translateY(' + (34*(1-k)).toFixed(1) + 'px)';
   });
-  document.getElementById('collection').style.opacity = fen(t,21.2,22.0, 22.6,23.2).toFixed(3);
+  el('collection').style.opacity = fen(t, ...T.vitrine.collection).toFixed(3);
 
-  // 4 — la chute
-  document.getElementById('scene4').style.opacity = seg(t,23.3,24.0).toFixed(3);
-  document.getElementById('fin').style.opacity    = seg(t,23.6,24.3).toFixed(3);
-  document.getElementById('url').style.opacity    = seg(t,24.5,25.2).toFixed(3);
+  // 5 — la chute
+  el('scene4').style.opacity = seg(t, ...T.chute.scene).toFixed(3);
+  el('fin').style.opacity    = seg(t, ...T.chute.fin).toFixed(3);
+  el('url').style.opacity    = seg(t, ...T.chute.url).toFixed(3);
 };
 window.__render(0);
 </script>

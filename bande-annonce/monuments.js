@@ -158,3 +158,23 @@ window.MONUMENTS = [
       'Q 148 210 170 202 Q 192 194 210 202'
   ]}
 ];
+
+// Etapes qui ne sont pas l'une des onze villes du trace : Meze est entre
+// Montpellier et Narbonne. Meme boite de 200x200, meme ligne de sol a y=200.
+window.MONUMENTS_ETAPES = {
+  'Mèze': { ville:'Mèze', legende:'Le port et les tables a huitres', traits:[
+    // un pointu, le bateau de l'etang de Thau
+    'M 82 158 L 184 158 Q 174 186 146 190 L 108 190 Q 90 186 82 158 Z',
+    'M 132 158 L 132 56',
+    'M 132 62 L 132 150 L 178 150 Z',
+    'M 132 80 L 132 150 L 92 150 Z',
+    'M 132 56 L 150 62 L 132 68',
+    // les tables a huitres : des pieux dans l'eau, reliés par deux cordes
+    'M 8 140 L 66 140',
+    'M 8 160 L 66 160',
+    'M 14 140 L 14 192 M 32 140 L 32 192 M 50 140 L 50 192 M 64 140 L 64 192',
+    // et l'eau
+    'M -6 196 Q 12 190 30 196 Q 48 202 66 196 Q 84 190 102 196 Q 120 202 138 196 Q 156 190 174 196 Q 192 202 206 196',
+    'M -6 208 Q 12 202 30 208 Q 48 214 66 208 Q 84 202 102 208 Q 120 214 138 208 Q 156 202 174 208 Q 192 214 206 208'
+  ]}
+};
