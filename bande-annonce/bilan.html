@@ -1,0 +1,95 @@
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<title>Devercinge — le bilan</title>
+<style>
+  :root{ --bg:#0a0a0c; --ink:#f2f1ef; --dim:#9d9ba3; --violet:#bc7aff; --green:#1fff8e;   /* plus vifs que le violet et le vert du reste du site */ }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ width:1080px; height:1920px; overflow:hidden; background:var(--bg); }
+  body{ position:relative; font-family:'Liberation Sans','DejaVu Sans',sans-serif; color:var(--ink); }
+  #stars{ position:absolute; inset:0; }
+  #stars span{ position:absolute; background:var(--ink); border-radius:50%; }
+  #logo{ position:absolute; left:50%; top:560px; width:230px; transform:translate(-50%,-50%); }
+  .bloc{ position:absolute; left:0; right:0; text-align:center; font-weight:700;
+         text-transform:uppercase; white-space:nowrap; }
+  /* Une seule lueur, verte, à droite : la lueur violette faisait une tache. */
+  #halo{ position:absolute; inset:0;
+         background:radial-gradient(ellipse 55% 30% at 88% 52%, rgba(31,255,142,.08), transparent 65%); }
+  /* Deux arrêts intermédiaires : un simple dégradé violet-vert passe par un bleu-gris terne. */
+  /* La boîte épouse le texte : le dégradé va du violet au vert sur les mots eux-mêmes. */
+  .degrade{ left:50%; right:auto; width:max-content; transform:translateX(-50%);
+            background:linear-gradient(90deg,var(--violet) 0%,#6f86ff 36%,#17e6c4 68%,var(--green) 100%);
+            filter:drop-shadow(0 0 22px rgba(31,255,142,.16));
+            -webkit-background-clip:text; background-clip:text;
+            -webkit-text-fill-color:transparent; }
+  #nb{ top:810px; font-size:128px; letter-spacing:.06em; padding-left:.06em; line-height:1.1; }
+  #unite{ top:965px; font-size:76px; letter-spacing:.2em; padding-left:.2em; }
+  #suite{ top:1290px; font-size:46px; letter-spacing:.14em; padding-left:.14em; }
+  #villes{ top:1130px; font-size:38px; letter-spacing:.2em; padding-left:.2em; color:var(--dim); }
+
+  .paysage, .paysage body{ width:1920px; height:1080px; }
+  .paysage #logo{ top:230px; width:170px; }
+  .paysage #nb{ top:360px; font-size:170px; }
+  .paysage #unite{ top:545px; font-size:84px; }
+  .paysage #villes{ top:730px; font-size:42px; }
+  .paysage #suite{ top:850px; font-size:52px; }
+</style>
+<div id="halo"></div>
+<div id="stars"></div>
+<img id="logo" src="../assets/logo-mark.png" alt="">
+<div class="bloc degrade" id="nb"></div>
+<div class="bloc degrade" id="unite">kilomètres</div>
+<div class="bloc" id="villes"></div>
+<div class="bloc degrade" id="suite">Et ce n'est que le début…</div>
+<script>
+// Les memes chiffres que recap.html : KM_ANNONCE (le chiffre d'Erwan) et le
+// nombre de lieux de LIEUX. A mettre a jour ensemble.
+const KM = 500, VILLES = 22;
+const PAYSAGE = /[?&]paysage/.test(location.search);
+document.documentElement.classList.toggle('paysage', PAYSAGE);
+const W = PAYSAGE ? 1920 : 1080, H = PAYSAGE ? 1080 : 1920;
+const lisse = x => x<0?0 : x>1?1 : x*x*(3-2*x);
+const seg = (t,a,b) => lisse((t-a)/(b-a));
+function graine(s){ return function(){ s=(s*1664525+1013904223)%4294967296; return s/4294967296; }; }
+const alea = graine(20260906);
+const etoiles = [];
+for (let i=0;i<150;i++){
+  const s=document.createElement('span'); const d=2+alea()*4;
+  s.style.left=(alea()*W)+'px'; s.style.top=(alea()*H)+'px';
+  s.style.width=d+'px'; s.style.height=d+'px';
+  document.getElementById('stars').appendChild(s);
+  etoiles.push({el:s, base:.25+alea()*.5, vitesse:.6+alea()*1.4, phase:alea()*6.28});
+}
+const UNITES = ['zéro','un','deux','trois','quatre','cinq','six','sept','huit','neuf','dix',
+  'onze','douze','treize','quatorze','quinze','seize','dix-sept','dix-huit','dix-neuf'];
+const DIZAINES = ['','','vingt','trente','quarante','cinquante','soixante','soixante','quatre-vingt','quatre-vingt'];
+function enLettres(n){
+  if (n < 20) return UNITES[n];
+  if (n < 100){
+    const d = Math.floor(n/10), u = n%10;
+    if (d === 7 || d === 9) return DIZAINES[d] + (u===1 && d===7 ? ' et ' : '-') + UNITES[10+u];
+    let s = DIZAINES[d];
+    if (u === 0) return d === 8 ? s + 's' : s;
+    return s + (u === 1 ? ' et un' : '-' + UNITES[u]);
+  }
+  const c = Math.floor(n/100), r = n%100;
+  let s = (c > 1 ? UNITES[c] + ' ' : '') + 'cent';
+  if (c > 1 && r === 0) s += 's';
+  return r ? s + ' ' + enLettres(r) : s;
+}
+document.getElementById('nb').textContent = enLettres(KM);
+document.getElementById('villes').textContent = enLettres(VILLES) + ' villes traversées';
+window.__duree = 6;   // la derniere ligne parait a 3 s : les images se prennent a 4,5 s
+window.__render = function(t){
+  etoiles.forEach(e=>{
+    const s=e.base*(0.45+0.55*Math.abs(Math.sin(e.phase+t*e.vitesse)));
+    e.el.style.opacity=(s*Math.min(1,seg(t,0,1.0))).toFixed(3);
+  });
+  const o = (a,b) => seg(t,a,b).toFixed(3);
+  document.getElementById('logo').style.opacity = o(0.2,1.0);
+  document.getElementById('nb').style.opacity = o(0.8,1.6);
+  document.getElementById('unite').style.opacity = o(1.4,2.2);
+  document.getElementById('villes').style.opacity = o(2.0,2.8);
+  document.getElementById('suite').style.opacity = o(3.0,3.8);
+};
+window.__render(0);
+</script>

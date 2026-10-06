@@ -1,6 +1,6 @@
-# La bande-annonce
+# Les videos
 
-Trente secondes pour Instagram, 1080x1920. Tout est fabrique ici : le
+Deux films, meme fabrique : 1080x1920 pour Instagram. Tout est fabrique ici : le
 montage est une page web rendue image par image, le son est synthetise par
 calcul. Aucune source exterieure, donc rien a crediter ni a licencier.
 
@@ -9,8 +9,27 @@ calcul. Aucune source exterieure, donc rien a crediter ni a licencier.
 | `montage.html` | le film. `window.__render(t)` peint l'instant `t`, `window.__duree` donne la longueur. Deterministe : la meme seconde donne toujours la meme image. |
 | `monuments.js` | les onze monuments au trait, un par ville, dans une boite de 200x200 posee sur une ligne de sol a y=200. |
 | `son.py` | l'habillage sonore. Nappe, cloches inharmoniques, souffles et pas, tout en numpy. |
-| `rendu.py` | pousse les images de `montage.html` dans ffmpeg. |
-| `devercinge-bande-annonce.mp4` | le resultat. |
+| `etape.html` | la video d'etape : une ville validee en cours de route. |
+| `son-etape.py` | son habillage sonore. |
+| `banniere.html` | la banniere : une boucle de 12 s, en 16:9 par defaut et en Reel avec `?reel`. |
+| `son-banniere.py` | le son du Reel, qui boucle lui aussi sans couture. |
+| `rendu.py` | pousse les images d'une page dans ffmpeg. |
+| `devercinge-bande-annonce.mp4` | la bande-annonce. |
+| `devercinge-etape-montpellier.mp4` | l'etape de Montpellier, en portrait (1080x1920). |
+| `devercinge-etape-montpellier-paysage.mp4` | la meme, en paysage (1920x1080). |
+| `devercinge-etape-meze.mp4` | l'etape de Meze, en portrait, avec l'augmentation des kilometres. |
+| `devercinge-etape-meze-paysage.mp4` | la meme, en paysage. |
+| `devercinge-etape-beziers.mp4`, `-argeliers.mp4`, `-la-redorte.mp4`, `-carcassonne.mp4` | les quatre etapes suivantes, en portrait (et leurs versions `-paysage.mp4`). |
+| `etapes.py` | produit d'un coup le son, le portrait et le paysage d'une ou de plusieurs etapes. |
+| `recap.html`, `son-recap.py`, `recap.py` | la bande-annonce recap : tous les lieux deja traverses, d'une traite (voir « La bande-annonce recap »). |
+| `bilan.html`, `image-bilan-500km.png`, `image-bilan-500km-paysage.png` | la page « cinq cents kilometres / vingt-deux villes traversees » seule, en image (portrait et paysage). Les chiffres `KM` et `VILLES` en haut de `bilan.html` sont ceux de `recap.html` : a mettre a jour ensemble. Images : `python3 couverture.py bilan.html "" 4 image.png` (ou `paysage`). Ajouter `2` en dernier argument donne la 4K (2160x3840 ou 3840x2160) : `image-bilan-500km-4k.png` et `image-bilan-500km-paysage-4k.png`. |
+| `devercinge-recap.mp4`, `devercinge-recap-paysage.mp4` | la bande-annonce recap, en portrait et en paysage. |
+| `devercinge-banniere.mp4` | la banniere, 1920x1080, 12 s, sans son, faite pour boucler. |
+| `devercinge-banniere-reel.mp4` | la banniere pour Instagram, 1080x1920, 12 s, avec son, en boucle. |
+| `devercinge-episode-1-reel.mp4` | la meme avec « Episode 1 » en grand au centre. |
+| `couverture-episode-1.png` | l'image de couverture du Reel, celle que montre la grille du profil. |
+| `couverture.py` | enregistre une image d'une page de montage. |
+| `episodes.py` | produit d'un coup les 25 videos numerotees et leurs images : Reels verticaux (`episodes/`) ou paysage (`episodes-paysage/`). Sorties non versionnees. |
 
 ## Refaire le film
 
@@ -25,7 +44,143 @@ Il faut `playwright` (avec Chromium installe via `playwright install`),
 `pillow`, `numpy` et `imageio-ffmpeg`. Si Chromium est ailleurs, passez son
 chemin : `CHROMIUM=/opt/pw-browsers/chromium python3 rendu.py`.
 
-## Les cinq temps
+## Refaire une video d'etape
+
+Les etapes sont **des donnees**, dans le bloc JSON `#etapes` en haut de
+`etape.html`. La page affiche celle que demande l'adresse : `etape.html?etape=meze`
+(montpellier par defaut). Pour une nouvelle etape, ajouter une entree :
+
+```json
+"meze": { "atteinte": 2, "km": 356, "km_avant": 322, "depuis": "Montpellier",
+          "plus_loin": { "nom": "Mèze", "lat": 43.4255, "lng": 3.6045 } }
+```
+
+| champ | sens |
+|---|---|
+| `atteinte` | indice de la derniere **ville du trace** franchie (0 Nice, 1 Marseille, 2 Montpellier, 3 Narbonne, 4 Toulouse, 5 Bordeaux, 6 La Rochelle, 7 Nantes, 8 Angers, 9 Rennes, 10 Saint-Malo) |
+| `km` | kilometres parcourus -- a remplacer par le releve GPS |
+| `km_avant`, `depuis` | facultatifs : kilometres de l'etape precedente et son nom. Ajoutent la ligne « + N kilometres depuis ... » |
+| `plus_loin` | facultatif : quand l'etape n'est **pas** l'une des onze villes. Une **liste** de points `{nom, lat, lng}` dans l'ordre du parcours, apres la ville `atteinte`. Le dernier est l'etape du jour (son monument est dans `monuments.js`, sous `MONUMENTS_ETAPES`) ; les precedents sont les etapes deja faites, que le trait vert traverse. Un objet seul est accepte |
+
+Le monument, le nom, le decompte des villes et les kilometres en toutes lettres
+suivent tout seuls.
+
+**En une commande**, pour une ou plusieurs etapes :
+
+```sh
+CHROMIUM=/opt/pw-browsers/chromium python3 etapes.py beziers argeliers la-redorte
+```
+
+Il produit `devercinge-etape-NOM.mp4` et `devercinge-etape-NOM-paysage.mp4` pour
+chaque etape (environ 4 minutes pour six videos). Pas a pas, pour comprendre ou
+refaire une seule video :
+
+```sh
+export CHROMIUM=/opt/pw-browsers/chromium
+python3 son-etape.py meze                          # -> habillage-etape-meze.wav
+python3 rendu.py etape.html "etape=meze"           # -> etape-etape-meze-muet.mp4         (portrait)
+python3 rendu.py etape.html "paysage&etape=meze"   # -> etape-paysage-etape-meze-muet.mp4 (paysage)
+ffmpeg -y -i etape-etape-meze-muet.mp4 -i habillage-etape-meze.wav \
+       -c:v copy -c:a aac -b:a 192k -shortest devercinge-etape-meze.mp4
+ffmpeg -y -i etape-paysage-etape-meze-muet.mp4 -i habillage-etape-meze.wav \
+       -c:v copy -c:a aac -b:a 192k -shortest devercinge-etape-meze-paysage.mp4
+```
+
+`son-etape.py` ouvre la page dans Chromium et lit `window.__reperes`, l'objet que
+la page construit pour se peindre elle-meme : tous les reperes de temps vivent
+dans un seul objet `T`, que l'image et le son lisent tous les deux. Plus aucune
+date n'est ecrite deux fois, plus aucune projection n'est recopiee : deplacer une
+scene dans la page deplace la note avec elle.
+
+### Une etape hors des onze villes : l'exemple de Meze
+
+Meze est entre Montpellier et Narbonne, a **34 km** de Montpellier (estimation :
+distance a vol d'oiseau, remise a l'echelle des 1408 km, comme pour Montpellier).
+Elle n'est pas dans le trace, donc `plus_loin`. Deux consequences a connaitre :
+
+- **Les deux points se recouvrent sur la carte** : 34 km sur 1 400 km, c'est une
+  trentaine de pixels, pour des disques de 24 px. L'etape du jour devient la
+  vedette (rayon 20 px, avec sa coche) et la ville d'avant un petit point (9 px)
+  dont le rayon **se deduit de la distance reelle**, pour qu'ils ne se touchent
+  jamais ; le nom se pose en haut a gauche, du cote que la ville d'avant ne gene pas.
+- **L'augmentation allonge la scene des chiffres de 2,1 s**, et tout ce qui suit
+  recule d'autant : 28,2 s au lieu de 26,1 s. Montpellier, qui n'a pas de
+  `km_avant`, garde ses 26,1 s.
+
+Le monument de Meze est un pointu et des tables a huitres (l'etang de Thau). Une
+nouvelle etape hors trace demande son propre dessin dans `MONUMENTS_ETAPES`.
+
+### Des etapes tres rapprochees : Beziers, Argeliers, La Redorte, Carcassonne
+
+A 25 km les unes des autres (une vingtaine de pixels sur la carte), les etapes
+s'entassent. Ce que la page fait pour que ca reste lisible :
+
+- le trait vert **traverse** les etapes deja faites (Meze, Beziers...) : chaque
+  etape liste donc tous ses points precedents dans `plus_loin` ;
+- les petits points ont un rayon **borne par l'ecart qui les separe**, pour ne
+  jamais se toucher ; l'etape du jour est entouree d'un **anneau** ;
+- le nom de l'etape du jour est place par un **solveur** : il essaie des positions
+  autour de l'etape, de plus en plus loin, et garde la plus proche qui ne touche
+  ni un point ni une ligne. Une position fixe tombait sur le point gris de
+  Narbonne. Le solveur ne s'applique qu'aux etapes a plusieurs points hors trace ;
+  Montpellier et Meze gardent leur placement.
+
+`atteinte` reste a 2 (Montpellier) pour ces cinq etapes (Meze comprise) : le cycliste
+suit le canal du Midi, qui contourne Narbonne a 16 km. Narbonne n'est donc pas comptee ;
+« trois villes sur onze » reste vrai jusqu'a ce qu'il y passe, ou la franchisse.
+
+**Les coordonnees ne viennent pas de la memoire** : de la base GeoNames hors ligne
+(paquet PyPI `reverse_geocoder`, fichier `rg_cities1000.csv`, communes de plus de
+1 000 habitants). Verification utile : Meze y est a 0,6 km des coordonnees que
+j'avais saisies. La Redorte, trop petite pour y figurer, est placee entre Azille
+et Puicheric, a 2 km pres. Carcassonne y figure (43,2167 N, 2,3500 E) : elle est a
+15 km de la ligne droite Narbonne-Toulouse, ce qui est normal, le vrai chemin
+passant par Carcassonne alors que la ligne grise relie simplement deux villes.
+
+Les kilometres suivent la meme methode pour toutes les etapes (distance a vol
+d'oiseau x 1,1303). Elle sous-estime sans doute un trace qui serpente : le canal du
+Midi entre La Redorte et Carcassonne fait plus de 27 km. Le releve GPS remplace
+ces estimations, une etape a la fois, dans le champ `km` du JSON.
+
+**Verifie** : en passant la page en donnees, la video de Montpellier est restee
+**identique au pixel pres** (14 images dans chaque format, ecart nul) et son son
+**identique octet pour octet**.
+
+**Un alea de rendu a connaitre.** En paysage, le halo du logo de la vitrine
+(zone d'environ 270 px, de 19 a 24 s) varie parfois de 44/255 sur quelques
+pixels : un rendu sur trois environ, **avec exactement le meme code**, y compris
+le code d'origine rendu deux fois de suite. C'est Chromium, pas une regression. Pour
+verifier qu'une modification ne change rien, il suffit qu'**un** rendu soit
+identique a l'original ; en rendre plusieurs et en prendre un seul comme preuve
+d'une difference serait une erreur.
+
+## Le paysage : meme page, meme son
+
+`etape.html` se met en paysage quand on l'ouvre avec `?paysage`
+(`etape.html?paysage` dans un navigateur, ou l'argument `paysage` de
+`rendu.py`). Ce n'est pas une copie : le portrait est la page telle quelle, le
+paysage une classe `paysage` posee sur `<html>` qui ne fait que surcharger des
+positions -- la carte passe a droite, le logo et le titre a gauche, le monument
+et ses trois lignes se placent cote a cote. Les minutages, les textes et les
+donnees sont les memes ; **le son aussi**, un seul `habillage-etape.wav` sert
+aux deux formats. Changer d'etape se fait donc une fois pour les deux.
+
+Pour les positions, le paysage ne vit que dans le bloc `PAYSAGE` de la feuille
+de style et dans trois constantes du script (`CADRE`, `PAS_PIECE`, `W`/`H`).
+Si le portrait bouge, le paysage n'est pas touche.
+
+Un texte trop long reduit sa taille plutot que de sortir de l'image : « neuf
+cent quatre-vingt-dix-neuf kilometres » passe de 32 a 29 px en portrait.
+
+`son-etape.py` lit dans `etape.html` tout ce qui porte une date : `ATTEINTE`,
+`DUREE`, les bornes du trace, les trois lignes du bloc de chiffres, la page du reste, le depart
+de la vitrine et son pas, l'entree du mot et celle de la chute. Plus une seule
+date n'y est ecrite en dur. Il recalcule ensuite les instants de validation avec
+la meme projection que la page. Contrairement a la bande-annonce, l'image et
+le son d'une etape ne peuvent donc pas se desynchroniser : deplacer une scene
+dans la page deplace la note avec elle.
+
+## Les cinq temps de la bande-annonce
 
 | | |
 |---|---|
@@ -35,10 +190,177 @@ chemin : `CHROMIUM=/opt/pw-browsers/chromium python3 rendu.py`.
 | 18,4 -> 28,3 s | les onze monuments defilent |
 | 28,2 -> 30,5 s | le logo, « Un seul reve », devercinge.com |
 
+## Les cinq temps de la video d'etape
+
+| | |
+|---|---|
+| 0 -> 8,1 s | la carte : le trait vert progresse, chaque ville franchie recoit sa coche |
+| 8,1 -> 15,2 s | le monument de l'etape se dessine, puis le nom, le decompte et les kilometres |
+| 15,0 -> 19,3 s | « Il reste », puis le nombre de kilometres restants en toutes lettres |
+| 18,6 -> 23,4 s | la vitrine : les cinq pieces se levent une a une, « Cinq pieces » |
+| 23,3 -> 26,1 s | le logo, « La route continue », devercinge.com |
+
+Le reste se deduit : `KM_TOTAL - KM_FAITS`, ecrit en lettres par la meme
+fonction que les kilometres parcourus. `KM_TOTAL` (1408) vit a cote de
+`KM_FAITS` en haut du script, a changer s'il bouge.
+
+Le bloc de chiffres garde volontairement la pose : une fois les trois lignes
+installees, rien ne bouge pendant plus de deux secondes. Mesure sur la page,
+image par image, le temps ou chaque ligne est pleinement opaque : le nom de
+la ville 3,6 s, le decompte 2,9 s, les kilometres 2,2 s. La derniere ligne
+est celle qui arrive, c'est donc elle qui commande la duree de la scene --
+la raccourcir la rend illisible avant les autres.
+
+Le vert dit ce qui est fait, le gris ce qui reste, et Saint-Malo garde son
+cercle violet de but.
+
+La vitrine reprend les images de `assets/products/` dans l'ordre ou
+`boutique.html` les presente : la vitrine du film et celle du site montrent
+la meme chose. Une piece ajoutee ou retiree la-bas se reporte dans le tableau
+`PIECES` en haut du script -- et le mot « Cinq pieces » avec, puisqu'il est
+ecrit a la main lui.
+
+## La banniere
+
+`banniere.html` est une boucle de 12 s en 1920x1080 : le logo, « Devercinge »,
+la devise a gauche, et a droite la route qui se dessine de Nice a Saint-Malo
+dans un degrade vert-violet, avec sa distance en toutes lettres. Elle ne
+depend d'aucune etape : elle sert tout au long du parcours. Pas de son, comme
+il est d'usage pour une banniere qui se lance toute seule.
+
+```sh
+python3 rendu.py banniere.html paysage     # -> banniere-paysage-muet.mp4
+mv banniere-paysage-muet.mp4 devercinge-banniere.mp4
+```
+
+**Elle boucle sans couture parce que tout y est periodique.** L'image a
+`t = 12 s` est strictement celle de `t = 0` (ecart nul, mesure sur la page).
+Le scintillement des etoiles utilise `|sin|`, de periode PI, avec une
+frequence multiple de PI/12 ; le halo du logo respire une fois par boucle ; le
+trace et les noms apparaissent puis s'effacent avant la fin. Si vous ajoutez
+quelque chose qui evolue avec le temps, il faut qu'il revienne a son point de
+depart a 12 s, sinon la couture se voit a chaque tour.
+
+Sur la plupart des plateformes il suffit de la placer en lecture automatique,
+en boucle et en sourdine.
+
+## La banniere en Reel, pour le fil Instagram
+
+Instagram n'a pas de banniere : la bonne cible est un Reel. Il se publie en
+9:16 (1080x1920), mais Instagram le **rogne** quand il le montre ailleurs que
+dans l'onglet Reels -- en 4:5 dans le fil (de y 285 a 1635), en 3:4 sur la
+grille du profil (de y 240 a 1680) -- et son interface recouvre le bas de
+l'image. `banniere.html?reel` compose donc tout entre **y 335 et y 1500**, avec
+des marges laterales de 60 px. Les formats d'Instagram bougent : a reverifier
+si un cadrage change.
+
+```sh
+python3 son-banniere.py                     # -> habillage-banniere.wav
+python3 rendu.py banniere.html reel         # -> banniere-reel-muet.mp4
+ffmpeg -y -i banniere-reel-muet.mp4 -i habillage-banniere.wav \
+       -c:v copy -c:a aac -b:a 192k -shortest devercinge-banniere-reel.mp4
+```
+
+Ce que la mise en page verticale change : le logo, le nom et la devise passent
+au-dessus de la route plutot qu'a cote, et **Saint-Malo se lit a droite de son
+point** au lieu d'au-dessus : au-dessus il serait venu s'ecrire par-dessus la
+devise. Verifie par calcul : aucun texte n'en recouvre un autre ni ne touche la
+route. Le paysage n'a pas bouge (8 images comparees, ecart nul).
+
+**Le son boucle comme l'image.** Un Reel se rejoue sans fin ; un son qui n'est
+pas periodique claque a chaque tour. `son-banniere.py` n'emploie que des
+frequences a nombre entier de periodes dans les 12 s, fait respirer le volume
+par un cosinus de periode 12 s, et pose les cloches « en cercle » : la queue
+d'une cloche qui depasse la fin revient par le debut. Mesure : le saut entre
+le dernier et le premier echantillon (0,0004) est plus petit qu'un saut
+ordinaire entre deux voisins (0,0018). Le fichier AAC ajoute un silence de
+quelques millisecondes au raccord, imperceptible.
+
+## Le numero d'episode
+
+`banniere.html?reel&episode=3` ajoute « Episode 3 » en grand au centre du
+Reel, dans le creux de la route -- la ou rien d'autre n'est dessine. Sans le
+parametre `episode`, ou en paysage, la banniere reste la banniere generique :
+verifie, les deux versions sont identiques au pixel pres a ce qu'elles
+etaient avant l'ajout.
+
+```sh
+python3 son-banniere.py
+python3 rendu.py banniere.html "reel&episode=3"     # -> banniere-reel-episode-3-muet.mp4
+ffmpeg -y -i banniere-reel-episode-3-muet.mp4 -i habillage-banniere.wav \
+       -c:v copy -c:a aac -b:a 192k -shortest devercinge-episode-3-reel.mp4
+python3 couverture.py banniere.html "reel&episode=3" 7.6 couverture-episode-3.png
+```
+
+Le chiffre est blanc pur, a un halo violet, et fait **274 px de haut, soit 14 %
+de l'image** : lisible meme sur la vignette d'une grille. Mesure sur les pixels
+reels : centre a ±6 px du milieu, au moins 76 px de la route pour un chiffre.
+A deux chiffres il reduit sa taille pour garder au moins 40 px entre lui et la
+route, halo compris ; a trois chiffres il faudrait revoir la mise en page.
+
+### Toute la serie d'un coup
+
+```sh
+CHROMIUM=/opt/pw-browsers/chromium python3 episodes.py        # 1 a 25
+python3 episodes.py 1 8                                        # ou une partie
+```
+
+Quatre rendus en parallele, environ **8 minutes pour 25 Reels**. Pour chaque
+numero N, dans `episodes/` : `devercinge-episode-NN-reel.mp4` (1080x1920, 12 s,
+avec son) et `couverture-episode-NN.png`. Le dossier n'est **pas versionne** :
+28 Mo de fichiers qui se regenerent en une commande n'ont ni a alourdir
+l'historique ni a etre publies avec le site. Le son est le meme pour tous.
+
+Mesure sur les 25 numeros : le chiffre est dans la zone qui survit au rognage,
+sans chevaucher aucun autre texte, a **58 px au moins de la route** (les numeros
+de 10 a 25 reduisent leur taille a 346 px de corps, soit 243 px de haut, pour
+cela ; de 1 a 9 il fait 274 px). Verifie aussi sur les fichiers produits : les 25
+font 12 s en 1080x1920 avec une piste son, la couverture correspond a
+l'image de la video a 7,6 s (ecart moyen 0,6 sur 255), et les 25 chiffres sont
+bien differents.
+
+### La serie en paysage : images et animations
+
+```sh
+CHROMIUM=/opt/pw-browsers/chromium python3 episodes.py paysage     # 1 a 25
+```
+
+Environ 8 minutes. Dans `episodes-paysage/`, pour chaque numero N :
+`devercinge-episode-NN-paysage.mp4` (1920x1080, 12 s, avec son) et
+`image-episode-NN.png` (la meme composition, fixe, a 7,6 s).
+
+**L'animation se joue en deux temps** : le mot « Episode » s'ecrit de gauche a
+droite (de 0,3 a 1,5 s) ; PUIS le chiffre apparait en grossissant et en
+devenant net (de 1,5 a 2,5 s). A 1,1 s on lit donc « Episode » sans numero.
+Elle boucle sans couture, comme le reste.
+
+**Le chiffre est au centre exact de l'image, et ce n'est pas un hasard.** Sur la
+grille d'un profil, Instagram rogne une image paysage au centre (3:4, soit de
+x 555 a 1365 sur 1920). La marque est donc a gauche et la route a droite,
+hors de ce que la grille peut couper ; le chiffre, lui, reste entier.
+
+Mesure sur les 25 numeros : chiffre a 72 px au moins de la route, marge de
+45 px minimum autour de tous les textes, centre a 14 px pres (le « 1 », plus
+etroit, est un peu decale), aucun chiffre coupe par la grille, aucun
+chevauchement. Sur les fichiers produits : les 25 font 12 s en 1920x1080 avec
+une piste son, l'image correspond a la video a 7,6 s, la boucle est sans
+couture (0,09/255) et les 25 chiffres sont differents.
+
+Un fichier paysage se publie tel quel comme **post** (Instagram accepte du 1,91:1
+au 4:5, le 16:9 passe en entier). Dans l'onglet **Reels**, qui est vertical, il
+s'afficherait avec des bandes noires : pour cet onglet, utiliser la serie
+verticale.
+
+**La couverture compte plus que la video.** Sur la grille du profil, un Reel
+est represente par sa couverture, pas par ses images : c'est `couverture.py`
+qui produit celle ou le numero se lit. A choisir a l'import dans Instagram
+(« Choisir dans la galerie »). Elle est prise a 7,6 s, quand la composition
+est complete.
+
 ## Deux choses a savoir avant d'y toucher
 
-**Les reperes de temps sont ecrits deux fois**, dans `montage.html` et dans
-`son.py`. Deplacer une scene sans reporter la meme valeur dans l'autre
+**Les reperes de temps de la bande-annonce sont ecrits deux fois**, dans
+`montage.html` et dans `son.py`. Deplacer une scene sans reporter la meme valeur dans l'autre
 fichier desynchronise l'image et le son. Les constantes qui comptent sont
 `CARTE_T0`, `HALTE` et `JAMBE` cote image, et la table `courbe` cote son.
 
@@ -46,3 +368,41 @@ fichier desynchronise l'image et le son. Les constantes qui comptent sont
 Saint-Malo, comme sur `aventure.html` au repos. Un relais de tous les noms
 avait ete essaye : chaque nom ne tenait que trois dixiemes de seconde, donc
 illisible, et le defile des monuments les nomme deja un par un.
+
+## La bande-annonce recap
+
+`recap.html` raconte, en 35 s, **tous les lieux que Erwan a traverses**, dans
+l'ordre ou il les a lui-meme listes (Nice, Cannes, Frejus, ... Carcassonne :
+vingt-deux lieux). Une cloche par lieu, de plus en plus haut ; le nom et le
+nombre de villes (« dix villes ») apparaissent un a la fois, sans se superposer.
+La carte suit le cycliste de tres pres, puis recule pour montrer le parcours
+entier jusqu'a Saint-Malo ; viennent ensuite les kilometres en lettres, la
+vitrine et la chute devercinge.com, comme les videos d'etape.
+
+```sh
+CHROMIUM=/opt/pw-browsers/chromium python3 recap.py     # son + portrait + paysage
+```
+
+Ou pas a pas : `python3 son-recap.py`, `python3 rendu.py recap.html` et
+`python3 rendu.py recap.html paysage`, puis ffmpeg comme pour une etape.
+
+- **Les lieux** sont la liste `LIEUX` en haut du script de la page (nom, slug,
+  latitude, longitude) ; `SUITE` est ce qui reste jusqu'a Saint-Malo. Pour
+  ajouter un lieu, l'ajouter a la fin de `LIEUX` : la duree, le son et le
+  decompte suivent.
+- **Les kilometres** affiches a la fin sont `KM_ANNONCE` : le chiffre de Erwan
+  lui-meme (« a Carcassonne j'aurai fait 500 km »), pas une estimation. Les
+  videos d'etape, elles, affichent des estimations a vol d'oiseau (474 km a
+  Carcassonne) : les deux ne coincident pas encore. A remplacer par le releve
+  GPS.
+- **Les photos des villes sont facultatives.** Un fichier
+  `recap-photos/<slug>.jpg` (`.jpeg`, `.png` ou `.webp`) devient un fond
+  tres sombre, avec un leger travelling, pendant que le cycliste est dans la
+  ville. Sans fichier, la page est identique : rien a changer. `rendu.py`
+  attend la fin du chargement (`window.__pret`) avant de filmer.
+- **Camera.** `camera(t)` moyenne la position du cycliste sur une seconde pour
+  glisser sans saccade ; le zoom interpole l'echelle en geometrique, de 450 px
+  par degre de longitude a l'echelle du parcours entier.
+- **Le son** lit `window.__reperes` dans la page, comme `son-etape.py` : une
+  cloche par lieu sur une gamme pentatonique de trois octaves.
+- **Paysage** : la carte vit a droite, derriere un fondu, les textes a gauche.
