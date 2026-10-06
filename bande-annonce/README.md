@@ -17,6 +17,8 @@ calcul. Aucune source exterieure, donc rien a crediter ni a licencier.
 | `devercinge-bande-annonce.mp4` | la bande-annonce. |
 | `devercinge-etape-montpellier.mp4` | l'etape de Montpellier, en portrait (1080x1920). |
 | `devercinge-etape-montpellier-paysage.mp4` | la meme, en paysage (1920x1080). |
+| `devercinge-etape-meze.mp4` | l'etape de Meze, en portrait, avec l'augmentation des kilometres. |
+| `devercinge-etape-meze-paysage.mp4` | la meme, en paysage. |
 | `devercinge-banniere.mp4` | la banniere, 1920x1080, 12 s, sans son, faite pour boucler. |
 | `devercinge-banniere-reel.mp4` | la banniere pour Instagram, 1080x1920, 12 s, avec son, en boucle. |
 | `devercinge-episode-1-reel.mp4` | la meme avec « Episode 1 » en grand au centre. |
@@ -39,28 +41,63 @@ chemin : `CHROMIUM=/opt/pw-browsers/chromium python3 rendu.py`.
 
 ## Refaire une video d'etape
 
-Une seule ligne a changer, en haut du script de `etape.html` :
+Les etapes sont **des donnees**, dans le bloc JSON `#etapes` en haut de
+`etape.html`. La page affiche celle que demande l'adresse : `etape.html?etape=meze`
+(montpellier par defaut). Pour une nouvelle etape, ajouter une entree :
 
-```js
-const ATTEINTE = 2;     // indice de la derniere ville franchie (0 = Nice)
-const KM_FAITS = 322;   // kilometres parcourus -- a remplacer par le releve GPS
-const KM_TOTAL = 1408;  // longueur du parcours ; le reste s'en deduit
+```json
+"meze": { "atteinte": 2, "km": 356, "km_avant": 322, "depuis": "Montpellier",
+          "plus_loin": { "nom": "Mèze", "lat": 43.4255, "lng": 3.6045 } }
 ```
 
-`ATTEINTE` suit l'ordre du trace : 0 Nice, 1 Marseille, 2 Montpellier,
-3 Narbonne, 4 Toulouse, 5 Bordeaux, 6 La Rochelle, 7 Nantes, 8 Angers,
-9 Rennes, 10 Saint-Malo. Le monument, le nom, le decompte des villes et les
-kilometres en toutes lettres suivent tout seuls.
+| champ | sens |
+|---|---|
+| `atteinte` | indice de la derniere **ville du trace** franchie (0 Nice, 1 Marseille, 2 Montpellier, 3 Narbonne, 4 Toulouse, 5 Bordeaux, 6 La Rochelle, 7 Nantes, 8 Angers, 9 Rennes, 10 Saint-Malo) |
+| `km` | kilometres parcourus -- a remplacer par le releve GPS |
+| `km_avant`, `depuis` | facultatifs : kilometres de l'etape precedente et son nom. Ajoutent la ligne « + N kilometres depuis ... » |
+| `plus_loin` | facultatif : quand l'etape n'est **pas** l'une des onze villes. Son nom, sa latitude, sa longitude. Elle se place apres la ville `atteinte` ; son monument est dans `monuments.js` sous `MONUMENTS_ETAPES` |
+
+Le monument, le nom, le decompte des villes et les kilometres en toutes lettres
+suivent tout seuls.
 
 ```sh
-python3 son-etape.py                  # -> habillage-etape.wav
-python3 rendu.py etape.html           # -> etape-muet.mp4          (portrait)
-python3 rendu.py etape.html paysage   # -> etape-paysage-muet.mp4  (paysage)
-ffmpeg -y -i etape-muet.mp4 -i habillage-etape.wav \
-       -c:v copy -c:a aac -b:a 192k -shortest devercinge-etape-<ville>.mp4
-ffmpeg -y -i etape-paysage-muet.mp4 -i habillage-etape.wav \
-       -c:v copy -c:a aac -b:a 192k -shortest devercinge-etape-<ville>-paysage.mp4
+export CHROMIUM=/opt/pw-browsers/chromium
+python3 son-etape.py meze                          # -> habillage-etape-meze.wav
+python3 rendu.py etape.html "etape=meze"           # -> etape-etape-meze-muet.mp4         (portrait)
+python3 rendu.py etape.html "paysage&etape=meze"   # -> etape-paysage-etape-meze-muet.mp4 (paysage)
+ffmpeg -y -i etape-etape-meze-muet.mp4 -i habillage-etape-meze.wav \
+       -c:v copy -c:a aac -b:a 192k -shortest devercinge-etape-meze.mp4
+ffmpeg -y -i etape-paysage-etape-meze-muet.mp4 -i habillage-etape-meze.wav \
+       -c:v copy -c:a aac -b:a 192k -shortest devercinge-etape-meze-paysage.mp4
 ```
+
+`son-etape.py` ouvre la page dans Chromium et lit `window.__reperes`, l'objet que
+la page construit pour se peindre elle-meme : tous les reperes de temps vivent
+dans un seul objet `T`, que l'image et le son lisent tous les deux. Plus aucune
+date n'est ecrite deux fois, plus aucune projection n'est recopiee : deplacer une
+scene dans la page deplace la note avec elle.
+
+### Une etape hors des onze villes : l'exemple de Meze
+
+Meze est entre Montpellier et Narbonne, a **34 km** de Montpellier (estimation :
+distance a vol d'oiseau, remise a l'echelle des 1408 km, comme pour Montpellier).
+Elle n'est pas dans le trace, donc `plus_loin`. Deux consequences a connaitre :
+
+- **Les deux points se recouvrent sur la carte** : 34 km sur 1 400 km, c'est une
+  trentaine de pixels, pour des disques de 24 px. L'etape du jour devient la
+  vedette (rayon 20 px, avec sa coche) et la ville d'avant un petit point (9 px)
+  dont le rayon **se deduit de la distance reelle**, pour qu'ils ne se touchent
+  jamais ; le nom se pose en haut a gauche, du cote que la ville d'avant ne gene pas.
+- **L'augmentation allonge la scene des chiffres de 2,1 s**, et tout ce qui suit
+  recule d'autant : 28,2 s au lieu de 26,1 s. Montpellier, qui n'a pas de
+  `km_avant`, garde ses 26,1 s.
+
+Le monument de Meze est un pointu et des tables a huitres (l'etang de Thau). Une
+nouvelle etape hors trace demande son propre dessin dans `MONUMENTS_ETAPES`.
+
+**Verifie** : en passant la page en donnees, la video de Montpellier est restee
+**identique au pixel pres** (14 images dans chaque format, ecart nul) et son son
+**identique octet pour octet**.
 
 ## Le paysage : meme page, meme son
 
