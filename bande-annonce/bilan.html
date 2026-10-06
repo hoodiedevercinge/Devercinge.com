@@ -17,6 +17,7 @@
             -webkit-text-fill-color:transparent; }
   #nb{ top:810px; font-size:128px; letter-spacing:.06em; padding-left:.06em; line-height:1.1; }
   #unite{ top:965px; font-size:76px; letter-spacing:.2em; padding-left:.2em; }
+  #suite{ top:1290px; font-size:46px; letter-spacing:.14em; padding-left:.14em; }
   #villes{ top:1130px; font-size:38px; letter-spacing:.2em; padding-left:.2em; color:var(--dim); }
 
   .paysage, .paysage body{ width:1920px; height:1080px; }
@@ -24,12 +25,14 @@
   .paysage #nb{ top:360px; font-size:170px; }
   .paysage #unite{ top:545px; font-size:84px; }
   .paysage #villes{ top:730px; font-size:42px; }
+  .paysage #suite{ top:850px; font-size:52px; }
 </style>
 <div id="stars"></div>
 <img id="logo" src="../assets/logo-mark.png" alt="">
 <div class="bloc degrade" id="nb"></div>
 <div class="bloc degrade" id="unite">kilomètres</div>
 <div class="bloc" id="villes"></div>
+<div class="bloc degrade" id="suite">Et ce n'est que le début…</div>
 <script>
 // Les memes chiffres que recap.html : KM_ANNONCE (le chiffre d'Erwan) et le
 // nombre de lieux de LIEUX. A mettre a jour ensemble.
@@ -68,7 +71,7 @@ function enLettres(n){
 }
 document.getElementById('nb').textContent = enLettres(KM);
 document.getElementById('villes').textContent = enLettres(VILLES) + ' villes traversées';
-window.__duree = 6;
+window.__duree = 6;   // la derniere ligne parait a 3 s : les images se prennent a 4,5 s
 window.__render = function(t){
   etoiles.forEach(e=>{
     const s=e.base*(0.45+0.55*Math.abs(Math.sin(e.phase+t*e.vitesse)));
@@ -79,6 +82,7 @@ window.__render = function(t){
   document.getElementById('nb').style.opacity = o(0.8,1.6);
   document.getElementById('unite').style.opacity = o(1.4,2.2);
   document.getElementById('villes').style.opacity = o(2.0,2.8);
+  document.getElementById('suite').style.opacity = o(3.0,3.8);
 };
 window.__render(0);
 </script>
