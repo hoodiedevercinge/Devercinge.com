@@ -216,5 +216,25 @@ window.MONUMENTS_ETAPES = {
     'M 6 200 L 6 180 M -4 164 L 6 180 L 16 164',
     'M 30 200 L 30 180 M 20 164 L 30 180 L 40 164',
     'M 54 200 L 54 180 M 44 164 L 54 180 L 64 164'
+  ]},
+
+  'Carcassonne': { ville:'Carcassonne', legende:'La Cite', traits:[
+    // trois tours a toit pointu, comme celles des remparts de la Cite
+    'M 20 200 L 20 112 L 52 112 L 52 200',
+    'M 14 112 L 36 60 L 58 112 Z',
+    'M 36 138 L 36 158',
+    'M 148 200 L 148 112 L 180 112 L 180 200',
+    'M 142 112 L 164 60 L 186 112 Z',
+    'M 164 138 L 164 158',
+    // la tour du milieu, plus haute, avec sa porte
+    'M 82 200 L 82 88 L 118 88 L 118 200',
+    'M 76 88 L 100 26 L 124 88 Z',
+    'M 100 112 L 100 134',
+    'M 91 200 L 91 178 Q 100 162 109 178 L 109 200',
+    // les courtines entre les tours, creneles
+    'M 52 200 L 52 152 L 82 152',
+    'M 52 152 L 52 144 L 60 144 L 60 152 L 68 152 L 68 144 L 76 144 L 76 152',
+    'M 118 152 L 148 152 M 118 152 L 118 144 L 126 144 L 126 152 L 134 152 L 134 144 L 142 144 L 142 152',
+    'M 148 152 L 148 200'
   ]}
 };
