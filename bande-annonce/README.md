@@ -19,6 +19,8 @@ calcul. Aucune source exterieure, donc rien a crediter ni a licencier.
 | `devercinge-etape-montpellier-paysage.mp4` | la meme, en paysage (1920x1080). |
 | `devercinge-etape-meze.mp4` | l'etape de Meze, en portrait, avec l'augmentation des kilometres. |
 | `devercinge-etape-meze-paysage.mp4` | la meme, en paysage. |
+| `devercinge-etape-beziers.mp4`, `-argeliers.mp4`, `-la-redorte.mp4` | les trois etapes suivantes, en portrait (et leurs versions `-paysage.mp4`). |
+| `etapes.py` | produit d'un coup le son, le portrait et le paysage d'une ou de plusieurs etapes. |
 | `devercinge-banniere.mp4` | la banniere, 1920x1080, 12 s, sans son, faite pour boucler. |
 | `devercinge-banniere-reel.mp4` | la banniere pour Instagram, 1080x1920, 12 s, avec son, en boucle. |
 | `devercinge-episode-1-reel.mp4` | la meme avec « Episode 1 » en grand au centre. |
@@ -55,10 +57,20 @@ Les etapes sont **des donnees**, dans le bloc JSON `#etapes` en haut de
 | `atteinte` | indice de la derniere **ville du trace** franchie (0 Nice, 1 Marseille, 2 Montpellier, 3 Narbonne, 4 Toulouse, 5 Bordeaux, 6 La Rochelle, 7 Nantes, 8 Angers, 9 Rennes, 10 Saint-Malo) |
 | `km` | kilometres parcourus -- a remplacer par le releve GPS |
 | `km_avant`, `depuis` | facultatifs : kilometres de l'etape precedente et son nom. Ajoutent la ligne « + N kilometres depuis ... » |
-| `plus_loin` | facultatif : quand l'etape n'est **pas** l'une des onze villes. Son nom, sa latitude, sa longitude. Elle se place apres la ville `atteinte` ; son monument est dans `monuments.js` sous `MONUMENTS_ETAPES` |
+| `plus_loin` | facultatif : quand l'etape n'est **pas** l'une des onze villes. Une **liste** de points `{nom, lat, lng}` dans l'ordre du parcours, apres la ville `atteinte`. Le dernier est l'etape du jour (son monument est dans `monuments.js`, sous `MONUMENTS_ETAPES`) ; les precedents sont les etapes deja faites, que le trait vert traverse. Un objet seul est accepte |
 
 Le monument, le nom, le decompte des villes et les kilometres en toutes lettres
 suivent tout seuls.
+
+**En une commande**, pour une ou plusieurs etapes :
+
+```sh
+CHROMIUM=/opt/pw-browsers/chromium python3 etapes.py beziers argeliers la-redorte
+```
+
+Il produit `devercinge-etape-NOM.mp4` et `devercinge-etape-NOM-paysage.mp4` pour
+chaque etape (environ 4 minutes pour six videos). Pas a pas, pour comprendre ou
+refaire une seule video :
 
 ```sh
 export CHROMIUM=/opt/pw-browsers/chromium
@@ -95,9 +107,42 @@ Elle n'est pas dans le trace, donc `plus_loin`. Deux consequences a connaitre :
 Le monument de Meze est un pointu et des tables a huitres (l'etang de Thau). Une
 nouvelle etape hors trace demande son propre dessin dans `MONUMENTS_ETAPES`.
 
+### Des etapes tres rapprochees : Beziers, Argeliers, La Redorte
+
+A 25 km les unes des autres (une vingtaine de pixels sur la carte), les etapes
+s'entassent. Ce que la page fait pour que ca reste lisible :
+
+- le trait vert **traverse** les etapes deja faites (Meze, Beziers...) : chaque
+  etape liste donc tous ses points precedents dans `plus_loin` ;
+- les petits points ont un rayon **borne par l'ecart qui les separe**, pour ne
+  jamais se toucher ; l'etape du jour est entouree d'un **anneau** ;
+- le nom de l'etape du jour est place par un **solveur** : il essaie des positions
+  autour de l'etape, de plus en plus loin, et garde la plus proche qui ne touche
+  ni un point ni une ligne. Une position fixe tombait sur le point gris de
+  Narbonne. Le solveur ne s'applique qu'aux etapes a plusieurs points hors trace ;
+  Montpellier et Meze gardent leur placement.
+
+`atteinte` reste a 2 (Montpellier) pour ces quatre etapes : le cycliste suit le
+canal du Midi, qui contourne Narbonne a 16 km. Narbonne n'est donc pas comptee ;
+« trois villes sur onze » reste vrai jusqu'a ce qu'il y passe, ou la franchisse.
+
+**Les coordonnees ne viennent pas de la memoire** : de la base GeoNames hors ligne
+(paquet PyPI `reverse_geocoder`, fichier `rg_cities1000.csv`, communes de plus de
+1 000 habitants). Verification utile : Meze y est a 0,6 km des coordonnees que
+j'avais saisies. La Redorte, trop petite pour y figurer, est placee entre Azille
+et Puicheric, a 2 km pres.
+
 **Verifie** : en passant la page en donnees, la video de Montpellier est restee
 **identique au pixel pres** (14 images dans chaque format, ecart nul) et son son
 **identique octet pour octet**.
+
+**Un alea de rendu a connaitre.** En paysage, le halo du logo de la vitrine
+(zone d'environ 270 px, de 19 a 24 s) varie parfois de 44/255 sur quelques
+pixels : un rendu sur trois environ, **avec exactement le meme code**, y compris
+le code d'origine rendu deux fois de suite. C'est Chromium, pas une regression. Pour
+verifier qu'une modification ne change rien, il suffit qu'**un** rendu soit
+identique a l'original ; en rendre plusieurs et en prendre un seul comme preuve
+d'une difference serait une erreur.
 
 ## Le paysage : meme page, meme son
 
