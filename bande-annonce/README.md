@@ -19,7 +19,7 @@ calcul. Aucune source exterieure, donc rien a crediter ni a licencier.
 | `devercinge-etape-montpellier-paysage.mp4` | la meme, en paysage (1920x1080). |
 | `devercinge-etape-meze.mp4` | l'etape de Meze, en portrait, avec l'augmentation des kilometres. |
 | `devercinge-etape-meze-paysage.mp4` | la meme, en paysage. |
-| `devercinge-etape-beziers.mp4`, `-argeliers.mp4`, `-la-redorte.mp4`, `-carcassonne.mp4` | les quatre etapes suivantes, en portrait (et leurs versions `-paysage.mp4`). |
+| `devercinge-etape-beziers.mp4`, `-argeliers.mp4`, `-la-redorte.mp4`, `-carcassonne.mp4`, `-toulouse.mp4` | les etapes suivantes, en portrait (et leurs versions `-paysage.mp4`). |
 | `etapes.py` | produit d'un coup le son, le portrait et le paysage d'une ou de plusieurs etapes. |
 | `recap.html`, `son-recap.py`, `recap.py` | la bande-annonce recap : tous les lieux deja traverses, d'une traite (voir « La bande-annonce recap »). |
 | `bilan.html`, `image-bilan-500km.png`, `image-bilan-500km-paysage.png` | la page « cinq cents kilometres / vingt-deux villes traversees » seule, en image (portrait et paysage). Les chiffres `KM` et `VILLES` en haut de `bilan.html` sont ceux de `recap.html` : a mettre a jour ensemble. Images : `python3 couverture.py bilan.html "" 4 image.png` (ou `paysage`). Ajouter `2` en dernier argument donne la 4K (2160x3840 ou 3840x2160) : `image-bilan-500km-4k.png` et `image-bilan-500km-paysage-4k.png`. |
@@ -59,6 +59,7 @@ Les etapes sont **des donnees**, dans le bloc JSON `#etapes` en haut de
 |---|---|
 | `atteinte` | indice de la derniere **ville du trace** franchie (0 Nice, 1 Marseille, 2 Montpellier, 3 Narbonne, 4 Toulouse, 5 Bordeaux, 6 La Rochelle, 7 Nantes, 8 Angers, 9 Rennes, 10 Saint-Malo) |
 | `km` | kilometres parcourus -- a remplacer par le releve GPS |
+| `jusqu_a`, `monument` | facultatifs, pour une **grande ville atteinte hors trace** (Toulouse) : `jusqu_a` est l'indice de cette grande ville (Toulouse = 4), le decompte devient « cinq villes sur onze » et Narbonne, a 30 km de la route, s'allume quand le trait passe au plus pres ; `monument` est l'indice de son dessin dans `MONUMENTS` (4) au lieu d'un dessin de `MONUMENTS_ETAPES` |
 | `km_avant`, `depuis` | facultatifs : kilometres de l'etape precedente et son nom. Ajoutent la ligne « + N kilometres depuis ... » |
 | `plus_loin` | facultatif : quand l'etape n'est **pas** l'une des onze villes. Une **liste** de points `{nom, lat, lng}` dans l'ordre du parcours, apres la ville `atteinte`. Le dernier est l'etape du jour (son monument est dans `monuments.js`, sous `MONUMENTS_ETAPES`) ; les precedents sont les etapes deja faites, que le trait vert traverse. Un objet seul est accepte |
 
@@ -406,3 +407,17 @@ Ou pas a pas : `python3 son-recap.py`, `python3 rendu.py recap.html` et
 - **Le son** lit `window.__reperes` dans la page, comme `son-etape.py` : une
   cloche par lieu sur une gamme pentatonique de trois octaves.
 - **Paysage** : la carte vit a droite, derriere un fondu, les textes a gauche.
+
+### Toulouse : une grande ville atteinte par les etapes
+
+Toulouse est l'une des onze villes, mais le cycliste y arrive par Mèze, Beziers,
+Argeliers, La Redorte et Carcassonne : le trait vert doit traverser ces etapes
+(`plus_loin`), pas aller droit de Montpellier a Narbonne. L'entree `toulouse`
+combine donc `atteinte: 2` et `plus_loin` avec `jusqu_a: 4` et `monument: 4`.
+
+**Valeurs a remplacer.** Aucune liste de lieux entre Carcassonne et Toulouse n'a
+ete fournie : le trait va droit de Carcassonne a Toulouse. Les kilometres
+(570, soit + 96 depuis Carcassonne) suivent la meme methode que les autres etapes
+(vol d'oiseau x 1,1303), donc le meme ecart avec les 500 km annonces a Carcassonne.
+Ajouter les lieux traverses a `plus_loin` (dans l'ordre, avant Toulouse) et
+corriger `km` quand Erwan donne son chiffre.

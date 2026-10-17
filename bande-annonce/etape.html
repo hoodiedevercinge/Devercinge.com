@@ -115,7 +115,7 @@
      sur onze », plus grande que les kilometres parcourus pour qu'on la lise
      comme une progression. Absente (et sans effet) quand l'etape n'en a pas. */
   #plus, #depuis{ display:none; position:absolute; left:0; right:0; text-align:center;
-                  text-transform:uppercase; }
+                  text-transform:uppercase; white-space:nowrap; }
   .avec-plus #plus, .avec-plus #depuis{ display:block; }
   #plus{
     top:1585px; font-size:44px; font-weight:700; letter-spacing:.14em; padding-left:.14em;
@@ -215,6 +215,12 @@
        km        kilometres parcourus -- a remplacer par le releve GPS
        km_avant  (facultatif) km de l'etape precedente : affiche l'augmentation
        depuis    (avec km_avant) nom de l'etape precedente
+       jusqu_a   (facultatif) indice de la derniere GRANDE ville franchie quand l'etape
+                 du jour en est une, atteinte par un chemin hors trace (Toulouse = 4) :
+                 le decompte « N villes sur onze » en tient compte et les villes entre
+                 `atteinte` et `jusqu_a` (Narbonne) s'allument au passage du trait
+       monument  (facultatif) indice dans MONUMENTS : le dessin de cette grande ville,
+                 au lieu d'un dessin de MONUMENTS_ETAPES
        plus_loin (facultatif) quand l'etape n'est pas l'une des onze villes :
                  une LISTE de points {nom, lat, lng}, dans l'ordre du parcours,
                  apres la ville `atteinte`. Le dernier est l'etape du jour (il a
@@ -247,7 +253,15 @@
                                   { "nom": "Béziers", "lat": 43.3412, "lng": 3.2140 },
                                   { "nom": "Argeliers", "lat": 43.3122, "lng": 2.9105 },
                                   { "nom": "La Redorte", "lat": 43.2539, "lng": 2.6350 },
-                                  { "nom": "Carcassonne", "lat": 43.2167, "lng": 2.3500 } ] }
+                                  { "nom": "Carcassonne", "lat": 43.2167, "lng": 2.3500 } ] },
+
+  "toulouse": { "atteinte": 2, "jusqu_a": 4, "monument": 4, "km": 570, "km_avant": 474, "depuis": "Carcassonne",
+                "plus_loin": [ { "nom": "Mèze", "lat": 43.4255, "lng": 3.6045 },
+                               { "nom": "Béziers", "lat": 43.3412, "lng": 3.2140 },
+                               { "nom": "Argeliers", "lat": 43.3122, "lng": 2.9105 },
+                               { "nom": "La Redorte", "lat": 43.2539, "lng": 2.6350 },
+                               { "nom": "Carcassonne", "lat": 43.2167, "lng": 2.3500 },
+                               { "nom": "Toulouse", "lat": 43.6047, "lng": 1.4442 } ] }
 }
 </script>
 
@@ -258,6 +272,7 @@ const NOM_ETAPE = (location.search.match(/[?&]etape=([a-z0-9-]+)/) || [])[1] || 
 const E = ETAPES[NOM_ETAPE];
 if (!E) throw new Error('etape inconnue : ' + NOM_ETAPE);
 const ATTEINTE = E.atteinte;
+const JUSQUA = E.jusqu_a != null ? E.jusqu_a : ATTEINTE;      // derniere grande ville comptee
 const KM_FAITS = E.km;
 const KM_TOTAL = 1408;            // longueur du parcours ; le reste s'en deduit
 const PLUS_LOIN = E.plus_loin ? [].concat(E.plus_loin) : [];    // une liste ; un objet seul est accepte
@@ -374,9 +389,20 @@ for (let a = 0; a < petits.length; a++) for (let b = a + 1; b < petits.length; b
   ECART_PETITS = Math.min(ECART_PETITS, ecartA(petits[a], petits[b]));
 const R_VEDETTE = PM ? Math.min(24, ECART_PM * 0.6) : 24;
 const R_AVANT   = PM ? Math.max(5, Math.min(14, ECART_PM - R_VEDETTE - 4, ECART_PETITS / 2 - 1.5)) : 24;
+// Une grande ville franchie sans que le trait la touche (Narbonne, a 30 km de la
+// route entre Beziers et Carcassonne) s'allume quand le trait passe au plus pres.
+// L'etape du jour, elle, a deja son propre disque : on ne la double pas.
+const rangProche = i => {
+  let m = 0;
+  for (let k = 1; k <= DERNIER; k++)
+    if (ecartA(P[i], PTS_FAITS[k]) < ecartA(P[i], PTS_FAITS[m])) m = k;
+  return m;
+};
 VILLES.forEach((v,i)=>{
   const precede = PM && i === ATTEINTE;
-  pastille(P[i], i <= ATTEINTE ? i : -1, i === VILLES.length-1, precede ? R_AVANT : 0, precede);
+  const enPlus = i > ATTEINTE && i <= JUSQUA && !(PM && ecartA(P[i], PM) < 3);
+  pastille(P[i], i <= ATTEINTE ? i : enPlus ? rangProche(i) : -1, i === VILLES.length-1,
+           precede || enPlus ? R_AVANT : 0, precede || enPlus);
 });
 PMS.forEach((q, k) => {                                // les etapes hors trace, par-dessus
   if (k < PMS.length - 1) pastille(q, ATTEINTE + 1 + k, false, R_AVANT, true);
@@ -453,7 +479,8 @@ const nomEtape = PMS.length > 1 ? etiquetteLibre(PM, NOM_DU_JOUR, R_VEDETTE)
 const nomBut   = etiquette(P[VILLES.length-1], VILLES[VILLES.length-1].nom, 'nom but', -40);
 
 // ───────────────────────────────────────────── le monument de l'etape
-const mon = DU_JOUR ? MONUMENTS_ETAPES[DU_JOUR.nom] : MONUMENTS[ATTEINTE];
+const mon = E.monument != null ? MONUMENTS[E.monument]
+          : DU_JOUR ? MONUMENTS_ETAPES[DU_JOUR.nom] : MONUMENTS[ATTEINTE];
 const svgMon = document.createElementNS('http://www.w3.org/2000/svg','svg');
 svgMon.setAttribute('width', 520); svgMon.setAttribute('height', 570);
 svgMon.setAttribute('viewBox','-14 -30 228 250');
@@ -520,7 +547,7 @@ function tenir(el, largeurMax){
 
 document.getElementById('ville').textContent = NOM_DU_JOUR;
 document.getElementById('compte').textContent =
-  enLettres(ATTEINTE + 1) + ' villes sur ' + enLettres(VILLES.length);
+  enLettres(JUSQUA + 1) + ' villes sur ' + enLettres(VILLES.length);
 document.getElementById('km').textContent = enLettres(KM_FAITS) + ' kilomètres';
 // L'augmentation depuis la derniere etape, quand l'etape en a une.
 document.documentElement.classList.toggle('avec-plus', !!E.km_avant);
