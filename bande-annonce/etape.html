@@ -219,6 +219,8 @@
                  du jour en est une, atteinte par un chemin hors trace (Toulouse = 4) :
                  le decompte « N villes sur onze » en tient compte et les villes entre
                  `atteinte` et `jusqu_a` (Narbonne) s'allument au passage du trait
+       titre, fin (facultatifs) remplacent « Étape validée » (en-tete) et « La route continue »
+                 (chute) : l'arrivee a Saint-Malo dit « Arrivée » et « Mission accomplie »
        monument  (facultatif) indice dans MONUMENTS : le dessin de cette grande ville,
                  au lieu d'un dessin de MONUMENTS_ETAPES
        plus_loin (facultatif) quand l'etape n'est pas l'une des onze villes :
@@ -261,7 +263,76 @@
                                { "nom": "Argeliers", "lat": 43.3122, "lng": 2.9105 },
                                { "nom": "La Redorte", "lat": 43.2539, "lng": 2.6350 },
                                { "nom": "Carcassonne", "lat": 43.2167, "lng": 2.3500 },
-                               { "nom": "Toulouse", "lat": 43.6047, "lng": 1.4442 } ] }
+                               { "nom": "Toulouse", "lat": 43.6047, "lng": 1.4442 } ] },
+
+  "bordeaux": { "atteinte": 2, "jusqu_a": 5, "monument": 5, "km": 809, "km_avant": 570, "depuis": "Toulouse",
+    "plus_loin": [ { "nom": "Mèze", "lat": 43.4255, "lng": 3.6045 },
+                               { "nom": "Béziers", "lat": 43.3412, "lng": 3.214 },
+                               { "nom": "Argeliers", "lat": 43.3122, "lng": 2.9105 },
+                               { "nom": "La Redorte", "lat": 43.2539, "lng": 2.635 },
+                               { "nom": "Carcassonne", "lat": 43.2167, "lng": 2.35 },
+                               { "nom": "Toulouse", "lat": 43.6047, "lng": 1.4442 },
+                               { "nom": "Bordeaux", "lat": 44.8378, "lng": -0.5792 } ] },
+
+  "la-rochelle": { "atteinte": 2, "jusqu_a": 6, "monument": 6, "km": 983, "km_avant": 809, "depuis": "Bordeaux",
+    "plus_loin": [ { "nom": "Mèze", "lat": 43.4255, "lng": 3.6045 },
+                               { "nom": "Béziers", "lat": 43.3412, "lng": 3.214 },
+                               { "nom": "Argeliers", "lat": 43.3122, "lng": 2.9105 },
+                               { "nom": "La Redorte", "lat": 43.2539, "lng": 2.635 },
+                               { "nom": "Carcassonne", "lat": 43.2167, "lng": 2.35 },
+                               { "nom": "Toulouse", "lat": 43.6047, "lng": 1.4442 },
+                               { "nom": "Bordeaux", "lat": 44.8378, "lng": -0.5792 },
+                               { "nom": "La Rochelle", "lat": 46.1591, "lng": -1.1578 } ] },
+
+  "nantes": { "atteinte": 2, "jusqu_a": 7, "monument": 7, "km": 1121, "km_avant": 983, "depuis": "La Rochelle",
+    "plus_loin": [ { "nom": "Mèze", "lat": 43.4255, "lng": 3.6045 },
+                               { "nom": "Béziers", "lat": 43.3412, "lng": 3.214 },
+                               { "nom": "Argeliers", "lat": 43.3122, "lng": 2.9105 },
+                               { "nom": "La Redorte", "lat": 43.2539, "lng": 2.635 },
+                               { "nom": "Carcassonne", "lat": 43.2167, "lng": 2.35 },
+                               { "nom": "Toulouse", "lat": 43.6047, "lng": 1.4442 },
+                               { "nom": "Bordeaux", "lat": 44.8378, "lng": -0.5792 },
+                               { "nom": "La Rochelle", "lat": 46.1591, "lng": -1.1578 },
+                               { "nom": "Nantes", "lat": 47.2199, "lng": -1.5582 } ] },
+
+  "angers": { "atteinte": 2, "jusqu_a": 8, "monument": 8, "km": 1211, "km_avant": 1121, "depuis": "Nantes",
+    "plus_loin": [ { "nom": "Mèze", "lat": 43.4255, "lng": 3.6045 },
+                               { "nom": "Béziers", "lat": 43.3412, "lng": 3.214 },
+                               { "nom": "Argeliers", "lat": 43.3122, "lng": 2.9105 },
+                               { "nom": "La Redorte", "lat": 43.2539, "lng": 2.635 },
+                               { "nom": "Carcassonne", "lat": 43.2167, "lng": 2.35 },
+                               { "nom": "Toulouse", "lat": 43.6047, "lng": 1.4442 },
+                               { "nom": "Bordeaux", "lat": 44.8378, "lng": -0.5792 },
+                               { "nom": "La Rochelle", "lat": 46.1591, "lng": -1.1578 },
+                               { "nom": "Nantes", "lat": 47.2199, "lng": -1.5582 },
+                               { "nom": "Angers", "lat": 47.4784, "lng": -0.5632 } ] },
+
+  "rennes": { "atteinte": 2, "jusqu_a": 9, "monument": 9, "km": 1335, "km_avant": 1211, "depuis": "Angers",
+    "plus_loin": [ { "nom": "Mèze", "lat": 43.4255, "lng": 3.6045 },
+                               { "nom": "Béziers", "lat": 43.3412, "lng": 3.214 },
+                               { "nom": "Argeliers", "lat": 43.3122, "lng": 2.9105 },
+                               { "nom": "La Redorte", "lat": 43.2539, "lng": 2.635 },
+                               { "nom": "Carcassonne", "lat": 43.2167, "lng": 2.35 },
+                               { "nom": "Toulouse", "lat": 43.6047, "lng": 1.4442 },
+                               { "nom": "Bordeaux", "lat": 44.8378, "lng": -0.5792 },
+                               { "nom": "La Rochelle", "lat": 46.1591, "lng": -1.1578 },
+                               { "nom": "Nantes", "lat": 47.2199, "lng": -1.5582 },
+                               { "nom": "Angers", "lat": 47.4784, "lng": -0.5632 },
+                               { "nom": "Rennes", "lat": 48.1173, "lng": -1.6778 } ] },
+
+  "saint-malo": { "atteinte": 2, "jusqu_a": 10, "monument": 10, "km": 1408, "km_avant": 1335, "depuis": "Rennes", "titre": "Arrivée", "fin": "Mission accomplie",
+    "plus_loin": [ { "nom": "Mèze", "lat": 43.4255, "lng": 3.6045 },
+                               { "nom": "Béziers", "lat": 43.3412, "lng": 3.214 },
+                               { "nom": "Argeliers", "lat": 43.3122, "lng": 2.9105 },
+                               { "nom": "La Redorte", "lat": 43.2539, "lng": 2.635 },
+                               { "nom": "Carcassonne", "lat": 43.2167, "lng": 2.35 },
+                               { "nom": "Toulouse", "lat": 43.6047, "lng": 1.4442 },
+                               { "nom": "Bordeaux", "lat": 44.8378, "lng": -0.5792 },
+                               { "nom": "La Rochelle", "lat": 46.1591, "lng": -1.1578 },
+                               { "nom": "Nantes", "lat": 47.2199, "lng": -1.5582 },
+                               { "nom": "Angers", "lat": 47.4784, "lng": -0.5632 },
+                               { "nom": "Rennes", "lat": 48.1173, "lng": -1.6778 },
+                               { "nom": "Saint-Malo", "lat": 48.6493, "lng": -2.0257 } ] }
 }
 </script>
 
@@ -398,7 +469,11 @@ const rangProche = i => {
     if (ecartA(P[i], PTS_FAITS[k]) < ecartA(P[i], PTS_FAITS[m])) m = k;
   return m;
 };
+// Une grande ville que le trait traverse deja comme etape (Toulouse sur la route de
+// Bordeaux) a son point : pas de second disque dessous.
+const dejaPoint = i => PMS.slice(0, -1).some(q => ecartA(P[i], q) < 3);
 VILLES.forEach((v,i)=>{
+  if (dejaPoint(i)) return;
   const precede = PM && i === ATTEINTE;
   const enPlus = i > ATTEINTE && i <= JUSQUA && !(PM && ecartA(P[i], PM) < 3);
   pastille(P[i], i <= ATTEINTE ? i : enPlus ? rangProche(i) : -1, i === VILLES.length-1,
@@ -545,6 +620,8 @@ function tenir(el, largeurMax){
     el.style.fontSize = (parseFloat(getComputedStyle(el).fontSize) * largeurMax / l).toFixed(1) + 'px';
 }
 
+if (E.titre) document.getElementById('titre').textContent = E.titre;
+if (E.fin) document.getElementById('fin').textContent = E.fin;
 document.getElementById('ville').textContent = NOM_DU_JOUR;
 document.getElementById('compte').textContent =
   enLettres(JUSQUA + 1) + ' villes sur ' + enLettres(VILLES.length);
@@ -558,7 +635,7 @@ if (E.km_avant){
 // Deux lignes : le nombre, puis l'unite. Sur une seule, « mille quatre-vingt-six
 // kilomètres » deborde de l'image des que le nombre s'allonge.
 document.getElementById('reste-nb').innerHTML =
-  enLettres(KM_TOTAL - KM_FAITS) + '<br>kilomètres';
+  enLettres(KM_TOTAL - KM_FAITS) + '<br>kilomètre' + (KM_TOTAL - KM_FAITS > 1 ? 's' : '');
 // Largeur disponible : l'image moins deux marges, ou la colonne de droite en paysage.
 const LARGEUR_TEXTE = PAYSAGE ? 840 : 960;
 ['ville', 'compte', 'km', 'plus'].forEach(id => tenir(document.getElementById(id), LARGEUR_TEXTE));
@@ -634,7 +711,7 @@ window.__render = function(t){
     }
   });
   nomEtape.style.opacity = seg(t, T.trace[1]-0.1, T.trace[1]+0.5).toFixed(3);
-  nomBut.style.opacity   = (0.9*seg(t,2.0,2.8)).toFixed(3);
+  nomBut.style.opacity   = NOM_DU_JOUR === VILLES[VILLES.length-1].nom ? '0' : (0.9*seg(t,2.0,2.8)).toFixed(3);
 
   // 2 — le monument et les chiffres
   el('scene2').style.opacity = fen(t, ...T.monument).toFixed(3);

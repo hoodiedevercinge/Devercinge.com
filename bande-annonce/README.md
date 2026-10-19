@@ -19,7 +19,7 @@ calcul. Aucune source exterieure, donc rien a crediter ni a licencier.
 | `devercinge-etape-montpellier-paysage.mp4` | la meme, en paysage (1920x1080). |
 | `devercinge-etape-meze.mp4` | l'etape de Meze, en portrait, avec l'augmentation des kilometres. |
 | `devercinge-etape-meze-paysage.mp4` | la meme, en paysage. |
-| `devercinge-etape-beziers.mp4`, `-argeliers.mp4`, `-la-redorte.mp4`, `-carcassonne.mp4`, `-toulouse.mp4` | les etapes suivantes, en portrait (et leurs versions `-paysage.mp4`). |
+| `devercinge-etape-beziers.mp4`, `-argeliers.mp4`, `-la-redorte.mp4`, `-carcassonne.mp4`, `-toulouse.mp4`, `-bordeaux.mp4`, `-la-rochelle.mp4`, `-nantes.mp4`, `-angers.mp4`, `-rennes.mp4`, `-saint-malo.mp4` | les etapes suivantes, en portrait (et leurs versions `-paysage.mp4`). Celles de Bordeaux a Saint-Malo sont des **generiques prets d'avance** (voir ci-dessous). |
 | `etapes.py` | produit d'un coup le son, le portrait et le paysage d'une ou de plusieurs etapes. |
 | `recap.html`, `son-recap.py`, `recap.py` | la bande-annonce recap : tous les lieux deja traverses, d'une traite (voir « La bande-annonce recap »). |
 | `bilan.html`, `image-bilan-500km.png`, `image-bilan-500km-paysage.png` | la page « cinq cents kilometres / vingt-deux villes traversees » seule, en image (portrait et paysage). Les chiffres `KM` et `VILLES` en haut de `bilan.html` sont ceux de `recap.html` : a mettre a jour ensemble. Images : `python3 couverture.py bilan.html "" 4 image.png` (ou `paysage`). Ajouter `2` en dernier argument donne la 4K (2160x3840 ou 3840x2160) : `image-bilan-500km-4k.png` et `image-bilan-500km-paysage-4k.png`. |
@@ -59,6 +59,7 @@ Les etapes sont **des donnees**, dans le bloc JSON `#etapes` en haut de
 |---|---|
 | `atteinte` | indice de la derniere **ville du trace** franchie (0 Nice, 1 Marseille, 2 Montpellier, 3 Narbonne, 4 Toulouse, 5 Bordeaux, 6 La Rochelle, 7 Nantes, 8 Angers, 9 Rennes, 10 Saint-Malo) |
 | `km` | kilometres parcourus -- a remplacer par le releve GPS |
+| `titre`, `fin` | facultatifs : remplacent « Etape validee » (en-tete) et « La route continue » (chute). Saint-Malo dit « Arrivee » et « Mission accomplie » |
 | `jusqu_a`, `monument` | facultatifs, pour une **grande ville atteinte hors trace** (Toulouse) : `jusqu_a` est l'indice de cette grande ville (Toulouse = 4), le decompte devient « cinq villes sur onze » et Narbonne, a 30 km de la route, s'allume quand le trait passe au plus pres ; `monument` est l'indice de son dessin dans `MONUMENTS` (4) au lieu d'un dessin de `MONUMENTS_ETAPES` |
 | `km_avant`, `depuis` | facultatifs : kilometres de l'etape precedente et son nom. Ajoutent la ligne « + N kilometres depuis ... » |
 | `plus_loin` | facultatif : quand l'etape n'est **pas** l'une des onze villes. Une **liste** de points `{nom, lat, lng}` dans l'ordre du parcours, apres la ville `atteinte`. Le dernier est l'etape du jour (son monument est dans `monuments.js`, sous `MONUMENTS_ETAPES`) ; les precedents sont les etapes deja faites, que le trait vert traverse. Un objet seul est accepte |
@@ -421,3 +422,31 @@ ete fournie : le trait va droit de Carcassonne a Toulouse. Les kilometres
 (vol d'oiseau x 1,1303), donc le meme ecart avec les 500 km annonces a Carcassonne.
 Ajouter les lieux traverses a `plus_loin` (dans l'ordre, avant Toulouse) et
 corriger `km` quand Erwan donne son chiffre.
+
+### Les generiques des grandes villes restantes : Bordeaux a Saint-Malo
+
+Une grande ville, un generique, prets avant que Erwan n'y arrive :
+`bordeaux`, `la-rochelle`, `nantes`, `angers`, `rennes`, `saint-malo`. Chacun est
+une entree de `etape.html` (`jusqu_a` et `monument` valent l'indice de la ville
+dans `MONUMENTS`, de 5 a 10) et se rend comme n'importe quelle etape :
+
+```sh
+CHROMIUM=/opt/pw-browsers/chromium python3 etapes.py bordeaux la-rochelle nantes angers rennes saint-malo
+```
+
+- Le trait vert passe par toutes les etapes deja faites, de Mèze a la ville
+  precedente. Les grandes villes deja franchies (Toulouse, Bordeaux...) y sont des
+  petits points ; Narbonne s'allume au passage.
+- **Les kilometres sont ceux du parcours prevu**, pas des releves : les 1 408 km
+  du trace, cales sur l'arrivee. Bordeaux 809, La Rochelle 983, Nantes 1 121,
+  Angers 1 211, Rennes 1 335, Saint-Malo 1 408 (distance a vol d'oiseau x 1,1303
+  entre les villes). A remplacer par le chiffre de Erwan le jour J, dans le champ
+  `km` (et `km_avant` de l'etape suivante).
+- **Saint-Malo est l'arrivee** : « Arrivee », « onze villes sur onze », « mille quatre
+  cent huit kilometres », « Il reste zero kilometre » et « Mission accomplie ». Le
+  nom du but n'est pas ecrit deux fois sur la carte.
+- Les etapes entre deux grandes villes ne sont pas connues d'avance : le trait va
+  droit d'une grande ville a la suivante. Si Erwan s'arrete ailleurs, ajouter ces
+  lieux a `plus_loin` (dans l'ordre, avant la ville).
+- La gamme du son (`son-etape.py`) continue vers l'aigu au-dela de onze points ;
+  les etapes deja produites ont le meme son, octet pour octet.

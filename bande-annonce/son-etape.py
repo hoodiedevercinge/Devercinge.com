@@ -118,7 +118,10 @@ poser(cloche(329.63, 2.2, 0.9, 0.12), 1.45)
 
 # ------------------- 2. une note par ville validee, de plus en plus haut
 gamme = [329.63, 392.00, 440.00, 523.25, 587.33, 659.25, 783.99, 880.00,
-         987.77, 1046.50, 1174.66]
+         987.77, 1046.50, 1174.66,
+         # au-dela de onze points (Nantes en compte douze, Saint-Malo quinze) la
+         # gamme continue vers l'aigu ; les onze premieres notes n'ont pas change
+         1318.51, 1567.98, 1760.00, 1975.53]
 for i, q in enumerate(quand):
     dernier = (i == len(quand) - 1)
     poser(cloche(gamme[i], 2.6 if dernier else 1.5, 1.0 if dernier else 0.45,
